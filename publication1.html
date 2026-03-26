@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Binomial Identities for Fibonacci and Lucas Sequences</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-gold: #fbbf24;
+            --accent-blue: #38bdf8;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0 40px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .author {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .doi-badge {
+            display: inline-block;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .doi-badge:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .two-column-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .two-column-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            border-left: 4px solid var(--accent-gold);
+            padding-left: 15px;
+            margin-bottom: 25px;
+            margin-top: 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .cover-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .cover-image:hover {
+            transform: scale(1.02);
+        }
+
+        .abstract-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-main);
+            text-align: justify;
+        }
+
+        .keywords-container {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .keywords-title {
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .keyword-tag {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .keyword-tag:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: var(--accent-blue);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-blue);
+            color: #0f172a;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>New Binomial Identities for Fibonacci, Lucas, and Generalized Fibonacci Sequences with Multiple Indices</h1>
+        <div class="author">N. Vorobtsov &bull; 2026</div>
+        <a href="https://arxiv.org/abs/2603.12150" target="_blank" class="doi-badge">arXiv: 2603.12150</a>
+    </header>
+
+    <div class="two-column-layout">
+        
+        <!-- ЛЕВАЯ КОЛОНКА (Абстракт) -->
+        <section class="left-column">
+            <h2>Abstract</h2>
+            <div class="card">
+                <p class="abstract-text">
+                    This paper presents new binomial identities involving multiple indices for Fibonacci, Lucas, and generalized Fibonacci sequences, expanding the known algebraic relationships within these fundamental sequences. The research explores deep structural symmetries that govern the behavior of these sequences under binomial transformations.
+                </p>
+                <p class="abstract-text">
+                    By establishing these novel identities, we provide a broader mathematical framework that not only unifies several existing theorems but also opens up new pathways for analyzing the combinatorial properties of recursive sequences.
+                </p>
+            </div>
+
+            <div class="keywords-container">
+                <div class="keywords-title">Keywords</div>
+                <div class="keyword-tags">
+                    <span class="keyword-tag">Fibonacci sequence</span>
+                    <span class="keyword-tag">Lucas sequence</span>
+                    <span class="keyword-tag">Binomial identities</span>
+                    <span class="keyword-tag">Multiple indices</span>
+                    <span class="keyword-tag">Combinatorics</span>
+                    <span class="keyword-tag">Number theory</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ПРАВАЯ КОЛОНКА (Обложка) -->
+        <section class="right-column">
+            <h2>Visual Representation</h2>
+            <div class="card" style="text-align: center; padding: 15px;">
+                <img src="cover_good.jpg" alt="Mathematical Cover" class="cover-image">
+            </div>
+        </section>
+
+    </div> <!-- End of two-column-layout -->
+
+    <footer>
+        <p>Published on arXiv &bull; Open Access</p>
+        <a href="https://arxiv.org/pdf/2603.12150" target="_blank" class="btn">Download Full PDF</a>
+    </footer>
+</div>
+
+</body>
+</html>
