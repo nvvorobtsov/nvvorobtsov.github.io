@@ -401,6 +401,13 @@ Sequence length will be: 845296925724899507 terms.
             setTimeout(() => { btn.innerText = 'Copy Code'; }, 2000);
         });
     }
+
+    // Return to main page on ESC key press
+    document.addEventListener('keyup', function(e) {
+        if (e.key === "Escape") {
+            window.location.href = 'index.html';
+        }
+    });
 </script>
 
 </body>

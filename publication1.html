@@ -139,21 +139,26 @@
             display: none;
             position: fixed;
             z-index: 1000;
-            padding-top: 50px;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
             background-color: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(5px);
         }
 
+        /* Центрирование контейнера внутри модального окна */
+        .modal-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
         .modal-content {
-            margin: auto;
-            display: block;
             max-width: 90%;
-            max-height: 85vh;
+            max-height: 90vh;
             border-radius: 8px;
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             object-fit: contain;
@@ -303,7 +308,9 @@
 <!-- The Modal -->
 <div id="imageModal" class="modal">
   <span class="close-modal">&times;</span>
-  <img class="modal-content" id="img01">
+  <div class="modal-container">
+      <img class="modal-content" id="img01">
+  </div>
 </div>
 
 <script>
@@ -333,9 +340,13 @@
     }
 
     // Close modal on ESC key press
-    document.addEventListener('keydown', function(e) {
-        if (e.key === "Escape" && modal.style.display === "block") {
-            modal.style.display = "none";
+    document.addEventListener('keyup', function(e) {
+        if (e.key === "Escape") {
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                window.location.href = 'index.html';
+            }
         }
     });
 </script>
