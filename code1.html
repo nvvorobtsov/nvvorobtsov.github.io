@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Source Code - Publication 01</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for Code Highlighting (Cursor-like theme) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-gold: #fbbf24;
+            --accent-blue: #38bdf8;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            margin-bottom: 40px;
+        }
+
+        .back-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .code-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-desc {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .code-container {
+            position: relative;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        .code-header {
+            background-color: #1e293b;
+            color: #94a3b8;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            font-family: 'Fira Code', monospace;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: none;
+            border: 1px solid #475569;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        pre[class*="language-"] {
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            background: #1d1f21; /* Cursor-like dark background */
+        }
+
+        code[class*="language-"], pre[class*="language-"] {
+            font-family: 'Fira Code', Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .terminal-output {
+            background-color: #000;
+            color: #38bdf8;
+            padding: 15px;
+            border-radius: 0 0 8px 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        .terminal-output .comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">&larr; Back to Publications</a>
+        <h1>Source Code & Examples</h1>
+        <div class="subtitle">PUBLICATION 01: New Binomial Identities for Fibonacci, Lucas, and Generalized Fibonacci Sequences with Multiple Indices</div>
+    </header>
+
+    <!-- Скрипт 1: fincube_master.py -->
+    <div class="code-section">
+        <div class="code-desc">
+            <strong>1. Exact Cube Decomposition Generator</strong><br>
+            This script (<code>fincube_master.py</code>) generates the exact decomposition of a single cube into a series of cubes. You can run the script with a parameter \( k = 2, 3, \dots \). For example, executing the command for \( k=4 \) will produce the massive sequence shown below.
+        </div>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>fincube_master.py</span>
+                <button class="copy-btn" onclick="copyCode('code1')">Copy Code</button>
+            </div>
+            <pre><code class="language-python" id="code1">#!/usr/bin/env python3
+import math
+import sys
+
+def fincube_ultimate(k):
+    a = k
+    a3 = a**3
+    a6 = a**6
+
+    def Y(b): return 2*a6 - 3*a3*(1 + 2*b) + 1 + 3*b + 3*b**2
+    def Z(b): return a6 - 1 - 3*b - 3*b**2
+    def W(b): return a**7 - 3*a**4*b + a*(3*b**2 - 1)
+
+    D_max = 9*(2*a3 - 1)**2 - 12*(2*a6 - 3*a3 + 1)
+    b_max = math.floor((3*(2*a3 - 1) - math.sqrt(D_max)) / 6)
+    while Y(b_max + 1) > 0: b_max += 1
+    while Y(b_max) <= 0: b_max -= 1
+
+    larr = []
+    for b in range(b_max, -1, -1):
+        larr.append(min(Y(b), Z(b)))
+        
+    for b in range(b_max, -1, -1):
+        larr.append(max(Y(b), Z(b)))
+        
+    larr.append(W(b_max + 1))
+    
+    l1 = [larr[i+1] - larr[i] for i in range(len(larr)-1)]
+    dlts = []
+    n1 = l1[0]
+    delta = l1[1] - l1[0]
+    count = 1
+    for i in range(1, len(l1)-1):
+        d = l1[i+1] - l1[i]
+        if d == delta:
+            count += 1
+        else:
+            dlts.append([n1, count, delta])
+            n1 = l1[i]
+            delta = d
+            count = 1
+    dlts.append([n1, count, delta])
+
+    INCUBE = W(0)
+    EULER = [Z(0), Y(0), W(1)]
+    BAZA = larr[0]
+    
+    return INCUBE, EULER, BAZA, dlts
+
+def wrap_text(text, max_len=80):
+    lines = []
+    eq_idx = text.find('= ', text.find(' = ') + 3)
+    if eq_idx != -1:
+        start_part = text[:eq_idx + 2]
+        rest_part = text[eq_idx + 2:]
+    else:
+        start_part = ""
+        rest_part = text
+
+    while len(start_part) > max_len:
+        split_idx = start_part.rfind(' ', 0, max_len)
+        if split_idx == -1: split_idx = max_len
+        lines.append(start_part[:split_idx])
+        start_part = start_part[split_idx:].lstrip()
+    
+    current_line = start_part
+    terms = rest_part.split('+')
+    
+    for i, term in enumerate(terms):
+        prefix = "" if i == 0 else "+"
+        term_str = prefix + term
+        
+        if len(current_line) + len(term_str) <= max_len:
+            current_line += term_str
+        else:
+            if current_line:
+                lines.append(current_line)
+            current_line = term_str
+
+    if current_line:
+        lines.append(current_line)
+
+    return '\n'.join(lines)
+
+def fincube(INCUBE, EULER, BAZA, dlts):
+    BAZA2 = BAZA
+    larr = [BAZA2]
+    len_dlts = len(dlts)
+
+    for i in range(len_dlts):
+        a, b, c = dlts[i][0], dlts[i][1], dlts[i][2]
+        for j in range(1, b + 1):
+            term = BAZA2 + j * a
+            if j > 1:
+                term += (j - 1) * j * c // 2
+            larr.append(term)
+        BAZA2 = larr[-1]
+
+    last_a = dlts[len_dlts - 1][0]
+    last_c = dlts[len_dlts - 1][2]
+    larr.append(BAZA2 + last_a + last_c)
+
+    larr.sort()
+    incube3 = INCUBE**3
+
+    str_out = f"{INCUBE}^3 = {EULER[0]}^3 + {EULER[1]}^3 + {EULER[2]}^3 = {incube3} = "
+    str_out += str(larr[0]) + "^3"
+    for i in range(1, len(larr)):
+        str_out += "+" + str(larr[i]) + "^3"
+        
+    return str_out
+
+def run_master(k):
+    print(f"Generating decomposition for k = {k}...")
+    INCUBE, EULER, BAZA, dlts = fincube_ultimate(k)
+    seq_length = sum(d[1] for d in dlts) + 2
+    print(f"Generated parameters. Sequence length will be: {seq_length} terms.")
+    raw_output = fincube(INCUBE, EULER, BAZA, dlts)
+    wrapped_output = wrap_text(raw_output, max_len=80)
+    
+    print("\nResult:\n" + "="*80)
+    print(wrapped_output)
+    print("="*80)
+
+if __name__ == "__main__":
+    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 2
+    run_master(k_input)</code></pre>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Terminal Execution</span>
+            </div>
+            <pre class="terminal-output">python fincube_master.py 4 > result.txt
+
+Generating decomposition for k = 4...
+Generated parameters. Sequence length will be: 55 terms.
+Result:
+================================================================================
+16380^3 = 4095^3 + 8001^3 + 15624^3 = 4394826072000 = 123^3+351^3+585^3+825^3
++1071^3+1323^3+1581^3+1845^3+1989^3+2115^3+2145^3+2295^3+2391^3+2439^3+2577^3
++2673^3+2709^3+2835^3+2955^3+2961^3+3069^3+3177^3+3255^3+3279^3+3375^3+3465^3
++3549^3+3555^3+3627^3+3699^3+3765^3+3825^3+3861^3+3879^3+3927^3+3969^3+4005^3
++4035^3+4059^3+4077^3+4089^3+4095^3+4173^3+4392^3+4491^3+4815^3+5145^3+5481^3
++5823^3+6171^3+6525^3+6885^3+7251^3+7623^3+8001^3
+================================================================================</pre>
+        </div>
+    </div>
+
+    <!-- Скрипт 2: fincube_length_only.py -->
+    <div class="code-section">
+        <div class="code-desc">
+            <strong>2. Instant Sequence Length Calculator \( O(1) \)</strong><br>
+            In addition to generating the full string, it is often useful to simply calculate the total number of cubes in the decomposition. This script (<code>fincube_length_only.py</code>) skips the string generation and computes only the sequence length algebraically. Therefore, it executes <em>instantly</em>, regardless of the input parameter \( k \).
+            <br><br>
+            For example, running it with an enormous value like \( k = 999,999 \):
+        </div>
+        
+        <div class="code-container">
+            <div class="code-header">
+                <span>fincube_length_only.py</span>
+                <button class="copy-btn" onclick="copyCode('code2')">Copy Code</button>
+            </div>
+            <pre><code class="language-python" id="code2">#!/usr/bin/env python3
+import math
+import sys
+
+def get_decomposition_stats(k):
+    a = k
+    a3 = a**3
+    a6 = a**6
+
+    def Y(b): 
+        return 2*a6 - 3*a3*(1 + 2*b) + 1 + 3*b + 3*b**2
+
+    D_max = 9*(2*a3 - 1)**2 - 12*(2*a6 - 3*a3 + 1)
+    sqrt_D_max = math.isqrt(D_max)
+    
+    b_max = (3*(2*a3 - 1) - sqrt_D_max) // 6
+    
+    while Y(b_max + 1) > 0: b_max += 1
+    while Y(b_max) <= 0: b_max -= 1
+
+    INCUBE = a**7 - a
+    seq_length = 2 * b_max + 3
+    
+    return INCUBE, seq_length
+
+def run_master(k):
+    print(f"Decomposition for k = {k}")
+    INCUBE, seq_length = get_decomposition_stats(k)
+    print(f"INCUBE base: {INCUBE}")
+    print(f"Sequence length will be: {seq_length} terms.")
+
+if __name__ == "__main__":
+    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+    run_master(k_input)</code></pre>
+        </div>
+
+        <div class="code-container">
+            <div class="code-header">
+                <span>Terminal Execution</span>
+            </div>
+            <pre class="terminal-output">python fincube_length_only.py 999999 > out.txt
+
+--------------------------------------------------
+Decomposition for k = 999999
+INCUBE base: 999993000020999965000034999979000006000000
+Sequence length will be: 845296925724899507 terms.
+--------------------------------------------------
+
+<span class="comment"># Can you imagine a sequence of 845,296,925,724,899,507 elements?!
+# And these are not just elements, but the sum of "cubes"!
+# That is 845 quadrillion, 296 trillion, 925 billion, 724 million, 899 thousand, 507 cubes 
+# in the decomposition of the cube of 999993000020999965000034999979000006000000!!</span></pre>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function copyCode(elementId) {
+        const codeElement = document.getElementById(elementId);
+        const text = codeElement.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = event.target;
+            btn.innerText = 'Copied!';
+            setTimeout(() => { btn.innerText = 'Copy Code'; }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
