@@ -149,7 +149,7 @@
 
 <div class="container">
     <header>
-        <a href="index.html" class="back-link">&larr; Back to Publications</a>
+        <a href="javascript:history.back()" class="back-link">&larr; Back to Publications</a>
         <h1>Source Code & Examples</h1>
         <div class="subtitle">PUBLICATION 05: Telescopic Properties of Ramanujan Polynomials and Their Connection to Prime Number Distribution Modulo 6</div>
     </header>
@@ -315,7 +315,7 @@ Result:
     // Return to main page on ESC key press
     document.addEventListener('keyup', function(e) {
         if (e.key === "Escape") {
-            window.location.href = 'index.html';
+            window.history.back();
         }
     });
 </script>
