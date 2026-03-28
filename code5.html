@@ -192,10 +192,18 @@
     <!-- Скрипт: clear_result.py -->
     <div class="code-section">
         <div class="code-desc">
-            <strong>Telescopic Cube Decomposition Generator</strong><br>
-            To obtain the exact "<span class="lang-en">Generation Example 3</span><span class="lang-ru">Пример генерации 3</span>" shown in the publication (bottom of page 2), you need to run the <code>clear_result.py</code> script with specific parameters. The script takes the base scale a, the starting point b<sub>0</sub>, and the number of telescopic steps k.
-            <br><br>
-            The full python source code is provided below.
+            <span class="lang-en">
+                <strong>Telescopic Cube Decomposition Generator</strong><br>
+                To obtain the exact &ldquo;Generation Example 3&rdquo; shown in the publication (bottom of page 2), run the <code>clear_result.py</code> script with the appropriate parameters. The script takes the base scale <em>a</em>, the starting value <em>b</em><sub>0</sub>, and the number of telescopic steps <em>k</em>.
+                <br><br>
+                The full Python source code is provided below.
+            </span>
+            <span class="lang-ru">
+                <strong>Генератор телескопического разложения кубов</strong><br>
+                Чтобы получить точный «Пример генерации 3», показанный в публикации (внизу на странице 2), запустите скрипт <code>clear_result.py</code> с нужными параметрами. Скрипт принимает масштабный коэффициент <em>a</em>, начальное значение <em>b</em><sub>0</sub> и число телескопических шагов <em>k</em>.
+                <br><br>
+                Ниже приведён полный исходный код на Python.
+            </span>
         </div>
         
         <div class="code-container">
@@ -481,7 +489,9 @@ Result:
         navigator.clipboard.writeText(text).then(() => {
             const btn = event.currentTarget;
             btn.innerHTML = lang === 'ru' ? 'Скопировано!' : 'Copied!';
-            setTimeout(() => { btn.innerHTML = lang === 'ru' ? 'Копировать код' : 'Copy Code'; }, 2000);
+            setTimeout(() => {
+                btn.innerHTML = '<span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span>';
+            }, 2000);
         });
     }
 
