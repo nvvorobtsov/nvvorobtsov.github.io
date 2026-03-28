@@ -148,28 +148,63 @@
             color: var(--text-muted);
             font-style: italic;
         }
+
+        /* Language Toggle Styles */
+        body.en .lang-ru { display: none !important; }
+        body.ru .lang-en { display: none !important; }
+
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--accent-blue);
+            color: #0f172a;
+        }
     </style>
 </head>
-<body>
+<body class="en">
+
+<div class="lang-toggle" onclick="toggleLanguage()">
+    <div class="lang-btn active" id="btn-en">EN</div>
+    <div class="lang-btn" id="btn-ru">RU</div>
+</div>
 
 <div class="container">
     <header>
-        <a href="javascript:history.back()" class="back-link">&larr; Back to Publications</a>
-        <h1>Source Code & Examples</h1>
-        <div class="subtitle">PUBLICATION 02: Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</div>
+        <a href="javascript:history.back()" class="back-link">&larr; <span class="lang-en">Back to Publications</span><span class="lang-ru">Вернуться к публикациям</span></a>
+        <h1><span class="lang-en">Source Code & Examples</span><span class="lang-ru">Исходный код и примеры</span></h1>
+        <div class="subtitle">PUBLICATION 02: <span class="lang-en">Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</span><span class="lang-ru">Телескопические тождества Рамануджана и массивные разложения кубов в суммы кубов</span></div>
     </header>
 
     <!-- Скрипт 1: fincube_master.py -->
     <div class="code-section">
         <div class="code-desc">
-            <strong>1. Exact Cube Decomposition Generator</strong><br>
-            This script (<code>fincube_master.py</code>) generates the exact decomposition of a single cube into a series of cubes. You can run the script with a parameter k = 2, 3, ... . For example, executing the command for k = 4 will produce the massive sequence shown below.
+            <strong><span class="lang-en">1. Exact Cube Decomposition Generator</span><span class="lang-ru">1. Генератор точного разложения кубов</span></strong><br>
+            <span class="lang-en"><span class="lang-en">This script (<code>fincube_master.py</code>) generates the exact decomposition of a single cube into a series of cubes. You can run the script with a parameter k = 2, 3, ... . For example, executing the command for k = 4 will produce the massive sequence shown below.</span><span class="lang-ru">Этот скрипт (<code>fincube_master.py</code>) генерирует точное разложение одного куба в серию кубов. Вы можете запустить скрипт с параметром k = 2, 3, ... . Например, выполнение команды для k = 4 создаст массивную последовательность, показанную ниже.</span></span><span class="lang-ru">Этот скрипт (<code>fincube_master.py</code>) генерирует точное разложение одного куба в серию кубов. Вы можете запустить скрипт с параметром k = 2, 3, ... . Например, выполнение команды для k = 4 создаст массивную последовательность, показанную ниже.</span>
         </div>
         
         <div class="code-container">
             <div class="code-header">
                 <span>fincube_master.py</span>
-                <button class="copy-btn" onclick="copyCode('code1')">Copy Code</button>
+                <button class="copy-btn" onclick="copyCode('code1')"><span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span></button>
             </div>
             <pre><code class="language-python" id="code1">#!/usr/bin/env python3
 import math
@@ -302,7 +337,7 @@ if __name__ == "__main__":
 
         <div class="code-container">
             <div class="code-header">
-                <span>Terminal Execution</span>
+                <span><span class="lang-en">Terminal Execution</span><span class="lang-ru">Вывод терминала</span></span>
             </div>
             <pre class="terminal-output">python fincube_master.py 4 > result.txt
 
@@ -323,16 +358,16 @@ Result:
     <!-- Скрипт 2: fincube_length_only.py -->
     <div class="code-section">
         <div class="code-desc">
-            <strong>2. Instant Sequence Length Calculator O(1)</strong><br>
-            In addition to generating the full string, it is often useful to simply calculate the total number of cubes in the decomposition. This script (<code>fincube_length_only.py</code>) skips the string generation and computes only the sequence length algebraically. Therefore, it executes <em>instantly</em>, regardless of the input parameter k.
+            <strong><span class="lang-en">2. Instant Sequence Length Calculator O(1)</span><span class="lang-ru">2. Мгновенный калькулятор длины последовательности O(1)</span></strong><br>
+            <span class="lang-en"><span class="lang-en">In addition to generating the full string, it is often useful to simply calculate the total number of cubes in the decomposition. This script (<code>fincube_length_only.py</code>) skips the string generation and computes only the sequence length algebraically. Therefore, it executes <em>instantly</em>, regardless of the input parameter k.</span><span class="lang-ru">В дополнение к генерации полной строки часто полезно просто вычислить общее количество кубов в разложении. Этот скрипт (<code>fincube_length_only.py</code>) пропускает генерацию строки и вычисляет только длину последовательности алгебраически. Поэтому он выполняется <em>мгновенно</em>, независимо от входного параметра k.</span></span><span class="lang-ru">В дополнение к генерации полной строки часто полезно просто вычислить общее количество кубов в разложении. Этот скрипт (<code>fincube_length_only.py</code>) пропускает генерацию строки и вычисляет только длину последовательности алгебраически. Поэтому он выполняется <em>мгновенно</em>, независимо от входного параметра k.</span>
             <br><br>
-            For example, running it with an enormous value like k = 999,999:
+            <span class="lang-en"><span class="lang-en">For example, running it with an enormous value like k = 999,999:</span><span class="lang-ru">Например, запуск с огромным значением, таким как k = 999,999:</span></span><span class="lang-ru">Например, запуск с огромным значением, таким как k = 999,999:</span>
         </div>
         
         <div class="code-container">
             <div class="code-header">
                 <span>fincube_length_only.py</span>
-                <button class="copy-btn" onclick="copyCode('code2')">Copy Code</button>
+                <button class="copy-btn" onclick="copyCode('code2')"><span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span></button>
             </div>
             <pre><code class="language-python" id="code2">#!/usr/bin/env python3
 import math
@@ -372,7 +407,7 @@ if __name__ == "__main__":
 
         <div class="code-container">
             <div class="code-header">
-                <span>Terminal Execution</span>
+                <span><span class="lang-en">Terminal Execution</span><span class="lang-ru">Вывод терминала</span></span>
             </div>
             <pre class="terminal-output">python fincube_length_only.py 999999 > out.txt
 
@@ -397,8 +432,8 @@ Sequence length will be: 845296925724899507 terms.
         const text = codeElement.innerText;
         navigator.clipboard.writeText(text).then(() => {
             const btn = event.target;
-            btn.innerText = 'Copied!';
-            setTimeout(() => { btn.innerText = 'Copy Code'; }, 2000);
+            btn.innerText = document.documentElement.lang === 'ru' ? 'Скопировано!' : 'Copied!';
+            setTimeout(() => { btn.innerText = '<span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span>'; }, 2000);
         });
     }
 
@@ -410,5 +445,39 @@ Sequence length will be: 845296925724899507 terms.
     });
 </script>
 
+
+<script>
+    // Language Toggle Logic
+    function setLanguage(lang) {
+        document.body.className = lang;
+        localStorage.setItem('preferredLang', lang);
+        
+        const btnRu = document.getElementById('btn-ru');
+        const btnEn = document.getElementById('btn-en');
+        
+        if (btnRu && btnEn) {
+            if (lang === 'ru') {
+                btnRu.classList.add('active');
+                btnEn.classList.remove('active');
+                document.documentElement.lang = 'ru';
+            } else {
+                btnEn.classList.add('active');
+                btnRu.classList.remove('active');
+                document.documentElement.lang = 'en';
+            }
+        }
+    }
+
+    function toggleLanguage() {
+        const currentLang = document.body.className;
+        setLanguage(currentLang === 'en' ? 'ru' : 'en');
+    }
+
+    // Apply language on load and when returning from bfcache
+    window.addEventListener('pageshow', function(event) {
+        const savedLang = localStorage.getItem('preferredLang') || 'en';
+        setLanguage(savedLang);
+    });
+</script>
 </body>
 </html>

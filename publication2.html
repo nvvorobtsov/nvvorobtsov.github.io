@@ -250,13 +250,48 @@
         .btn:hover {
             opacity: 0.9;
         }
+
+        /* Language Toggle Styles */
+        body.en .lang-ru { display: none !important; }
+        body.ru .lang-en { display: none !important; }
+
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--accent-blue);
+            color: #0f172a;
+        }
     </style>
 </head>
-<body>
+<body class="en">
+
+<div class="lang-toggle" onclick="toggleLanguage()">
+    <div class="lang-btn active" id="btn-en">EN</div>
+    <div class="lang-btn" id="btn-ru">RU</div>
+</div>
 
 <div class="container">
     <header>
-        <h1>Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</h1>
+        <h1><span class="lang-en">Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</span><span class="lang-ru">Телескопические тождества Рамануджана и массивные разложения кубов в суммы кубов</span></h1>
         <div class="author">N. Vorobtsov &bull; 2026</div>
         <a href="https://doi.org/10.5281/zenodo.19053976" target="_blank" class="doi-badge">DOI: 10.5281/zenodo.19053976</a>
     </header>
@@ -265,42 +300,42 @@
         
         <!-- ЛЕВАЯ КОЛОНКА (Абстракт) -->
         <section class="left-column">
-            <h2>Abstract</h2>
+            <h2><span class="lang-en">Abstract</span><span class="lang-ru">Аннотация</span></h2>
             <div class="card">
                 <p class="abstract-text">
-                    This foundational paper introduces the concept of using Srinivasa Ramanujan's polynomial identities to generate massive, exact decompositions of a single cube into a sum of many cubes. By exploiting the telescopic nature of these polynomials, we demonstrate a systematic method for constructing arbitrarily long chains of cubic equations.
+                    <span class="lang-en">This foundational paper introduces the concept of using Srinivasa Ramanujan's polynomial identities to generate massive, exact decompositions of a single cube into a sum of many cubes. By exploiting the telescopic nature of these polynomials, we demonstrate a systematic method for constructing arbitrarily long chains of cubic equations.</span><span class="lang-ru">Эта основополагающая статья вводит концепцию использования полиномиальных тождеств Сринивасы Рамануджана для генерации массивных, точных разложений одного куба в сумму множества кубов. Используя телескопическую природу этих полиномов, мы демонстрируем систематический метод построения сколь угодно длинных цепей кубических уравнений.</span>
                 </p>
                 <p class="abstract-text">
-                    The resulting decompositions provide new insights into the structure of Diophantine equations and offer a powerful algorithmic tool for exploring the additive properties of numbers.
+                    <span class="lang-en">The resulting decompositions provide new insights into the structure of Diophantine equations and offer a powerful algorithmic tool for exploring the additive properties of numbers.</span><span class="lang-ru">Полученные разложения дают новое понимание структуры диофантовых уравнений и предлагают мощный алгоритмический инструмент для исследования аддитивных свойств чисел.</span>
                 </p>
             </div>
 
             <div class="keywords-container">
-                <div class="keywords-title">Keywords</div>
+                <div class="keywords-title"><span class="lang-en">Keywords</span><span class="lang-ru">Ключевые слова</span></div>
                 <div class="keyword-tags">
-                    <span class="keyword-tag">Telescoping series</span>
-                    <span class="keyword-tag">Ramanujan identities</span>
+                    <span class="keyword-tag"><span class="lang-en">Telescoping series</span><span class="lang-ru">Телескопические ряды</span></span>
+                    <span class="keyword-tag"><span class="lang-en">Ramanujan identities</span><span class="lang-ru">Тождества Рамануджана</span></span>
                     <span class="keyword-tag">Sum of cubes</span>
                     <span class="keyword-tag">Massive decompositions</span>
-                    <span class="keyword-tag">Diophantine equations</span>
+                    <span class="keyword-tag"><span class="lang-en">Diophantine equations</span><span class="lang-ru">Диофантовы уравнения</span></span>
                 </div>
             </div>
         </section>
 
         <!-- ПРАВАЯ КОЛОНКА (Обложка) -->
         <section class="right-column">
-            <h2>Visual Representation</h2>
+            <h2><span class="lang-en">Visual Representation</span><span class="lang-ru">Визуальное представление</span></h2>
             <div class="card" style="text-align: center; padding: 15px;">
                 <img src="cover_pub4.png" alt="Mathematical Cover" class="cover-image" id="coverImg">
-                <span class="image-hint">Click image to view full size</span>
+                <span class="image-hint"><span class="lang-en">Click image to view full size</span><span class="lang-ru">Нажмите на изображение для увеличения</span></span>
             </div>
         </section>
 
     </div> <!-- End of two-column-layout -->
 
     <footer>
-        <p>Published on Zenodo &bull; Open Access (CC-BY 4.0)</p>
-        <a href="https://zenodo.org/records/19053976" target="_blank" class="btn">View Full Paper on Zenodo</a>
+        <p><span class="lang-en">Published on Zenodo &bull; Open Access (CC-BY 4.0)</span><span class="lang-ru">Опубликовано на Zenodo &bull; Открытый доступ (CC-BY 4.0)</span></p>
+        <a href="https://zenodo.org/records/19053976" target="_blank" class="btn"><span class="lang-en">View Full Paper on Zenodo</span><span class="lang-ru">Смотреть полную статью на Zenodo</span></a>
     </footer>
 </div>
 
@@ -346,5 +381,39 @@
     });
 </script>
 
+
+<script>
+    // Language Toggle Logic
+    function setLanguage(lang) {
+        document.body.className = lang;
+        localStorage.setItem('preferredLang', lang);
+        
+        const btnRu = document.getElementById('btn-ru');
+        const btnEn = document.getElementById('btn-en');
+        
+        if (btnRu && btnEn) {
+            if (lang === 'ru') {
+                btnRu.classList.add('active');
+                btnEn.classList.remove('active');
+                document.documentElement.lang = 'ru';
+            } else {
+                btnEn.classList.add('active');
+                btnRu.classList.remove('active');
+                document.documentElement.lang = 'en';
+            }
+        }
+    }
+
+    function toggleLanguage() {
+        const currentLang = document.body.className;
+        setLanguage(currentLang === 'en' ? 'ru' : 'en');
+    }
+
+    // Apply language on load and when returning from bfcache
+    window.addEventListener('pageshow', function(event) {
+        const savedLang = localStorage.getItem('preferredLang') || 'en';
+        setLanguage(savedLang);
+    });
+</script>
 </body>
 </html>

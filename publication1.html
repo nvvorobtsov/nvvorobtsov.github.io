@@ -250,13 +250,48 @@
         .btn:hover {
             opacity: 0.9;
         }
+
+        /* Language Toggle Styles */
+        body.en .lang-ru { display: none !important; }
+        body.ru .lang-en { display: none !important; }
+
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--accent-blue);
+            color: #0f172a;
+        }
     </style>
 </head>
-<body>
+<body class="en">
+
+<div class="lang-toggle" onclick="toggleLanguage()">
+    <div class="lang-btn active" id="btn-en">EN</div>
+    <div class="lang-btn" id="btn-ru">RU</div>
+</div>
 
 <div class="container">
     <header>
-        <h1>New Binomial Identities for Fibonacci, Lucas, and Generalized Fibonacci Sequences with Multiple Indices</h1>
+        <h1><span class="lang-en">New Binomial Identities for Fibonacci, Lucas, and Generalized Fibonacci Sequences with Multiple Indices</span><span class="lang-ru">Новые биномиальные тождества для последовательностей Фибоначчи, Люка и обобщенных последовательностей Фибоначчи с кратными индексами</span></h1>
         <div class="author">N. Vorobtsov &bull; 2026</div>
         <a href="https://arxiv.org/abs/2603.12150" target="_blank" class="doi-badge">arXiv: 2603.12150</a>
     </header>
@@ -265,43 +300,43 @@
         
         <!-- ЛЕВАЯ КОЛОНКА (Абстракт) -->
         <section class="left-column">
-            <h2>Abstract</h2>
+            <h2><span class="lang-en">Abstract</span><span class="lang-ru">Аннотация</span></h2>
             <div class="card">
                 <p class="abstract-text">
-                    This paper presents new binomial identities involving multiple indices for Fibonacci, Lucas, and generalized Fibonacci sequences, expanding the known algebraic relationships within these fundamental sequences. The research explores deep structural symmetries that govern the behavior of these sequences under binomial transformations.
+                    <span class="lang-en">This paper presents new binomial identities involving multiple indices for Fibonacci, Lucas, and generalized Fibonacci sequences, expanding the known algebraic relationships within these fundamental sequences. The research explores deep structural symmetries that govern the behavior of these sequences under binomial transformations.</span><span class="lang-ru">В этой статье представлены новые биномиальные тождества с кратными индексами для последовательностей Фибоначчи, Люка и обобщенных последовательностей Фибоначчи, расширяющие известные алгебраические связи внутри этих фундаментальных последовательностей. Исследование изучает глубокие структурные симметрии, которые управляют поведением этих последовательностей при биномиальных преобразованиях.</span>
                 </p>
                 <p class="abstract-text">
-                    By establishing these novel identities, we provide a broader mathematical framework that not only unifies several existing theorems but also opens up new pathways for analyzing the combinatorial properties of recursive sequences.
+                    <span class="lang-en">By establishing these novel identities, we provide a broader mathematical framework that not only unifies several existing theorems but also opens up new pathways for analyzing the combinatorial properties of recursive sequences.</span><span class="lang-ru">Устанавливая эти новые тождества, мы предоставляем более широкую математическую структуру, которая не только объединяет несколько существующих теорем, но и открывает новые пути для анализа комбинаторных свойств рекурсивных последовательностей.</span>
                 </p>
             </div>
 
             <div class="keywords-container">
-                <div class="keywords-title">Keywords</div>
+                <div class="keywords-title"><span class="lang-en">Keywords</span><span class="lang-ru">Ключевые слова</span></div>
                 <div class="keyword-tags">
-                    <span class="keyword-tag">Fibonacci sequence</span>
-                    <span class="keyword-tag">Lucas sequence</span>
-                    <span class="keyword-tag">Binomial identities</span>
-                    <span class="keyword-tag">Multiple indices</span>
-                    <span class="keyword-tag">Combinatorics</span>
-                    <span class="keyword-tag">Number theory</span>
+                    <span class="keyword-tag"><span class="lang-en">Fibonacci sequence</span><span class="lang-ru">Последовательность Фибоначчи</span></span>
+                    <span class="keyword-tag"><span class="lang-en">Lucas sequence</span><span class="lang-ru">Последовательность Люка</span></span>
+                    <span class="keyword-tag"><span class="lang-en">Binomial identities</span><span class="lang-ru">Биномиальные тождества</span></span>
+                    <span class="keyword-tag"><span class="lang-en">Multiple indices</span><span class="lang-ru">Кратные индексы</span></span>
+                    <span class="keyword-tag"><span class="lang-en">Combinatorics</span><span class="lang-ru">Комбинаторика</span></span>
+                    <span class="keyword-tag"><span class="lang-en">Number theory</span><span class="lang-ru">Теория чисел</span></span>
                 </div>
             </div>
         </section>
 
         <!-- ПРАВАЯ КОЛОНКА (Обложка) -->
         <section class="right-column">
-            <h2>Visual Representation</h2>
+            <h2><span class="lang-en">Visual Representation</span><span class="lang-ru">Визуальное представление</span></h2>
             <div class="card" style="text-align: center; padding: 15px;">
                 <img src="cover_good.jpg" alt="Mathematical Cover" class="cover-image" id="coverImg">
-                <span class="image-hint">Click image to view full size</span>
+                <span class="image-hint"><span class="lang-en">Click image to view full size</span><span class="lang-ru">Нажмите на изображение для увеличения</span></span>
             </div>
         </section>
 
     </div> <!-- End of two-column-layout -->
 
     <footer>
-        <p>Published on arXiv &bull; Open Access</p>
-        <a href="https://arxiv.org/pdf/2603.12150" target="_blank" class="btn">Download Full PDF</a>
+        <p><span class="lang-en">Published on arXiv &bull; Open Access</span><span class="lang-ru">Опубликовано на arXiv &bull; Открытый доступ</span></p>
+        <a href="https://arxiv.org/pdf/2603.12150" target="_blank" class="btn"><span class="lang-en">Download Full PDF</span><span class="lang-ru">Скачать PDF</span></a>
     </footer>
 </div>
 
@@ -351,5 +386,39 @@
     });
 </script>
 
+
+<script>
+    // Language Toggle Logic
+    function setLanguage(lang) {
+        document.body.className = lang;
+        localStorage.setItem('preferredLang', lang);
+        
+        const btnRu = document.getElementById('btn-ru');
+        const btnEn = document.getElementById('btn-en');
+        
+        if (btnRu && btnEn) {
+            if (lang === 'ru') {
+                btnRu.classList.add('active');
+                btnEn.classList.remove('active');
+                document.documentElement.lang = 'ru';
+            } else {
+                btnEn.classList.add('active');
+                btnRu.classList.remove('active');
+                document.documentElement.lang = 'en';
+            }
+        }
+    }
+
+    function toggleLanguage() {
+        const currentLang = document.body.className;
+        setLanguage(currentLang === 'en' ? 'ru' : 'en');
+    }
+
+    // Apply language on load and when returning from bfcache
+    window.addEventListener('pageshow', function(event) {
+        const savedLang = localStorage.getItem('preferredLang') || 'en';
+        setLanguage(savedLang);
+    });
+</script>
 </body>
 </html>

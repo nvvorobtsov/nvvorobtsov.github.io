@@ -25,10 +25,40 @@
             padding: 0;
         }
 
+        /* Language Toggle Styles */
+        body.en .lang-ru { display: none !important; }
+        body.ru .lang-en { display: none !important; }
+
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: var(--accent-blue);
+            color: #0f172a;
+        }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
             padding: 60px 20px;
+            position: relative;
         }
 
         header {
@@ -134,79 +164,146 @@
         }
     </style>
 </head>
-<body>
+<body class="en">
+
+<div class="lang-toggle" onclick="toggleLanguage()">
+    <div class="lang-btn active" id="btn-en">EN</div>
+    <div class="lang-btn" id="btn-ru">RU</div>
+</div>
 
 <div class="container">
     <header>
-        <h1>Nick Vorobtsov</h1>
-        <div class="subtitle">Independent Researcher &bull; Number Theory & Diophantine Equations</div>
+        <h1>
+            <span class="lang-en">Nick Vorobtsov</span>
+            <span class="lang-ru">Николай Воробцов</span>
+        </h1>
+        <div class="subtitle">
+            <span class="lang-en">Independent Researcher &bull; Number Theory & Diophantine Equations</span>
+            <span class="lang-ru">Независимый исследователь &bull; Теория чисел и диофантовы уравнения</span>
+        </div>
     </header>
 
     <div class="publications">
         
         <!-- Публикация 5 -->
         <div class="paper-card">
-            <div class="paper-number">PUBLICATION 05 &bull; 2026</div>
-            <h2 class="paper-title">Telescopic Properties of Ramanujan Polynomials and Their Connection to Prime Number Distribution Modulo 6</h2>
+            <div class="paper-number">
+                <span class="lang-en">PUBLICATION 05 &bull; 2026</span>
+                <span class="lang-ru">ПУБЛИКАЦИЯ 05 &bull; 2026</span>
+            </div>
+            <h2 class="paper-title">
+                <span class="lang-en">Telescopic Properties of Ramanujan Polynomials and Their Connection to Prime Number Distribution Modulo 6</span>
+                <span class="lang-ru">Телескопические свойства полиномов Рамануджана и их связь с распределением простых чисел по модулю 6</span>
+            </h2>
             <div class="paper-desc">
-                Reveals a previously unnoticed modular symmetry within Ramanujan's identity for the sum of cubes, demonstrating that the base polynomials strictly generate numbers belonging to the fundamental prime ranges 6n+1 and 6n-1.
+                <span class="lang-en">Reveals a previously unnoticed modular symmetry within Ramanujan's identity for the sum of cubes, demonstrating that the base polynomials strictly generate numbers belonging to the fundamental prime ranges 6n+1 and 6n-1.</span>
+                <span class="lang-ru">Раскрывает ранее не замеченную модулярную симметрию в тождестве Рамануджана для суммы кубов, демонстрируя, что базовые полиномы строго генерируют числа, принадлежащие к фундаментальным диапазонам простых чисел 6n+1 и 6n-1.</span>
             </div>
             <div class="links">
-                <a href="publication5.html" class="btn btn-primary">Interactive Cover</a>
-                <a href="code5.html" class="btn">View Source Code</a>
+                <a href="publication5.html" class="btn btn-primary">
+                    <span class="lang-en">Interactive Cover</span>
+                    <span class="lang-ru">Интерактивная обложка</span>
+                </a>
+                <a href="code5.html" class="btn">
+                    <span class="lang-en">View Source Code</span>
+                    <span class="lang-ru">Исходный код</span>
+                </a>
                 <a href="https://zenodo.org/records/19238858" target="_blank" class="btn">Zenodo (DOI)</a>
             </div>
         </div>
 
         <!-- Публикация 4 -->
         <div class="paper-card">
-            <div class="paper-number">PUBLICATION 04 &bull; 2026</div>
-            <h2 class="paper-title">Cubic Relations of Mersenne and Fermat Numbers as a Consequence of Ramanujan's Polynomial Identities</h2>
+            <div class="paper-number">
+                <span class="lang-en">PUBLICATION 04 &bull; 2026</span>
+                <span class="lang-ru">ПУБЛИКАЦИЯ 04 &bull; 2026</span>
+            </div>
+            <h2 class="paper-title">
+                <span class="lang-en">Cubic Relations of Mersenne and Fermat Numbers as a Consequence of Ramanujan's Polynomial Identities</span>
+                <span class="lang-ru">Кубические соотношения чисел Мерсенна и Ферма как следствие полиномиальных тождеств Рамануджана</span>
+            </h2>
             <div class="paper-desc">
-                Explores the deep connections between Ramanujan's polynomial identities and the generation of Mersenne and Fermat numbers within massive cube decompositions.
+                <span class="lang-en">Explores the deep connections between Ramanujan's polynomial identities and the generation of Mersenne and Fermat numbers within massive cube decompositions.</span>
+                <span class="lang-ru">Исследует глубокие связи между полиномиальными тождествами Рамануджана и генерацией чисел Мерсенна и Ферма в рамках массивных разложений кубов.</span>
             </div>
             <div class="links">
-                <a href="publication4.html" class="btn btn-primary">Interactive Cover</a>
+                <a href="publication4.html" class="btn btn-primary">
+                    <span class="lang-en">Interactive Cover</span>
+                    <span class="lang-ru">Интерактивная обложка</span>
+                </a>
                 <a href="https://zenodo.org/records/19087405" target="_blank" class="btn">Zenodo (DOI)</a>
             </div>
         </div>
 
         <!-- Публикация 3 -->
         <div class="paper-card">
-            <div class="paper-number">PUBLICATION 03 &bull; 2026</div>
-            <h2 class="paper-title">Algebraic Symmetries and Modular Properties of Ramanujan Polynomials in the Cube Decomposition Problem</h2>
+            <div class="paper-number">
+                <span class="lang-en">PUBLICATION 03 &bull; 2026</span>
+                <span class="lang-ru">ПУБЛИКАЦИЯ 03 &bull; 2026</span>
+            </div>
+            <h2 class="paper-title">
+                <span class="lang-en">Algebraic Symmetries and Modular Properties of Ramanujan Polynomials in the Cube Decomposition Problem</span>
+                <span class="lang-ru">Алгебраические симметрии и модулярные свойства полиномов Рамануджана в задаче разложения кубов</span>
+            </h2>
             <div class="paper-desc">
-                Investigates the algebraic symmetries and modular arithmetic properties underlying the polynomials used by Ramanujan to solve the sum of cubes problem.
+                <span class="lang-en">Investigates the algebraic symmetries and modular arithmetic properties underlying the polynomials used by Ramanujan to solve the sum of cubes problem.</span>
+                <span class="lang-ru">Исследует алгебраические симметрии и свойства модулярной арифметики, лежащие в основе полиномов, использованных Рамануджаном для решения задачи о сумме кубов.</span>
             </div>
             <div class="links">
-                <a href="publication3.html" class="btn btn-primary">Interactive Cover</a>
+                <a href="publication3.html" class="btn btn-primary">
+                    <span class="lang-en">Interactive Cover</span>
+                    <span class="lang-ru">Интерактивная обложка</span>
+                </a>
                 <a href="https://zenodo.org/records/19055351" target="_blank" class="btn">Zenodo (DOI)</a>
             </div>
         </div>
 
         <!-- Публикация 2 -->
         <div class="paper-card">
-            <div class="paper-number">PUBLICATION 02 &bull; 2026</div>
-            <h2 class="paper-title">Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</h2>
+            <div class="paper-number">
+                <span class="lang-en">PUBLICATION 02 &bull; 2026</span>
+                <span class="lang-ru">ПУБЛИКАЦИЯ 02 &bull; 2026</span>
+            </div>
+            <h2 class="paper-title">
+                <span class="lang-en">Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</span>
+                <span class="lang-ru">Телескопические тождества Рамануджана и массивные разложения кубов в суммы кубов</span>
+            </h2>
             <div class="paper-desc">
-                Explores the use of Ramanujan's identities to generate massive, telescoping decompositions of a single cube into a sum of many cubes.
+                <span class="lang-en">Explores the use of Ramanujan's identities to generate massive, telescoping decompositions of a single cube into a sum of many cubes.</span>
+                <span class="lang-ru">Исследует использование тождеств Рамануджана для генерации массивных телескопических разложений одного куба в сумму множества кубов.</span>
             </div>
             <div class="links">
-                <a href="publication2.html" class="btn btn-primary">Interactive Cover</a>
-                <a href="code2.html" class="btn">View Source Code</a>
+                <a href="publication2.html" class="btn btn-primary">
+                    <span class="lang-en">Interactive Cover</span>
+                    <span class="lang-ru">Интерактивная обложка</span>
+                </a>
+                <a href="code2.html" class="btn">
+                    <span class="lang-en">View Source Code</span>
+                    <span class="lang-ru">Исходный код</span>
+                </a>
                 <a href="https://zenodo.org/records/19053976" target="_blank" class="btn">Zenodo (DOI)</a>
             </div>
         </div>
 
         <!-- Публикация 1 (arXiv) -->
         <div class="paper-card">
-            <div class="paper-number">PUBLICATION 01 &bull; 2026</div>
-            <h2 class="paper-title">New Binomial Identities for Fibonacci, Lucas, and Generalized Fibonacci Sequences with Multiple Indices</h2>
+            <div class="paper-number">
+                <span class="lang-en">PUBLICATION 01 &bull; 2026</span>
+                <span class="lang-ru">ПУБЛИКАЦИЯ 01 &bull; 2026</span>
+            </div>
+            <h2 class="paper-title">
+                <span class="lang-en">New Binomial Identities for Fibonacci, Lucas, and Generalized Fibonacci Sequences with Multiple Indices</span>
+                <span class="lang-ru">Новые биномиальные тождества для последовательностей Фибоначчи, Люка и обобщенных последовательностей Фибоначчи с кратными индексами</span>
+            </h2>
             <div class="paper-desc">
-                Presents new binomial identities involving multiple indices for Fibonacci, Lucas, and generalized Fibonacci sequences, expanding the known algebraic relationships within these fundamental sequences.
+                <span class="lang-en">Presents new binomial identities involving multiple indices for Fibonacci, Lucas, and generalized Fibonacci sequences, expanding the known algebraic relationships within these fundamental sequences.</span>
+                <span class="lang-ru">Представляет новые биномиальные тождества с кратными индексами для последовательностей Фибоначчи, Люка и обобщенных последовательностей Фибоначчи, расширяя известные алгебраические связи внутри этих фундаментальных последовательностей.</span>
             </div>
             <div class="links">
-                <a href="publication1.html" class="btn btn-primary">Interactive Cover</a>
+                <a href="publication1.html" class="btn btn-primary">
+                    <span class="lang-en">Interactive Cover</span>
+                    <span class="lang-ru">Интерактивная обложка</span>
+                </a>
                 <a href="https://arxiv.org/abs/2603.12150" target="_blank" class="btn">arXiv:2603.12150</a>
                 <a href="https://arxiv.org/pdf/2603.12150" target="_blank" class="btn">PDF</a>
             </div>
@@ -215,9 +312,39 @@
     </div>
 
     <footer>
-        &copy; 2026 Nick Vorobtsov. All publications are Open Access under CC-BY 4.0.
+        <span class="lang-en">&copy; 2026 Nick Vorobtsov. All publications are Open Access under CC-BY 4.0.</span>
+        <span class="lang-ru">&copy; 2026 Николай Воробцов. Все публикации находятся в открытом доступе (CC-BY 4.0).</span>
     </footer>
 </div>
+
+<script>
+    // Language Toggle Logic
+    function setLanguage(lang) {
+        document.body.className = lang;
+        localStorage.setItem('preferredLang', lang);
+        
+        if (lang === 'ru') {
+            document.getElementById('btn-ru').classList.add('active');
+            document.getElementById('btn-en').classList.remove('active');
+            document.documentElement.lang = 'ru';
+        } else {
+            document.getElementById('btn-en').classList.add('active');
+            document.getElementById('btn-ru').classList.remove('active');
+            document.documentElement.lang = 'en';
+        }
+    }
+
+    function toggleLanguage() {
+        const currentLang = document.body.className;
+        setLanguage(currentLang === 'en' ? 'ru' : 'en');
+    }
+
+    // Apply language on load and when returning from bfcache
+    window.addEventListener('pageshow', function(event) {
+        const savedLang = localStorage.getItem('preferredLang') || 'en';
+        setLanguage(savedLang);
+    });
+</script>
 
 </body>
 </html>
