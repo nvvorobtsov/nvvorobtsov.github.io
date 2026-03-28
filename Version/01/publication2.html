@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telescoping Ramanujan Identities and Massive Decompositions</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-gold: #fbbf24;
+            --accent-blue: #38bdf8;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0 40px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .author {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .doi-badge {
+            display: inline-block;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .doi-badge:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+
+        .two-column-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .two-column-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            border-left: 4px solid var(--accent-gold);
+            padding-left: 15px;
+            margin-bottom: 25px;
+            margin-top: 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .cover-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .cover-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 40px rgba(56, 189, 248, 0.2);
+        }
+
+        .image-hint {
+            display: block;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        /* Modal (Lightbox) Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Центрирование контейнера внутри модального окна */
+        .modal-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+            object-fit: contain;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: var(--accent-blue);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .abstract-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-main);
+            text-align: justify;
+        }
+
+        .keywords-container {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .keywords-title {
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .keyword-tag {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .keyword-tag:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: var(--accent-blue);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-blue);
+            color: #0f172a;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</h1>
+        <div class="author">N. Vorobtsov &bull; 2026</div>
+        <a href="https://doi.org/10.5281/zenodo.19053976" target="_blank" class="doi-badge">DOI: 10.5281/zenodo.19053976</a>
+    </header>
+
+    <div class="two-column-layout">
+        
+        <!-- ЛЕВАЯ КОЛОНКА (Абстракт) -->
+        <section class="left-column">
+            <h2>Abstract</h2>
+            <div class="card">
+                <p class="abstract-text">
+                    This foundational paper introduces the concept of using Srinivasa Ramanujan's polynomial identities to generate massive, exact decompositions of a single cube into a sum of many cubes. By exploiting the telescopic nature of these polynomials, we demonstrate a systematic method for constructing arbitrarily long chains of cubic equations.
+                </p>
+                <p class="abstract-text">
+                    The resulting decompositions provide new insights into the structure of Diophantine equations and offer a powerful algorithmic tool for exploring the additive properties of numbers.
+                </p>
+            </div>
+
+            <div class="keywords-container">
+                <div class="keywords-title">Keywords</div>
+                <div class="keyword-tags">
+                    <span class="keyword-tag">Telescoping series</span>
+                    <span class="keyword-tag">Ramanujan identities</span>
+                    <span class="keyword-tag">Sum of cubes</span>
+                    <span class="keyword-tag">Massive decompositions</span>
+                    <span class="keyword-tag">Diophantine equations</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ПРАВАЯ КОЛОНКА (Обложка) -->
+        <section class="right-column">
+            <h2>Visual Representation</h2>
+            <div class="card" style="text-align: center; padding: 15px;">
+                <img src="cover_pub4.png" alt="Mathematical Cover" class="cover-image" id="coverImg">
+                <span class="image-hint">Click image to view full size</span>
+            </div>
+        </section>
+
+    </div> <!-- End of two-column-layout -->
+
+    <footer>
+        <p>Published on Zenodo &bull; Open Access (CC-BY 4.0)</p>
+        <a href="https://zenodo.org/records/19053976" target="_blank" class="btn">View Full Paper on Zenodo</a>
+    </footer>
+</div>
+
+<!-- The Modal -->
+<div id="imageModal" class="modal">
+  <span class="close-modal">&times;</span>
+  <div class="modal-container">
+      <img class="modal-content" id="img01">
+  </div>
+</div>
+
+<script>
+    var modal = document.getElementById("imageModal");
+    var img = document.getElementById("coverImg");
+    var modalImg = document.getElementById("img01");
+    
+    img.onclick = function(){
+      modal.style.display = "block";
+      modalImg.src = this.src;
+    }
+    
+    var span = document.getElementsByClassName("close-modal")[0];
+    
+    span.onclick = function() { 
+      modal.style.display = "none";
+    }
+
+    modal.onclick = function(e) {
+        if (e.target !== modalImg) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Close modal on ESC key press
+    document.addEventListener('keyup', function(e) {
+        if (e.key === "Escape") {
+            if (modal.style.display === "block") {
+                modal.style.display = "none";
+            } else {
+                window.history.back();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
