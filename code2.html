@@ -206,7 +206,8 @@
                 <span>fincube_master.py</span>
                 <button class="copy-btn" onclick="copyCode('code1')"><span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span></button>
             </div>
-            <pre><code class="language-python" id="code1">#!/usr/bin/env python3
+            <div class="lang-en">
+                <pre><code class="language-python" id="code1_en">#!/usr/bin/env python3
 import math
 import sys
 
@@ -320,10 +321,17 @@ def fincube(INCUBE, EULER, BAZA, dlts):
 
 def run_master(k):
     print(f"Generating decomposition for k = {k}...")
+    
+    # 1. Calculate parameters algebraically
     INCUBE, EULER, BAZA, dlts = fincube_ultimate(k)
+    
     seq_length = sum(d[1] for d in dlts) + 2
     print(f"Generated parameters. Sequence length will be: {seq_length} terms.")
+    
+    # 2. Reconstruct decomposition and verify math
     raw_output = fincube(INCUBE, EULER, BAZA, dlts)
+    
+    # 3. Apply neat line wrapping
     wrapped_output = wrap_text(raw_output, max_len=80)
     
     print("\nResult:\n" + "="*80)
@@ -333,6 +341,143 @@ def run_master(k):
 if __name__ == "__main__":
     k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 2
     run_master(k_input)</code></pre>
+            </div>
+            <div class="lang-ru">
+                <pre><code class="language-python" id="code1_ru">#!/usr/bin/env python3
+import math
+import sys
+
+def fincube_ultimate(k):
+    a = k
+    a3 = a**3
+    a6 = a**6
+
+    def Y(b): return 2*a6 - 3*a3*(1 + 2*b) + 1 + 3*b + 3*b**2
+    def Z(b): return a6 - 1 - 3*b - 3*b**2
+    def W(b): return a**7 - 3*a**4*b + a*(3*b**2 - 1)
+
+    D_max = 9*(2*a3 - 1)**2 - 12*(2*a6 - 3*a3 + 1)
+    b_max = math.floor((3*(2*a3 - 1) - math.sqrt(D_max)) / 6)
+    while Y(b_max + 1) > 0: b_max += 1
+    while Y(b_max) <= 0: b_max -= 1
+
+    larr = []
+    for b in range(b_max, -1, -1):
+        larr.append(min(Y(b), Z(b)))
+        
+    for b in range(b_max, -1, -1):
+        larr.append(max(Y(b), Z(b)))
+        
+    larr.append(W(b_max + 1))
+    
+    l1 = [larr[i+1] - larr[i] for i in range(len(larr)-1)]
+    dlts = []
+    n1 = l1[0]
+    delta = l1[1] - l1[0]
+    count = 1
+    for i in range(1, len(l1)-1):
+        d = l1[i+1] - l1[i]
+        if d == delta:
+            count += 1
+        else:
+            dlts.append([n1, count, delta])
+            n1 = l1[i]
+            delta = d
+            count = 1
+    dlts.append([n1, count, delta])
+
+    INCUBE = W(0)
+    EULER = [Z(0), Y(0), W(1)]
+    BAZA = larr[0]
+    
+    return INCUBE, EULER, BAZA, dlts
+
+def wrap_text(text, max_len=80):
+    lines = []
+    eq_idx = text.find('= ', text.find(' = ') + 3)
+    if eq_idx != -1:
+        start_part = text[:eq_idx + 2]
+        rest_part = text[eq_idx + 2:]
+    else:
+        start_part = ""
+        rest_part = text
+
+    while len(start_part) > max_len:
+        split_idx = start_part.rfind(' ', 0, max_len)
+        if split_idx == -1: split_idx = max_len
+        lines.append(start_part[:split_idx])
+        start_part = start_part[split_idx:].lstrip()
+    
+    current_line = start_part
+    terms = rest_part.split('+')
+    
+    for i, term in enumerate(terms):
+        prefix = "" if i == 0 else "+"
+        term_str = prefix + term
+        
+        if len(current_line) + len(term_str) <= max_len:
+            current_line += term_str
+        else:
+            if current_line:
+                lines.append(current_line)
+            current_line = term_str
+
+    if current_line:
+        lines.append(current_line)
+
+    return '\n'.join(lines)
+
+def fincube(INCUBE, EULER, BAZA, dlts):
+    BAZA2 = BAZA
+    larr = [BAZA2]
+    len_dlts = len(dlts)
+
+    for i in range(len_dlts):
+        a, b, c = dlts[i][0], dlts[i][1], dlts[i][2]
+        for j in range(1, b + 1):
+            term = BAZA2 + j * a
+            if j > 1:
+                term += (j - 1) * j * c // 2
+            larr.append(term)
+        BAZA2 = larr[-1]
+
+    last_a = dlts[len_dlts - 1][0]
+    last_c = dlts[len_dlts - 1][2]
+    larr.append(BAZA2 + last_a + last_c)
+
+    larr.sort()
+    incube3 = INCUBE**3
+
+    str_out = f"{INCUBE}^3 = {EULER[0]}^3 + {EULER[1]}^3 + {EULER[2]}^3 = {incube3} = "
+    str_out += str(larr[0]) + "^3"
+    for i in range(1, len(larr)):
+        str_out += "+" + str(larr[i]) + "^3"
+        
+    return str_out
+
+def run_master(k):
+    print(f"Generating decomposition for k = {k}...")
+    
+    # 1. Считаем параметры алгебраически
+    INCUBE, EULER, BAZA, dlts = fincube_ultimate(k)
+    
+    seq_length = sum(d[1] for d in dlts) + 2
+    print(f"Generated parameters. Sequence length will be: {seq_length} terms.")
+    
+    # 2. Восстанавливаем разложение и проверяем математику
+    raw_output = fincube(INCUBE, EULER, BAZA, dlts)
+    
+    # 3. Делаем аккуратный перенос строк
+    wrapped_output = wrap_text(raw_output, max_len=80)
+    
+    print("\nResult:\n" + "="*80)
+    print(wrapped_output)
+    print("="*80)
+
+if __name__ == "__main__":
+    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 2
+    run_master(k_input)</code></pre>
+            </div>
         </div>
 
         <div class="code-container">
@@ -369,7 +514,8 @@ Result:
                 <span>fincube_length_only.py</span>
                 <button class="copy-btn" onclick="copyCode('code2')"><span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span></button>
             </div>
-            <pre><code class="language-python" id="code2">#!/usr/bin/env python3
+            <div class="lang-en">
+                <pre><code class="language-python" id="code2_en">#!/usr/bin/env python3
 import math
 import sys
 
@@ -381,15 +527,20 @@ def get_decomposition_stats(k):
     def Y(b): 
         return 2*a6 - 3*a3*(1 + 2*b) + 1 + 3*b + 3*b**2
 
+    # Analytic calculation of b_max (the largest integer b where Y(b) > 0)
     D_max = 9*(2*a3 - 1)**2 - 12*(2*a6 - 3*a3 + 1)
     sqrt_D_max = math.isqrt(D_max)
     
     b_max = (3*(2*a3 - 1) - sqrt_D_max) // 6
     
+    # Adjust to ensure exact boundary
     while Y(b_max + 1) > 0: b_max += 1
     while Y(b_max) <= 0: b_max -= 1
 
+    # INCUBE is simply W(0) = a^7 - a
     INCUBE = a**7 - a
+    
+    # The sequence length is algebraically exactly 2 * b_max + 3
     seq_length = 2 * b_max + 3
     
     return INCUBE, seq_length
@@ -403,6 +554,48 @@ def run_master(k):
 if __name__ == "__main__":
     k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 3
     run_master(k_input)</code></pre>
+            </div>
+            <div class="lang-ru">
+                <pre><code class="language-python" id="code2_ru">#!/usr/bin/env python3
+import math
+import sys
+
+def get_decomposition_stats(k):
+    a = k
+    a3 = a**3
+    a6 = a**6
+
+    def Y(b): 
+        return 2*a6 - 3*a3*(1 + 2*b) + 1 + 3*b + 3*b**2
+
+    # Аналитическое вычисление b_max (наибольшее целое b, при котором Y(b) > 0)
+    D_max = 9*(2*a3 - 1)**2 - 12*(2*a6 - 3*a3 + 1)
+    sqrt_D_max = math.isqrt(D_max)
+    
+    b_max = (3*(2*a3 - 1) - sqrt_D_max) // 6
+    
+    # Корректировка для обеспечения точной границы
+    while Y(b_max + 1) > 0: b_max += 1
+    while Y(b_max) <= 0: b_max -= 1
+
+    # INCUBE - это просто W(0) = a^7 - a
+    INCUBE = a**7 - a
+    
+    # Длина последовательности алгебраически равна ровно 2 * b_max + 3
+    seq_length = 2 * b_max + 3
+    
+    return INCUBE, seq_length
+
+def run_master(k):
+    print(f"Decomposition for k = {k}")
+    INCUBE, seq_length = get_decomposition_stats(k)
+    print(f"INCUBE base: {INCUBE}")
+    print(f"Sequence length will be: {seq_length} terms.")
+
+if __name__ == "__main__":
+    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+    run_master(k_input)</code></pre>
+            </div>
         </div>
 
         <div class="code-container">
@@ -417,23 +610,28 @@ INCUBE base: 999993000020999965000034999979000006000000
 Sequence length will be: 845296925724899507 terms.
 --------------------------------------------------
 
-<span class="comment"># Can you imagine a sequence of 845,296,925,724,899,507 elements?!
+<span class="comment"><span class="lang-en"># Can you imagine a sequence of 845,296,925,724,899,507 elements?!
 # And these are not just elements, but the sum of "cubes"!
 # That is 845 quadrillion, 296 trillion, 925 billion, 724 million, 899 thousand, 507 cubes 
-# in the decomposition of the cube of 999993000020999965000034999979000006000000!!</span></pre>
+# in the decomposition of the cube of 999993000020999965000034999979000006000000!!</span><span class="lang-ru"># Вы можете себе представить последовательность из 845 296 925 724 899 507 элементов?!
+# И это не просто элементы, а суммы "кубов"!
+# Это 845 квадриллионов, 296 триллионов, 925 миллиардов, 724 миллиона, 899 тысяч, 507 кубов 
+# в разложении куба числа 999993000020999965000034999979000006000000!!</span></span></pre>
         </div>
     </div>
 
 </div>
 
 <script>
-    function copyCode(elementId) {
-        const codeElement = document.getElementById(elementId);
+    function copyCode(baseId) {
+        const lang = document.documentElement.lang || 'en';
+        const elementId = baseId + '_' + lang;
+        const codeElement = document.getElementById(elementId) || document.getElementById(baseId);
         const text = codeElement.innerText;
         navigator.clipboard.writeText(text).then(() => {
-            const btn = event.target;
-            btn.innerText = document.documentElement.lang === 'ru' ? 'Скопировано!' : 'Copied!';
-            setTimeout(() => { btn.innerText = '<span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span>'; }, 2000);
+            const btn = event.currentTarget;
+            btn.innerHTML = lang === 'ru' ? 'Скопировано!' : 'Copied!';
+            setTimeout(() => { btn.innerHTML = lang === 'ru' ? 'Копировать код' : 'Copy Code'; }, 2000);
         });
     }
 
