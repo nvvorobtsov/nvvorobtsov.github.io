@@ -261,7 +261,7 @@
 <div class="container">
     <header>
         <h1><span class="lang-en">Telescopic Properties of Ramanujan Polynomials and Their Connection to Prime Number Distribution Modulo 6</span><span class="lang-ru">Телескопические свойства полиномов Рамануджана и их связь с распределением простых чисел по модулю 6</span></h1>
-        <div class="author">N. Vorobtsov &bull; 2026</div>
+        <div class="author"><span class="lang-en">N. Vorobtsov</span><span class="lang-ru">Н. Воробцов</span> &bull; 2026</div>
         <a href="https://doi.org/10.5281/zenodo.19238858" target="_blank" class="doi-badge">DOI: 10.5281/zenodo.19238858</a>
     </header>
 
@@ -290,27 +290,42 @@
                 </div>
             </div>
 
-            <h3>The Prime Number Connection (Modulo 6)</h3>
-            <p>By fixing the scaling parameter \( a = 6 \), we uncover a strict alignment with the fundamental prime number ranges \( 6n \pm 1 \):</p>
-            <div class="card">
-                <div class="math-block">
-                    \[ X(6, b) \equiv 0 \pmod 6 \]
-                    \[ W(6, b) \equiv 0 \pmod 6 \]
-                    \[ Y(6, b) \equiv 1 \pmod 6 \quad \longleftarrow \text{Right prime range } (6n+1) \]
-                    \[ Z(6, b) \equiv -1 \pmod 6 \quad \longleftarrow \text{Left prime range } (6n-1) \]
+            <span class="lang-en">
+                <h3>The Prime Number Connection (Modulo 6)</h3>
+                <p>By fixing the scaling parameter \( a = 6 \), we uncover a strict alignment with the fundamental prime number ranges \( 6n \pm 1 \):</p>
+                <div class="card">
+                    <div class="math-block">
+                        \[ X(6, b) \equiv 0 \pmod 6 \]
+                        \[ W(6, b) \equiv 0 \pmod 6 \]
+                        \[ Y(6, b) \equiv 1 \pmod 6 \quad \longleftarrow \text{Right prime range } (6n+1) \]
+                        \[ Z(6, b) \equiv -1 \pmod 6 \quad \longleftarrow \text{Left prime range } (6n-1) \]
+                    </div>
+                    <p>This proves that Ramanujan's identity acts as a perfect algebraic balance between the two fundamental classes of prime numbers: \( 0^3 + 1^3 + (-1)^3 \equiv 0 \pmod 6 \).</p>
                 </div>
-                <p>This proves that Ramanujan's identity acts as a perfect algebraic balance between the two fundamental classes of prime numbers: \( 0^3 + 1^3 + (-1)^3 \equiv 0 \pmod 6 \).</p>
-            </div>
+            </span>
+            <span class="lang-ru">
+                <h3>Связь с простыми числами (по модулю 6)</h3>
+                <p>Зафиксировав масштабирующий параметр \( a = 6 \), мы обнаруживаем строгое соответствие фундаментальным диапазонам простых чисел \( 6n \pm 1 \):</p>
+                <div class="card">
+                    <div class="math-block">
+                        \[ X(6, b) \equiv 0 \pmod 6 \]
+                        \[ W(6, b) \equiv 0 \pmod 6 \]
+                        \[ Y(6, b) \equiv 1 \pmod 6 \quad \longleftarrow \text{Правый диапазон простых } (6n+1) \]
+                        \[ Z(6, b) \equiv -1 \pmod 6 \quad \longleftarrow \text{Левый диапазон простых } (6n-1) \]
+                    </div>
+                    <p>Отсюда следует, что тождество Рамануджана задаёт точный алгебраический баланс между двумя фундаментальными классами простых чисел: \( 0^3 + 1^3 + (-1)^3 \equiv 0 \pmod 6 \).</p>
+                </div>
+            </span>
         </section>
 
         <!-- ПРАВАЯ КОЛОНКА -->
         <section class="right-column">
             <h2><span class="lang-en">Massive Cube Decompositions</span><span class="lang-ru">Массивные разложения кубов</span></h2>
-            <p>By leveraging the telescopic nature of the polynomials, we can generate arbitrarily long, exact decompositions of cubes. Below are two striking examples of this mechanism in action.</p>
+            <p><span class="lang-en">By leveraging the telescopic nature of the polynomials, we can generate arbitrarily long, exact decompositions of cubes. Below are two striking examples of this mechanism in action.</span><span class="lang-ru">Опираясь на телескопическую природу полиномов, можно строить сколь угодно длинные точные разложения кубов. Ниже — два наглядных примера этого механизма.</span></p>
 
             <div class="card">
-                <div class="example-title"><span class="lang-en">Generation Example 1</span><span class="lang-ru">Пример генерации 1</span>: The 8-Cube Chain</div>
-                <p>Setting the base scale \( a=2 \), starting point \( b_0=10 \), and telescope steps \( k=5 \). After moving negative terms and canceling common cubes, we obtain a pure decomposition where the sum of two cubes equals the sum of eight unique cubes.</p>
+                <div class="example-title"><span class="lang-en">Generation Example 1: The 8-Cube Chain</span><span class="lang-ru">Пример генерации 1: цепочка из восьми кубов</span></div>
+                <p><span class="lang-en">Set the base scale \( a=2 \), starting point \( b_0=10 \), and telescope steps \( k=5 \). After moving negative terms to the other side and canceling common cubes, we obtain a pure decomposition in which the sum of two cubes equals the sum of eight distinct cubes.</span><span class="lang-ru">Задаём масштаб \( a=2 \), начальную точку \( b_0=10 \) и число телескопических шагов \( k=5 \). Перенеся отрицательные слагаемые и сократив совпадающие кубы, получаем «чистое» разложение: сумма двух кубов равна сумме восьми различных кубов.</span></p>
                 
                 <div class="massive-equation">
                     <span class="term">63<sup>3</sup></span>
@@ -325,13 +340,13 @@
                     <span class="term"><span class="plus">+</span> 567<sup>3</sup></span>
                 </div>
                 <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">
-                    Sum = 432,331,263 (Factorization: \( 3^6 \cdot 7^4 \cdot 13 \cdot 19 \))
+                    <span class="lang-en">Sum = 432,331,263 (factorization: \( 3^6 \cdot 7^4 \cdot 13 \cdot 19 \))</span><span class="lang-ru">Сумма = 432&nbsp;331&nbsp;263 (разложение: \( 3^6 \cdot 7^4 \cdot 13 \cdot 19 \))</span>
                 </p>
             </div>
 
             <div class="card">
-                <div class="example-title"><span class="lang-en">Generation Example 3</span><span class="lang-ru">Пример генерации 3</span>: The 31-Cube Monolith</div>
-                <p>By increasing the scale to \( a=3 \), starting at \( b_0=-16 \), and running the telescope for \( k=15 \) steps, the left side collapses to a <strong>single cube</strong>, while the right side expands into a massive sum of <strong>31 unique cubes</strong>.</p>
+                <div class="example-title"><span class="lang-en">Generation Example 3: The 31-Cube Monolith</span><span class="lang-ru">Пример генерации 3: монолит из 31 куба</span></div>
+                <p><span class="lang-en">Increase the scale to \( a=3 \), start at \( b_0=-16 \), and run the telescope for \( k=15 \) steps. The left-hand side collapses to a <strong>single cube</strong>, while the right-hand side expands into a large sum of <strong>31 distinct cubes</strong>.</span><span class="lang-ru">Увеличиваем масштаб до \( a=3 \), берём старт \( b_0=-16 \) и \( k=15 \) шагов телескопа. Левая часть схлопывается в <strong>один куб</strong>, а правая раскрывается в сумму <strong>31 различного куба</strong>.</span></p>
                 
                 <div class="massive-equation">
                     <span class="term">8376<sup>3</sup> =</span>
@@ -368,7 +383,7 @@
                     <span class="term"><span class="plus">+</span> 4690<sup>3</sup></span>
                 </div>
                 <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">
-                    Sum = 587,638,181,376 (Factorization: \( 2^9 \cdot 3^3 \cdot 349^3 \))
+                    <span class="lang-en">Sum = 587,638,181,376 (factorization: \( 2^9 \cdot 3^3 \cdot 349^3 \))</span><span class="lang-ru">Сумма = 587&nbsp;638&nbsp;181&nbsp;376 (разложение: \( 2^9 \cdot 3^3 \cdot 349^3 \))</span>
                 </p>
             </div>
 
@@ -377,7 +392,7 @@
                 <div class="keyword-tags">
                     <span class="keyword-tag"><span class="lang-en">Ramanujan polynomials</span><span class="lang-ru">Полиномы Рамануджана</span></span>
                     <span class="keyword-tag"><span class="lang-en">Diophantine equations</span><span class="lang-ru">Диофантовы уравнения</span></span>
-                    <span class="keyword-tag">Sum of cubes</span>
+                    <span class="keyword-tag"><span class="lang-en">Sum of cubes</span><span class="lang-ru">Сумма кубов</span></span>
                     <span class="keyword-tag"><span class="lang-en">Prime numbers</span><span class="lang-ru">Простые числа</span></span>
                     <span class="keyword-tag"><span class="lang-en">Telescoping series</span><span class="lang-ru">Телескопические ряды</span></span>
                     <span class="keyword-tag"><span class="lang-en">Modular arithmetic</span><span class="lang-ru">Модулярная арифметика</span></span>
