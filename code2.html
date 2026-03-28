@@ -208,10 +208,19 @@
             </div>
             <div class="lang-en">
                 <pre><code class="language-python" id="code1_en">#!/usr/bin/env python3
+"""
+fincube_master - Deterministic decomposition of a cube into a sum of cubes.
+Combines the mathematical generator (fincube_ultimate) with the verification 
+and string generation logic (fincube), producing neatly wrapped output.
+"""
 import math
 import sys
 
 def fincube_ultimate(k):
+    """
+    Generates the exact parameters (INCUBE, EULER, BAZA, dlts) 
+    from the initial root 'k' using the telescoping Ramanujan polynomials.
+    """
     a = k
     a3 = a**3
     a6 = a**6
@@ -250,6 +259,11 @@ def fincube_ultimate(k):
             count = 1
     dlts.append([n1, count, delta])
 
+    # The original array 'larr' has len(larr) elements.
+    # The array of differences 'l1' has len(larr) - 1 elements.
+    # Therefore, the sum of 'count's in dlts will be exactly len(larr) - 1.
+    # So the total number of terms is sum(counts) + 1.
+
     INCUBE = W(0)
     EULER = [Z(0), Y(0), W(1)]
     BAZA = larr[0]
@@ -257,8 +271,13 @@ def fincube_ultimate(k):
     return INCUBE, EULER, BAZA, dlts
 
 def wrap_text(text, max_len=80):
+    """
+    Wraps text to max_len. Ensures that lines broken in the decomposition
+    always start with a '+' sign.
+    """
     lines = []
-    eq_idx = text.find('= ', text.find(' = ') + 3)
+    # Find the main equation part (e.g. "X^3 = A^3 + B^3 + C^3 = Val = ")
+    eq_idx = text.find('= ', text.find(' = ') + 3) # Find the last '=' before the sequence
     if eq_idx != -1:
         start_part = text[:eq_idx + 2]
         rest_part = text[eq_idx + 2:]
@@ -266,6 +285,7 @@ def wrap_text(text, max_len=80):
         start_part = ""
         rest_part = text
 
+    # Wrap the starting text normally if it's very long (unlikely, but safe)
     while len(start_part) > max_len:
         split_idx = start_part.rfind(' ', 0, max_len)
         if split_idx == -1: split_idx = max_len
@@ -273,6 +293,9 @@ def wrap_text(text, max_len=80):
         start_part = start_part[split_idx:].lstrip()
     
     current_line = start_part
+
+    # The rest_part looks like "1^3+2^3+3^3..."
+    # We want to split at '+' such that the '+' moves to the next line
     terms = rest_part.split('+')
     
     for i, term in enumerate(terms):
@@ -282,6 +305,8 @@ def wrap_text(text, max_len=80):
         if len(current_line) + len(term_str) <= max_len:
             current_line += term_str
         else:
+            # Current line is full, push it and start a new one with the term
+            # Ensure the term itself fits (cubes shouldn't exceed 80 chars individually)
             if current_line:
                 lines.append(current_line)
             current_line = term_str
@@ -289,9 +314,15 @@ def wrap_text(text, max_len=80):
     if current_line:
         lines.append(current_line)
 
-    return '\n'.join(lines)
+    return '
+'.join(lines)
+
 
 def fincube(INCUBE, EULER, BAZA, dlts):
+    """
+    Takes the parameters, generates the decomposition array, verifies the sum,
+    and returns the formatted output string.
+    """
     BAZA2 = BAZA
     larr = [BAZA2]
     len_dlts = len(dlts)
@@ -310,14 +341,22 @@ def fincube(INCUBE, EULER, BAZA, dlts):
     larr.append(BAZA2 + last_a + last_c)
 
     larr.sort()
+
+    sum_cubes = sum(x**3 for x in larr)
     incube3 = INCUBE**3
 
-    str_out = f"{INCUBE}^3 = {EULER[0]}^3 + {EULER[1]}^3 + {EULER[2]}^3 = {incube3} = "
+    if sum_cubes != incube3:
+        str_out = "The condition is not met: incubus = sum of decomposition! => "
+    else:
+        str_out = ""
+
+    str_out += f"{INCUBE}^3 = {EULER[0]}^3 + {EULER[1]}^3 + {EULER[2]}^3 = {incube3} = "
     str_out += str(larr[0]) + "^3"
     for i in range(1, len(larr)):
         str_out += "+" + str(larr[i]) + "^3"
         
     return str_out
+
 
 def run_master(k):
     print(f"Generating decomposition for k = {k}...")
@@ -325,6 +364,11 @@ def run_master(k):
     # 1. Calculate parameters algebraically
     INCUBE, EULER, BAZA, dlts = fincube_ultimate(k)
     
+    # When counting the exact sequence length produced by the dlts array:
+    # the algorithm iterates `sum(b)` times, appending one term each time, and adds one final term.
+    # Because 'b' is the 1-th index of each entry (i.e., d[1]), 
+    # the total number of terms added to `larr` (which starts with 1 element, BAZA) 
+    # is 1 (the initial BAZA) + sum(d[1]) + 1 (the final appended term).
     seq_length = sum(d[1] for d in dlts) + 2
     print(f"Generated parameters. Sequence length will be: {seq_length} terms.")
     
@@ -334,20 +378,37 @@ def run_master(k):
     # 3. Apply neat line wrapping
     wrapped_output = wrap_text(raw_output, max_len=80)
     
-    print("\nResult:\n" + "="*80)
+    print("
+Result:
+" + "="*80)
     print(wrapped_output)
     print("="*80)
 
 if __name__ == "__main__":
-    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 2
+    # Run for k=2 as a small test example
+    # (You can change this value to 22 or 50)
+    if len(sys.argv) > 1:
+        k_input = int(sys.argv[1])
+    else:
+        k_input = 2 # Default
+        
     run_master(k_input)</code></pre>
             </div>
             <div class="lang-ru">
                 <pre><code class="language-python" id="code1_ru">#!/usr/bin/env python3
+"""
+fincube_master - Детерминированное разложение куба в сумму кубов.
+Объединяет математический генератор (fincube_ultimate) с логикой проверки
+и генерации строк (fincube), создавая аккуратно отформатированный вывод.
+"""
 import math
 import sys
 
 def fincube_ultimate(k):
+    """
+    Генерирует точные параметры (INCUBE, EULER, BAZA, dlts)
+    из начального корня 'k', используя телескопические полиномы Рамануджана.
+    """
     a = k
     a3 = a**3
     a6 = a**6
@@ -386,6 +447,11 @@ def fincube_ultimate(k):
             count = 1
     dlts.append([n1, count, delta])
 
+    # Исходный массив 'larr' имеет len(larr) элементов.
+    # Массив разностей 'l1' имеет len(larr) - 1 элементов.
+    # Следовательно, сумма 'count' в dlts будет ровно len(larr) - 1.
+    # Таким образом, общее количество членов равно sum(counts) + 1.
+
     INCUBE = W(0)
     EULER = [Z(0), Y(0), W(1)]
     BAZA = larr[0]
@@ -393,8 +459,13 @@ def fincube_ultimate(k):
     return INCUBE, EULER, BAZA, dlts
 
 def wrap_text(text, max_len=80):
+    """
+    Оборачивает текст до max_len. Гарантирует, что строки, разбитые в разложении,
+    всегда начинаются со знака '+'.
+    """
     lines = []
-    eq_idx = text.find('= ', text.find(' = ') + 3)
+    # Находим главную часть уравнения (например, "X^3 = A^3 + B^3 + C^3 = Val = ")
+    eq_idx = text.find('= ', text.find(' = ') + 3) # Находим последнее '=' перед последовательностью
     if eq_idx != -1:
         start_part = text[:eq_idx + 2]
         rest_part = text[eq_idx + 2:]
@@ -402,6 +473,7 @@ def wrap_text(text, max_len=80):
         start_part = ""
         rest_part = text
 
+    # Оборачиваем начальный текст обычным образом, если он очень длинный (маловероятно, но безопасно)
     while len(start_part) > max_len:
         split_idx = start_part.rfind(' ', 0, max_len)
         if split_idx == -1: split_idx = max_len
@@ -409,6 +481,9 @@ def wrap_text(text, max_len=80):
         start_part = start_part[split_idx:].lstrip()
     
     current_line = start_part
+
+    # rest_part выглядит как "1^3+2^3+3^3..."
+    # Мы хотим разбить по '+', чтобы '+' переносился на следующую строку
     terms = rest_part.split('+')
     
     for i, term in enumerate(terms):
@@ -418,6 +493,8 @@ def wrap_text(text, max_len=80):
         if len(current_line) + len(term_str) <= max_len:
             current_line += term_str
         else:
+            # Текущая строка заполнена, добавляем её и начинаем новую с этим членом
+            # Убедимся, что сам член помещается (кубы не должны превышать 80 символов индивидуально)
             if current_line:
                 lines.append(current_line)
             current_line = term_str
@@ -425,9 +502,15 @@ def wrap_text(text, max_len=80):
     if current_line:
         lines.append(current_line)
 
-    return '\n'.join(lines)
+    return '
+'.join(lines)
+
 
 def fincube(INCUBE, EULER, BAZA, dlts):
+    """
+    Принимает параметры, генерирует массив разложения, проверяет сумму
+    и возвращает отформатированную строку вывода.
+    """
     BAZA2 = BAZA
     larr = [BAZA2]
     len_dlts = len(dlts)
@@ -446,14 +529,22 @@ def fincube(INCUBE, EULER, BAZA, dlts):
     larr.append(BAZA2 + last_a + last_c)
 
     larr.sort()
+
+    sum_cubes = sum(x**3 for x in larr)
     incube3 = INCUBE**3
 
-    str_out = f"{INCUBE}^3 = {EULER[0]}^3 + {EULER[1]}^3 + {EULER[2]}^3 = {incube3} = "
+    if sum_cubes != incube3:
+        str_out = "Условие не выполнено: incube != сумме разложения! => "
+    else:
+        str_out = ""
+
+    str_out += f"{INCUBE}^3 = {EULER[0]}^3 + {EULER[1]}^3 + {EULER[2]}^3 = {incube3} = "
     str_out += str(larr[0]) + "^3"
     for i in range(1, len(larr)):
         str_out += "+" + str(larr[i]) + "^3"
         
     return str_out
+
 
 def run_master(k):
     print(f"Generating decomposition for k = {k}...")
@@ -461,6 +552,11 @@ def run_master(k):
     # 1. Считаем параметры алгебраически
     INCUBE, EULER, BAZA, dlts = fincube_ultimate(k)
     
+    # При подсчете точной длины последовательности, создаваемой массивом dlts:
+    # алгоритм выполняет итерации `sum(b)` раз, добавляя по одному члену каждый раз, и добавляет один последний член.
+    # Поскольку 'b' является 1-м индексом каждой записи (т.е. d[1]), 
+    # общее количество членов, добавленных в `larr` (который начинается с 1 элемента, BAZA), 
+    # равно 1 (начальная BAZA) + sum(d[1]) + 1 (последний добавленный член).
     seq_length = sum(d[1] for d in dlts) + 2
     print(f"Generated parameters. Sequence length will be: {seq_length} terms.")
     
@@ -470,12 +566,20 @@ def run_master(k):
     # 3. Делаем аккуратный перенос строк
     wrapped_output = wrap_text(raw_output, max_len=80)
     
-    print("\nResult:\n" + "="*80)
+    print("
+Result:
+" + "="*80)
     print(wrapped_output)
     print("="*80)
 
 if __name__ == "__main__":
-    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 2
+    # Запускаем для k=2 как небольшого тестового примера
+    # (Вы можете изменить это значение на 22 или 50)
+    if len(sys.argv) > 1:
+        k_input = int(sys.argv[1])
+    else:
+        k_input = 2 # По умолчанию
+        
     run_master(k_input)</code></pre>
             </div>
         </div>
@@ -520,22 +624,33 @@ import math
 import sys
 
 def get_decomposition_stats(k):
+    """
+    Computes INCUBE base and sequence length analytically in O(1) time
+    without generating the actual arrays.
+    """
     a = k
     a3 = a**3
     a6 = a**6
 
+    # Function to check the boundary for b_max
     def Y(b): 
         return 2*a6 - 3*a3*(1 + 2*b) + 1 + 3*b + 3*b**2
 
     # Analytic calculation of b_max (the largest integer b where Y(b) > 0)
     D_max = 9*(2*a3 - 1)**2 - 12*(2*a6 - 3*a3 + 1)
+    
+    # We use integer arithmetic or precise floats to avoid precision issues for large k
+    # For very large k, float sqrt might lose precision. 
+    # We can use integer square root:
     sqrt_D_max = math.isqrt(D_max)
     
     b_max = (3*(2*a3 - 1) - sqrt_D_max) // 6
     
     # Adjust to ensure exact boundary
-    while Y(b_max + 1) > 0: b_max += 1
-    while Y(b_max) <= 0: b_max -= 1
+    while Y(b_max + 1) > 0: 
+        b_max += 1
+    while Y(b_max) <= 0: 
+        b_max -= 1
 
     # INCUBE is simply W(0) = a^7 - a
     INCUBE = a**7 - a
@@ -552,7 +667,11 @@ def run_master(k):
     print(f"Sequence length will be: {seq_length} terms.")
 
 if __name__ == "__main__":
-    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+    if len(sys.argv) > 1:
+        k_input = int(sys.argv[1])
+    else:
+        k_input = 3
+        
     run_master(k_input)</code></pre>
             </div>
             <div class="lang-ru">
@@ -561,22 +680,33 @@ import math
 import sys
 
 def get_decomposition_stats(k):
+    """
+    Вычисляет базу INCUBE и длину последовательности аналитически за время O(1)
+    без генерации самих массивов.
+    """
     a = k
     a3 = a**3
     a6 = a**6
 
+    # Функция для проверки границы для b_max
     def Y(b): 
         return 2*a6 - 3*a3*(1 + 2*b) + 1 + 3*b + 3*b**2
 
     # Аналитическое вычисление b_max (наибольшее целое b, при котором Y(b) > 0)
     D_max = 9*(2*a3 - 1)**2 - 12*(2*a6 - 3*a3 + 1)
+    
+    # Мы используем целочисленную арифметику, чтобы избежать проблем с точностью для больших k
+    # Для очень больших k float sqrt может потерять точность. 
+    # Мы можем использовать целочисленный квадратный корень:
     sqrt_D_max = math.isqrt(D_max)
     
     b_max = (3*(2*a3 - 1) - sqrt_D_max) // 6
     
     # Корректировка для обеспечения точной границы
-    while Y(b_max + 1) > 0: b_max += 1
-    while Y(b_max) <= 0: b_max -= 1
+    while Y(b_max + 1) > 0: 
+        b_max += 1
+    while Y(b_max) <= 0: 
+        b_max -= 1
 
     # INCUBE - это просто W(0) = a^7 - a
     INCUBE = a**7 - a
@@ -593,7 +723,11 @@ def run_master(k):
     print(f"Sequence length will be: {seq_length} terms.")
 
 if __name__ == "__main__":
-    k_input = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+    if len(sys.argv) > 1:
+        k_input = int(sys.argv[1])
+    else:
+        k_input = 3
+        
     run_master(k_input)</code></pre>
             </div>
         </div>
