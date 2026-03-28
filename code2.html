@@ -154,24 +154,41 @@
         body.ru .lang-en { display: none !important; }
 
         .lang-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top, 0px));
+            right: max(12px, env(safe-area-inset-right, 0px));
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 20px;
+            border-radius: 22px;
             display: flex;
             overflow: hidden;
-            cursor: pointer;
-            z-index: 1000;
+            z-index: 10000;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
         }
 
         .lang-btn {
-            padding: 6px 12px;
-            font-size: 0.85rem;
+            margin: 0;
+            padding: 12px 18px;
+            min-width: 48px;
+            min-height: 48px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
             font-weight: 600;
+            font-family: inherit;
+            line-height: 1.2;
             color: var(--text-muted);
-            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(56, 189, 248, 0.3);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .lang-btn:focus-visible {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
         }
 
         .lang-btn.active {
@@ -182,9 +199,9 @@
 </head>
 <body class="en">
 
-<div class="lang-toggle" onclick="toggleLanguage()">
-    <div class="lang-btn active" id="btn-en">EN</div>
-    <div class="lang-btn" id="btn-ru">RU</div>
+<div class="lang-toggle" role="group" aria-label="Language">
+    <button type="button" class="lang-btn active" id="btn-en" aria-pressed="true" onclick="setLanguage('en')">EN</button>
+    <button type="button" class="lang-btn" id="btn-ru" aria-pressed="false" onclick="setLanguage('ru')">RU</button>
 </div>
 
 <div class="container">
@@ -791,18 +808,17 @@ Sequence length will be: 845296925724899507 terms.
             if (lang === 'ru') {
                 btnRu.classList.add('active');
                 btnEn.classList.remove('active');
+                btnRu.setAttribute('aria-pressed', 'true');
+                btnEn.setAttribute('aria-pressed', 'false');
                 document.documentElement.lang = 'ru';
             } else {
                 btnEn.classList.add('active');
                 btnRu.classList.remove('active');
+                btnEn.setAttribute('aria-pressed', 'true');
+                btnRu.setAttribute('aria-pressed', 'false');
                 document.documentElement.lang = 'en';
             }
         }
-    }
-
-    function toggleLanguage() {
-        const currentLang = document.body.className;
-        setLanguage(currentLang === 'en' ? 'ru' : 'en');
     }
 
     // Apply language on load and when returning from bfcache
