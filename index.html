@@ -208,6 +208,36 @@
             color: #0f172a;
         }
 
+        .header-stats {
+            text-align: center;
+            margin-bottom: 28px;
+            margin-top: -4px;
+        }
+
+        .header-stats-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.72rem;
+            color: #64748b;
+        }
+
+        .header-stats-row .hit-eye {
+            font-size: 0.62rem;
+            opacity: 0.45;
+            line-height: 1;
+        }
+
+        .header-stats-row .hit-sep {
+            opacity: 0.5;
+            margin: 0 1px;
+        }
+
+        .header-stats-row .header-sum-num {
+            font-variant-numeric: tabular-nums;
+        }
+
         footer {
             text-align: center;
             margin-top: 60px;
@@ -236,6 +266,15 @@
             <span class="lang-ru">Независимый исследователь &bull; Теория чисел и диофантовы уравнения</span>
         </div>
     </header>
+
+    <div class="header-stats" title="Sum of all 13 publication link counters (total : last 24 h UTC)">
+        <div class="header-stats-row">
+            <span class="hit-eye" aria-hidden="true">👁</span>
+            <span class="header-sum-num" aria-live="polite">
+                <span id="header-sum-total">—</span><span class="hit-sep">:</span><span id="header-sum-24">—</span>
+            </span>
+        </div>
+    </div>
 
     <div class="publications">
         
@@ -508,6 +547,48 @@
         if (hEl) hEl.textContent = last24;
     }
 
+    function setHeaderSum(total, last24) {
+        var ht = document.getElementById('header-sum-total');
+        var hh = document.getElementById('header-sum-24');
+        if (ht) ht.textContent = total === '—' ? '—' : String(total);
+        if (hh) hh.textContent = last24 === '—' ? '—' : String(last24);
+    }
+
+    function sumFromStatsPayload(data) {
+        var tot = 0;
+        var h24 = 0;
+        COUNTER_IDS.forEach(function (id) {
+            var row = data[id];
+            if (row && typeof row === 'object') {
+                tot += Number(row.total) || 0;
+                h24 += Number(row.last24) || 0;
+            }
+        });
+        setHeaderSum(tot, h24);
+    }
+
+    function updateHeaderSumFromDom() {
+        var tot = 0;
+        var h24 = 0;
+        var any = false;
+        document.querySelectorAll('.publications .btn-with-count').forEach(function (w) {
+            var tEl = w.querySelector('.hit-total');
+            var hEl = w.querySelector('.hit-24');
+            if (!tEl || !hEl) return;
+            var tv = parseInt(tEl.textContent, 10);
+            var hv = parseInt(hEl.textContent, 10);
+            if (!isNaN(tv)) {
+                tot += tv;
+                any = true;
+            }
+            if (!isNaN(hv)) {
+                h24 += hv;
+                any = true;
+            }
+        });
+        if (any) setHeaderSum(tot, h24);
+    }
+
     function refreshCounts() {
         fetch(SUPABASE_URL + '/rest/v1/rpc/get_main_link_stats', {
             method: 'POST',
@@ -529,9 +610,11 @@
                         setPairForId(id, '0', '0');
                     }
                 });
+                sumFromStatsPayload(data);
             })
             .catch(function () {
                 COUNTER_IDS.forEach(function (id) { setPairForId(id, '—', '—'); });
+                setHeaderSum('—', '—');
             });
     }
 
@@ -552,6 +635,7 @@
                 var h24 = Number(data.last24);
                 if (!isNaN(tot) && !isNaN(h24)) {
                     setPairForId(counterId, String(tot), String(h24));
+                    updateHeaderSumFromDom();
                 }
             })
             .catch(function () {});
