@@ -77,6 +77,16 @@
             margin: 0 auto;
             padding: 60px 20px;
             position: relative;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 960px) {
+            .container {
+                max-width: none;
+                width: 100%;
+                padding-left: clamp(24px, 4vw, 72px);
+                padding-right: clamp(24px, 4vw, 72px);
+            }
         }
 
         header {
@@ -138,6 +148,29 @@
             color: var(--text-muted);
             margin-bottom: 20px;
             font-size: 0.95rem;
+        }
+
+        .publications {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pub-col {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        @media (min-width: 960px) {
+            .publications {
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 28px;
+            }
+
+            .pub-col {
+                flex: 1;
+            }
         }
 
         .links {
@@ -284,7 +317,7 @@
     </div>
 
     <div class="publications">
-        
+        <div class="pub-col">
         <!-- Публикация 5 -->
         <div class="paper-card">
             <div class="paper-number">
@@ -399,7 +432,8 @@
                 </div>
             </div>
         </div>
-
+        </div>
+        <div class="pub-col">
         <!-- Публикация 2 -->
         <div class="paper-card">
             <div class="paper-number">
@@ -485,6 +519,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
 
     </div>
