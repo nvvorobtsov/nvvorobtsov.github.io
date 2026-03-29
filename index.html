@@ -142,6 +142,42 @@
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        .btn-with-count {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-hit-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: #64748b;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .btn-hit-count .hit-eye {
+            font-size: 0.6rem;
+            opacity: 0.45;
+            line-height: 1;
+        }
+
+        .btn-hit-count .hit-num {
+            font-variant-numeric: tabular-nums;
+            min-width: 1ch;
+        }
+
+        .btn-hit-count .hit-sep {
+            opacity: 0.5;
+            margin: 0 1px;
         }
 
         .btn {
@@ -218,15 +254,33 @@
                 <span class="lang-ru">Раскрывает ранее не замеченную модулярную симметрию в тождестве Рамануджана для суммы кубов, демонстрируя, что базовые полиномы строго генерируют числа, принадлежащие к фундаментальным диапазонам простых чисел 6n+1 и 6n-1.</span>
             </div>
             <div class="links">
-                <a href="publication5.html" class="btn btn-primary">
-                    <span class="lang-en">Interactive Cover</span>
-                    <span class="lang-ru">Интерактивная обложка</span>
-                </a>
-                <a href="code5.html" class="btn">
-                    <span class="lang-en">View Source Code</span>
-                    <span class="lang-ru">Исходный код</span>
-                </a>
-                <a href="https://zenodo.org/records/19238858" target="_blank" class="btn">Zenodo (DOI)</a>
+                <div class="btn-with-count" data-counter-id="pub5_cover">
+                    <a href="publication5.html" class="btn btn-primary">
+                        <span class="lang-en">Interactive Cover</span>
+                        <span class="lang-ru">Интерактивная обложка</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub5_code">
+                    <a href="code5.html" class="btn">
+                        <span class="lang-en">View Source Code</span>
+                        <span class="lang-ru">Исходный код</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub5_zenodo">
+                    <a href="https://zenodo.org/records/19238858" target="_blank" class="btn">Zenodo (DOI)</a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -245,11 +299,23 @@
                 <span class="lang-ru">Исследует глубокие связи между полиномиальными тождествами Рамануджана и генерацией чисел Мерсенна и Ферма в рамках массивных разложений кубов.</span>
             </div>
             <div class="links">
-                <a href="publication4.html" class="btn btn-primary">
-                    <span class="lang-en">Interactive Cover</span>
-                    <span class="lang-ru">Интерактивная обложка</span>
-                </a>
-                <a href="https://zenodo.org/records/19087405" target="_blank" class="btn">Zenodo (DOI)</a>
+                <div class="btn-with-count" data-counter-id="pub4_cover">
+                    <a href="publication4.html" class="btn btn-primary">
+                        <span class="lang-en">Interactive Cover</span>
+                        <span class="lang-ru">Интерактивная обложка</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub4_zenodo">
+                    <a href="https://zenodo.org/records/19087405" target="_blank" class="btn">Zenodo (DOI)</a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -268,11 +334,23 @@
                 <span class="lang-ru">Исследует алгебраические симметрии и свойства модулярной арифметики, лежащие в основе полиномов, использованных Рамануджаном для решения задачи о сумме кубов.</span>
             </div>
             <div class="links">
-                <a href="publication3.html" class="btn btn-primary">
-                    <span class="lang-en">Interactive Cover</span>
-                    <span class="lang-ru">Интерактивная обложка</span>
-                </a>
-                <a href="https://zenodo.org/records/19055351" target="_blank" class="btn">Zenodo (DOI)</a>
+                <div class="btn-with-count" data-counter-id="pub3_cover">
+                    <a href="publication3.html" class="btn btn-primary">
+                        <span class="lang-en">Interactive Cover</span>
+                        <span class="lang-ru">Интерактивная обложка</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub3_zenodo">
+                    <a href="https://zenodo.org/records/19055351" target="_blank" class="btn">Zenodo (DOI)</a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -291,15 +369,33 @@
                 <span class="lang-ru">Исследует использование тождеств Рамануджана для генерации массивных телескопических разложений одного куба в сумму множества кубов.</span>
             </div>
             <div class="links">
-                <a href="publication2.html" class="btn btn-primary">
-                    <span class="lang-en">Interactive Cover</span>
-                    <span class="lang-ru">Интерактивная обложка</span>
-                </a>
-                <a href="code2.html" class="btn">
-                    <span class="lang-en">View Source Code</span>
-                    <span class="lang-ru">Исходный код</span>
-                </a>
-                <a href="https://zenodo.org/records/19053976" target="_blank" class="btn">Zenodo (DOI)</a>
+                <div class="btn-with-count" data-counter-id="pub2_cover">
+                    <a href="publication2.html" class="btn btn-primary">
+                        <span class="lang-en">Interactive Cover</span>
+                        <span class="lang-ru">Интерактивная обложка</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub2_code">
+                    <a href="code2.html" class="btn">
+                        <span class="lang-en">View Source Code</span>
+                        <span class="lang-ru">Исходный код</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub2_zenodo">
+                    <a href="https://zenodo.org/records/19053976" target="_blank" class="btn">Zenodo (DOI)</a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -318,12 +414,30 @@
                 <span class="lang-ru">Представляет новые биномиальные тождества с кратными индексами для последовательностей Фибоначчи, Люка и обобщенных последовательностей Фибоначчи, расширяя известные алгебраические связи внутри этих фундаментальных последовательностей.</span>
             </div>
             <div class="links">
-                <a href="publication1.html" class="btn btn-primary">
-                    <span class="lang-en">Interactive Cover</span>
-                    <span class="lang-ru">Интерактивная обложка</span>
-                </a>
-                <a href="https://arxiv.org/abs/2603.12150" target="_blank" class="btn">arXiv:2603.12150</a>
-                <a href="https://arxiv.org/pdf/2603.12150" target="_blank" class="btn">PDF</a>
+                <div class="btn-with-count" data-counter-id="pub1_cover">
+                    <a href="publication1.html" class="btn btn-primary">
+                        <span class="lang-en">Interactive Cover</span>
+                        <span class="lang-ru">Интерактивная обложка</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub1_arxiv">
+                    <a href="https://arxiv.org/abs/2603.12150" target="_blank" class="btn">arXiv:2603.12150</a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub1_pdf">
+                    <a href="https://arxiv.org/pdf/2603.12150" target="_blank" class="btn">PDF</a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -363,6 +477,100 @@
         const savedLang = localStorage.getItem('preferredLang') || 'en';
         setLanguage(savedLang);
     });
+</script>
+
+<script>
+(function () {
+    var SUPABASE_URL = 'https://ottgavgusjmuexofeuys.supabase.co';
+    var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
+    var COUNTER_IDS = [
+        'pub5_cover', 'pub5_code', 'pub5_zenodo',
+        'pub4_cover', 'pub4_zenodo',
+        'pub3_cover', 'pub3_zenodo',
+        'pub2_cover', 'pub2_code', 'pub2_zenodo',
+        'pub1_cover', 'pub1_arxiv', 'pub1_pdf'
+    ];
+
+    function apiHeaders() {
+        return {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function setPairForId(id, total, last24) {
+        var wrap = document.querySelector('.btn-with-count[data-counter-id="' + id + '"]');
+        if (!wrap) return;
+        var tEl = wrap.querySelector('.hit-total');
+        var hEl = wrap.querySelector('.hit-24');
+        if (tEl) tEl.textContent = total;
+        if (hEl) hEl.textContent = last24;
+    }
+
+    function refreshCounts() {
+        fetch(SUPABASE_URL + '/rest/v1/rpc/get_main_link_stats', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: '{}'
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data || typeof data !== 'object') return;
+                COUNTER_IDS.forEach(function (id) {
+                    var row = data[id];
+                    if (row && typeof row === 'object') {
+                        setPairForId(
+                            id,
+                            String(Number(row.total) || 0),
+                            String(Number(row.last24) || 0)
+                        );
+                    } else {
+                        setPairForId(id, '0', '0');
+                    }
+                });
+            })
+            .catch(function () {
+                COUNTER_IDS.forEach(function (id) { setPairForId(id, '—', '—'); });
+            });
+    }
+
+    function incrementCounter(counterId) {
+        fetch(SUPABASE_URL + '/rest/v1/rpc/register_link_click', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({ counter_id: counterId }),
+            keepalive: true
+        })
+            .then(function (r) {
+                if (!r.ok) return null;
+                return r.json();
+            })
+            .then(function (data) {
+                if (data == null || typeof data !== 'object') return;
+                var tot = Number(data.total);
+                var h24 = Number(data.last24);
+                if (!isNaN(tot) && !isNaN(h24)) {
+                    setPairForId(counterId, String(tot), String(h24));
+                }
+            })
+            .catch(function () {});
+    }
+
+    var pub = document.querySelector('.publications');
+    if (pub) {
+        pub.addEventListener('click', function (e) {
+            var a = e.target.closest('a.btn');
+            if (!a || !a.href) return;
+            var wrap = a.closest('.btn-with-count');
+            if (!wrap) return;
+            var cid = wrap.getAttribute('data-counter-id');
+            if (cid) incrementCounter(cid);
+        });
+    }
+
+    refreshCounts();
+})();
 </script>
 
 </body>
