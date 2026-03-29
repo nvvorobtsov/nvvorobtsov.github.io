@@ -175,6 +175,11 @@
             min-width: 1ch;
         }
 
+        .btn-with-count.recent-last-hit .btn-hit-count {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
         .btn-hit-count .hit-sep {
             opacity: 0.5;
             margin: 0 1px;
@@ -547,6 +552,43 @@
         if (hEl) hEl.textContent = last24;
     }
 
+    function clearRecentHighlight() {
+        document.querySelectorAll('.btn-with-count.recent-last-hit').forEach(function (w) {
+            w.classList.remove('recent-last-hit');
+        });
+    }
+
+    function applyRecentHighlight(counterIds) {
+        clearRecentHighlight();
+        if (!Array.isArray(counterIds) || counterIds.length === 0) return;
+        var seen = Object.create(null);
+        counterIds.forEach(function (id) {
+            if (id == null || id === '' || seen[id]) return;
+            seen[id] = true;
+            var wrap = document.querySelector('.btn-with-count[data-counter-id="' + id + '"]');
+            if (wrap) wrap.classList.add('recent-last-hit');
+        });
+    }
+
+    function fetchRecentClickIds() {
+        return fetch(SUPABASE_URL + '/rest/v1/rpc/get_last_n_link_click_counter_ids', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({ n_recent: 3 })
+        })
+            .then(function (r) {
+                if (!r.ok) return null;
+                return r.json();
+            })
+            .then(function (arr) {
+                if (Array.isArray(arr)) applyRecentHighlight(arr);
+                else clearRecentHighlight();
+            })
+            .catch(function () {
+                clearRecentHighlight();
+            });
+    }
+
     function setHeaderSum(total, last24) {
         var ht = document.getElementById('header-sum-total');
         var hh = document.getElementById('header-sum-24');
@@ -590,13 +632,16 @@
     }
 
     function refreshCounts() {
-        fetch(SUPABASE_URL + '/rest/v1/rpc/get_main_link_stats', {
-            method: 'POST',
-            headers: apiHeaders(),
-            body: '{}'
-        })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
+        Promise.all([
+            fetch(SUPABASE_URL + '/rest/v1/rpc/get_main_link_stats', {
+                method: 'POST',
+                headers: apiHeaders(),
+                body: '{}'
+            }).then(function (r) { return r.json(); }),
+            fetchRecentClickIds()
+        ])
+            .then(function (results) {
+                var data = results[0];
                 if (!data || typeof data !== 'object') return;
                 COUNTER_IDS.forEach(function (id) {
                     var row = data[id];
@@ -615,6 +660,7 @@
             .catch(function () {
                 COUNTER_IDS.forEach(function (id) { setPairForId(id, '—', '—'); });
                 setHeaderSum('—', '—');
+                clearRecentHighlight();
             });
     }
 
@@ -636,6 +682,7 @@
                 if (!isNaN(tot) && !isNaN(h24)) {
                     setPairForId(counterId, String(tot), String(h24));
                     updateHeaderSumFromDom();
+                    fetchRecentClickIds();
                 }
             })
             .catch(function () {});
