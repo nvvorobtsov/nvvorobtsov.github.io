@@ -104,6 +104,8 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 30px;
+            /* Counters under buttons are low-contrast; tuck them into former bottom padding */
+            padding-bottom: calc(30px - 5px - 0.65rem);
             margin-bottom: 30px;
             transition: transform 0.2s, box-shadow 0.2s;
         }
