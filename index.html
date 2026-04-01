@@ -607,6 +607,7 @@
         });
     }
 
+    /* RPC returns up to 3 most recent clicks only if they fall in the last 24 h (UTC); else []. */
     function fetchRecentClickIds() {
         return fetch(SUPABASE_URL + '/rest/v1/rpc/get_last_n_link_click_counter_ids', {
             method: 'POST',
