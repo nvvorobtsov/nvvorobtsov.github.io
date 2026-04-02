@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Latest changes — Nick Vorobtsov</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-gold: #fbbf24;
+            --accent-blue: #38bdf8;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.65;
+            margin: 0;
+            padding: 0;
+        }
+        body.en .lang-ru { display: none !important; }
+        body.ru .lang-en { display: none !important; }
+        .lang-toggle {
+            color-scheme: light;
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top, 0px));
+            right: max(12px, env(safe-area-inset-right, 0px));
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            display: flex;
+            overflow: hidden;
+            z-index: 10000;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+        }
+        .lang-btn {
+            margin: 0;
+            padding: 12px 18px;
+            min-width: 48px;
+            min-height: 48px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            line-height: 1.2;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-appearance: none;
+            appearance: none;
+            -webkit-tap-highlight-color: rgba(245, 158, 11, 0.45);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .lang-btn:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+        .lang-btn.active {
+            background: #f59e0b !important;
+            color: #0f172a !important;
+            font-weight: 700;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 48px 20px 60px;
+            box-sizing: border-box;
+        }
+        .back-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 28px;
+        }
+        .back-link:hover { text-decoration: underline; }
+        h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            margin: 0 0 8px;
+            color: var(--text-main);
+        }
+        .lead {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+            margin: 0 0 28px;
+        }
+        .changelog-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 28px 28px 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .changelog-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .changelog-item {
+            margin: 0 0 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .changelog-item:last-child {
+            border-bottom: none;
+            padding-bottom: 16px;
+            margin-bottom: 0;
+        }
+        .changelog-date {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            letter-spacing: 0.02em;
+            margin-bottom: 10px;
+        }
+        .changelog-text {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 1.02rem;
+        }
+        .changelog-text em {
+            font-style: normal;
+            color: var(--accent-blue);
+            font-weight: 500;
+        }
+        #changelog-error {
+            color: #f87171;
+            font-size: 0.95rem;
+            display: none;
+            margin-bottom: 16px;
+        }
+        #changelog-error.visible { display: block; }
+    </style>
+</head>
+<body class="en">
+
+<div class="lang-toggle" role="group" aria-label="Language">
+    <button type="button" class="lang-btn active" id="btn-en" aria-pressed="true" onclick="setLanguage('en')">EN</button>
+    <button type="button" class="lang-btn" id="btn-ru" aria-pressed="false" onclick="setLanguage('ru')">RU</button>
+</div>
+
+<div class="container">
+    <a href="index.html" class="back-link">&larr; <span class="lang-en">Back to home</span><span class="lang-ru">На главную</span></a>
+
+    <h1><span class="lang-en">Latest changes</span><span class="lang-ru">Последние изменения</span></h1>
+    <p class="lead">
+        <span class="lang-en">What’s new on this site.</span>
+        <span class="lang-ru">Что нового на сайте.</span>
+    </p>
+
+    <div class="changelog-card">
+        <p id="changelog-error" role="alert"></p>
+        <ul class="changelog-list" id="changelog-root"></ul>
+    </div>
+</div>
+
+<script type="application/json" id="changelog-embedded">
+{"entries":[{"date":"2026-04-02","ru":"на странице с кодом к публикации 05 добавлена вторая программа (decompose_gui) с графическим окном и пример её вида: по числам a, начальному b и числу шагов k она считает телескопическое разложение в кубах и показывает результат в окне (можно смотреть только число членов или полный текст разложения).","en":"On the source-code page for publication 05, a second program (decompose_gui) was added with a graphical window and a sample view: given a, starting b, and the number of steps k, it computes the telescopic cube decomposition and shows the result in the window (you can show only the term count or the full expansion)."}]}
+</script>
+
+<script>
+(function () {
+    var root = document.getElementById('changelog-root');
+    var errEl = document.getElementById('changelog-error');
+    var changelogData = null;
+
+    function escapeHtml(s) {
+        var d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    function renderList() {
+        if (!changelogData || !root) return;
+        var lang = document.body.classList.contains('ru') ? 'ru' : 'en';
+        var entries = changelogData.entries || [];
+        root.innerHTML = '';
+        entries.forEach(function (item) {
+            var text = item[lang] || item.en || item.ru || '';
+            var li = document.createElement('li');
+            li.className = 'changelog-item';
+            var dateEl = document.createElement('div');
+            dateEl.className = 'changelog-date';
+            dateEl.textContent = item.date || '';
+            var p = document.createElement('p');
+            p.className = 'changelog-text';
+            p.innerHTML = '— ' + escapeHtml(text);
+            li.appendChild(dateEl);
+            li.appendChild(p);
+            root.appendChild(li);
+        });
+    }
+
+    function loadEmbedded() {
+        var el = document.getElementById('changelog-embedded');
+        if (!el || !el.textContent) return null;
+        try {
+            return JSON.parse(el.textContent.trim());
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function showError(msg) {
+        errEl.textContent = msg;
+        errEl.classList.add('visible');
+    }
+
+    function clearError() {
+        errEl.classList.remove('visible');
+        errEl.textContent = '';
+    }
+
+    window.setLanguage = function (lang) {
+        document.body.className = lang;
+        localStorage.setItem('preferredLang', lang);
+        var btnRu = document.getElementById('btn-ru');
+        var btnEn = document.getElementById('btn-en');
+        if (btnRu && btnEn) {
+            if (lang === 'ru') {
+                btnRu.classList.add('active');
+                btnEn.classList.remove('active');
+                btnRu.setAttribute('aria-pressed', 'true');
+                btnEn.setAttribute('aria-pressed', 'false');
+                document.documentElement.lang = 'ru';
+            } else {
+                btnEn.classList.add('active');
+                btnRu.classList.remove('active');
+                btnEn.setAttribute('aria-pressed', 'true');
+                btnRu.setAttribute('aria-pressed', 'false');
+                document.documentElement.lang = 'en';
+            }
+        }
+        renderList();
+    };
+
+    function loadChangelog() {
+        fetch('data/changelog.json', { cache: 'no-store' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function (data) {
+                changelogData = data;
+                clearError();
+                renderList();
+            })
+            .catch(function () {
+                var embedded = loadEmbedded();
+                if (embedded && embedded.entries && embedded.entries.length) {
+                    changelogData = embedded;
+                    clearError();
+                    renderList();
+                } else {
+                    showError(document.body.classList.contains('ru')
+                        ? 'Не удалось загрузить список изменений.'
+                        : 'Could not load the changelog.');
+                }
+            });
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+        loadChangelog();
+        var saved = localStorage.getItem('preferredLang') || 'en';
+        setLanguage(saved);
+    });
+
+    window.addEventListener('pageshow', function () {
+        var saved = localStorage.getItem('preferredLang') || 'en';
+        setLanguage(saved);
+    });
+})();
+</script>
+</body>
+</html>
