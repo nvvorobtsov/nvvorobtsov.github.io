@@ -199,6 +199,69 @@
             color: #0f172a !important;
             font-weight: 700;
         }
+
+        .code-section[id] {
+            scroll-margin-top: 76px;
+        }
+
+        .page-jump-nav {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 14px;
+            margin: 8px 0 28px;
+            padding: 14px 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .page-jump-nav .jump-hint {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            width: 100%;
+            margin: 0 0 2px;
+        }
+
+        .page-jump-nav .jump-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .page-jump-nav a {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 600;
+            font-family: 'Fira Code', monospace;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .page-jump-nav a.jump-cli {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+        }
+
+        .page-jump-nav a.jump-cli:hover {
+            background: rgba(56, 189, 248, 0.22);
+            border-color: var(--accent-blue);
+        }
+
+        .page-jump-nav a.jump-gui {
+            background: rgba(251, 191, 36, 0.14);
+            color: var(--accent-gold);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+        }
+
+        .page-jump-nav a.jump-gui:hover {
+            background: rgba(251, 191, 36, 0.26);
+            border-color: var(--accent-gold);
+        }
     </style>
 </head>
 <body class="en">
@@ -215,8 +278,19 @@
         <div class="subtitle">PUBLICATION 02: <span class="lang-en">Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</span><span class="lang-ru">Телескопические тождества Рамануджана и массивные разложения кубов в суммы кубов</span></div>
     </header>
 
+    <nav class="page-jump-nav" aria-label="On-page navigation">
+        <p class="jump-hint">
+            <span class="lang-en"><strong>On this page</strong> — two programs:</span>
+            <span class="lang-ru"><strong>На этой странице</strong> две программы:</span>
+        </p>
+        <div class="jump-links">
+            <a class="jump-cli" href="#prog-master">fincube_master.py</a>
+            <a class="jump-gui" href="#prog-length"><span class="lang-en">fincube_length_only.py (O(1))</span><span class="lang-ru">fincube_length_only.py (O(1))</span></a>
+        </div>
+    </nav>
+
     <!-- Скрипт 1: fincube_master.py -->
-    <div class="code-section">
+    <div class="code-section" id="prog-master">
         <div class="code-desc">
             <strong><span class="lang-en">1. Exact Cube Decomposition Generator</span><span class="lang-ru">1. Генератор точного разложения кубов</span></strong><br>
             <span class="lang-en"><span class="lang-en">This script (<code>fincube_master.py</code>) generates the exact decomposition of a single cube into a series of cubes. You can run the script with a parameter k = 2, 3, ... . For example, executing the command for k = 4 will produce the massive sequence shown below.</span><span class="lang-ru">Этот скрипт (<code>fincube_master.py</code>) генерирует точное разложение одного куба в серию кубов. Вы можете запустить скрипт с параметром k = 2, 3, ... . Например, выполнение команды для k = 4 создаст массивную последовательность, показанную ниже.</span></span><span class="lang-ru">Этот скрипт (<code>fincube_master.py</code>) генерирует точное разложение одного куба в серию кубов. Вы можете запустить скрипт с параметром k = 2, 3, ... . Например, выполнение команды для k = 4 создаст массивную последовательность, показанную ниже.</span>
@@ -626,7 +700,7 @@ Result:
     </div>
 
     <!-- Скрипт 2: fincube_length_only.py -->
-    <div class="code-section">
+    <div class="code-section" id="prog-length">
         <div class="code-desc">
             <strong><span class="lang-en">2. Instant Sequence Length Calculator O(1)</span><span class="lang-ru">2. Мгновенный калькулятор длины последовательности O(1)</span></strong><br>
             <span class="lang-en"><span class="lang-en">In addition to generating the full string, it is often useful to simply calculate the total number of cubes in the decomposition. This script (<code>fincube_length_only.py</code>) skips the string generation and computes only the sequence length algebraically. Therefore, it executes <em>instantly</em>, regardless of the input parameter k.</span><span class="lang-ru">В дополнение к генерации полной строки часто полезно просто вычислить общее количество кубов в разложении. Этот скрипт (<code>fincube_length_only.py</code>) пропускает генерацию строки и вычисляет только длину последовательности алгебраически. Поэтому он выполняется <em>мгновенно</em>, независимо от входного параметра k.</span></span><span class="lang-ru">В дополнение к генерации полной строки часто полезно просто вычислить общее количество кубов в разложении. Этот скрипт (<code>fincube_length_only.py</code>) пропускает генерацию строки и вычисляет только длину последовательности алгебраически. Поэтому он выполняется <em>мгновенно</em>, независимо от входного параметра k.</span>
@@ -796,6 +870,33 @@ Sequence length will be: 845296925724899507 terms.
             window.history.back();
         }
     });
+
+    // In-page jump links: replaceState so each click does not stack history entries
+    // (otherwise "Back" / history.back() must be pressed once per hash navigation).
+    (function initJumpNavReplaceState() {
+        function bind() {
+            document.querySelectorAll('.page-jump-nav a[href^="#"]').forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    var raw = a.getAttribute('href');
+                    if (!raw || raw.charAt(0) !== '#') return;
+                    var id = raw.slice(1);
+                    if (!id) return;
+                    var target = document.getElementById(id);
+                    if (!target) return;
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    var path = window.location.pathname;
+                    var search = window.location.search || '';
+                    history.replaceState(null, '', path + search + '#' + id);
+                });
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bind);
+        } else {
+            bind();
+        }
+    })();
 </script>
 
 

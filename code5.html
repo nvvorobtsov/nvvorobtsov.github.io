@@ -1699,6 +1699,33 @@ if __name__ == &quot;__main__&quot;:
             window.history.back();
         }
     });
+
+    // In-page jump links: replaceState so each click does not stack history entries
+    // (otherwise "Back" / history.back() must be pressed once per hash navigation).
+    (function initJumpNavReplaceState() {
+        function bind() {
+            document.querySelectorAll('.page-jump-nav a[href^="#"]').forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    var raw = a.getAttribute('href');
+                    if (!raw || raw.charAt(0) !== '#') return;
+                    var id = raw.slice(1);
+                    if (!id) return;
+                    var target = document.getElementById(id);
+                    if (!target) return;
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    var path = window.location.pathname;
+                    var search = window.location.search || '';
+                    history.replaceState(null, '', path + search + '#' + id);
+                });
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bind);
+        } else {
+            bind();
+        }
+    })();
 </script>
 
 
