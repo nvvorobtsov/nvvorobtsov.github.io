@@ -262,6 +262,30 @@
             background: rgba(251, 191, 36, 0.26);
             border-color: var(--accent-gold);
         }
+
+        .between-programs-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .btn-back-to-top {
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 8px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-back-to-top:hover {
+            background: rgba(56, 189, 248, 0.18);
+            border-color: var(--accent-blue);
+        }
     </style>
 </head>
 <body class="en">
@@ -272,7 +296,7 @@
 </div>
 
 <div class="container">
-    <header>
+    <header id="page-top">
         <a href="javascript:history.back()" class="back-link">&larr; <span class="lang-en">Back to Publications</span><span class="lang-ru">Вернуться к публикациям</span></a>
         <h1><span class="lang-en">Source Code & Examples</span><span class="lang-ru">Исходный код и примеры</span></h1>
         <div class="subtitle">PUBLICATION 02: <span class="lang-en">Telescoping Ramanujan Identities and Massive Decompositions of Cubes into Sums of Cubes</span><span class="lang-ru">Телескопические тождества Рамануджана и массивные разложения кубов в суммы кубов</span></div>
@@ -699,6 +723,13 @@ Result:
         </div>
     </div>
 
+    <div class="between-programs-nav">
+        <button type="button" class="btn-back-to-top" onclick="goPageTop()">
+            <span class="lang-en">Back to top of page</span>
+            <span class="lang-ru">Вернуться в начало страницы</span>
+        </button>
+    </div>
+
     <!-- Скрипт 2: fincube_length_only.py -->
     <div class="code-section" id="prog-length">
         <div class="code-desc">
@@ -870,6 +901,18 @@ Sequence length will be: 845296925724899507 terms.
             window.history.back();
         }
     });
+
+    function goPageTop() {
+        var topEl = document.getElementById('page-top');
+        if (topEl) {
+            topEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        var path = window.location.pathname;
+        var search = window.location.search || '';
+        history.replaceState(null, '', path + search);
+    }
 
     // In-page jump links: replaceState so each click does not stack history entries
     // (otherwise "Back" / history.back() must be pressed once per hash navigation).
