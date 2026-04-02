@@ -3,7 +3,12 @@
     {
       "date": "2026-04-02",
       "ru": "на странице с кодом к публикации 05 добавлена вторая программа (decompose_gui) с графическим окном и пример её вида: по числам a, начальному b и числу шагов k она считает телескопическое разложение в кубах и показывает результат в окне (можно смотреть только число членов или полный текст разложения).",
-      "en": "On the source-code page for publication 05, a second program (decompose_gui) was added with a graphical window and a sample view: given a, starting b, and the number of steps k, it computes the telescopic cube decomposition and shows the result in the window (you can show only the term count or the full expansion)."
+      "en": "On the source-code page for publication 05, a second program (decompose_gui) was added with a graphical window and a sample view: given a, starting b, and the number of steps k, it computes the telescopic cube decomposition and shows the result in the window (you can show only the term count or the full expansion).",
+      "link": {
+        "href": "code5.html?count=pub5_code#prog-gui",
+        "en": "Go to the code page — GUI program",
+        "ru": "Перейти к странице кода — программа с окном"
+      }
     }
   ]
 }

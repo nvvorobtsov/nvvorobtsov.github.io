@@ -249,6 +249,69 @@
             border: 1px solid #334155;
             margin-top: 10px;
         }
+
+        .code-section[id] {
+            scroll-margin-top: 76px;
+        }
+
+        .page-jump-nav {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 14px;
+            margin: 8px 0 28px;
+            padding: 14px 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        .page-jump-nav .jump-hint {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            width: 100%;
+            margin: 0 0 2px;
+        }
+
+        .page-jump-nav .jump-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .page-jump-nav a {
+            display: inline-block;
+            padding: 7px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 600;
+            font-family: 'Fira Code', monospace;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .page-jump-nav a.jump-cli {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+        }
+
+        .page-jump-nav a.jump-cli:hover {
+            background: rgba(56, 189, 248, 0.22);
+            border-color: var(--accent-blue);
+        }
+
+        .page-jump-nav a.jump-gui {
+            background: rgba(251, 191, 36, 0.14);
+            color: var(--accent-gold);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+        }
+
+        .page-jump-nav a.jump-gui:hover {
+            background: rgba(251, 191, 36, 0.26);
+            border-color: var(--accent-gold);
+        }
     </style>
 </head>
 <body class="en">
@@ -265,8 +328,19 @@
         <div class="subtitle">PUBLICATION 05: <span class="lang-en">Telescopic Properties of Ramanujan Polynomials and Their Connection to Prime Number Distribution Modulo 6</span><span class="lang-ru">Телескопические свойства полиномов Рамануджана и их связь с распределением простых чисел по модулю 6</span></div>
     </header>
 
+    <nav class="page-jump-nav" aria-label="On-page navigation">
+        <p class="jump-hint">
+            <span class="lang-en"><strong>On this page</strong> — two programs:</span>
+            <span class="lang-ru"><strong>На этой странице</strong> две программы:</span>
+        </p>
+        <div class="jump-links">
+            <a class="jump-cli" href="#prog-cli">clear_result.py</a>
+            <a class="jump-gui" href="#prog-gui"><span class="lang-en">decompose_gui (window)</span><span class="lang-ru">decompose_gui (окно)</span></a>
+        </div>
+    </nav>
+
     <!-- Скрипт: clear_result.py -->
-    <div class="code-section">
+    <div class="code-section" id="prog-cli">
         <div class="code-desc">
             <span class="lang-en">
                 <strong>Telescopic Cube Decomposition Generator</strong><br>
@@ -654,7 +728,7 @@ Right: 31 cubes
     </div>
 
     <!-- Full GUI (~15 KiB): same files as clear_result_experiments/ -->
-    <div class="code-section">
+    <div class="code-section" id="prog-gui">
         <div class="code-desc">
             <span class="lang-en">
                 <strong>Full GUI program (<code>decompose_gui_EN.py</code>)</strong><br>
@@ -1659,6 +1733,46 @@ if __name__ == &quot;__main__&quot;:
         const savedLang = localStorage.getItem('preferredLang') || 'en';
         setLanguage(savedLang);
     });
+</script>
+
+<script>
+(function () {
+    var SUPABASE_URL = 'https://ottgavgusjmuexofeuys.supabase.co';
+    var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
+    var COUNT_QUERY_PARAM = 'count';
+    var allowedCounterIds = { pub5_code: true };
+
+    function apiHeaders() {
+        return {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function stripCountFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        if (!params.has(COUNT_QUERY_PARAM)) return;
+        params.delete(COUNT_QUERY_PARAM);
+        var q = params.toString();
+        var path = window.location.pathname;
+        var hash = window.location.hash || '';
+        var next = path + (q ? '?' + q : '') + hash;
+        history.replaceState(null, '', next);
+    }
+
+    var params = new URLSearchParams(window.location.search);
+    var cid = params.get(COUNT_QUERY_PARAM);
+    if (cid && allowedCounterIds[cid]) {
+        fetch(SUPABASE_URL + '/rest/v1/rpc/register_link_click', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({ counter_id: cid }),
+            keepalive: true
+        }).catch(function () {});
+        stripCountFromUrl();
+    }
+})();
 </script>
 </body>
 </html>

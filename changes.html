@@ -136,6 +136,36 @@
             margin-bottom: 16px;
         }
         #changelog-error.visible { display: block; }
+
+        .changelog-link-wrap {
+            margin: 14px 0 0;
+        }
+
+        .changelog-jump-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            background: rgba(56, 189, 248, 0.14);
+            color: var(--accent-blue);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .changelog-jump-link:hover {
+            background: rgba(56, 189, 248, 0.24);
+            border-color: var(--accent-blue);
+        }
+
+        .changelog-jump-link::after {
+            content: "\2192";
+            font-size: 1rem;
+            opacity: 0.85;
+        }
     </style>
 </head>
 <body class="en">
@@ -161,7 +191,7 @@
 </div>
 
 <script type="application/json" id="changelog-embedded">
-{"entries":[{"date":"2026-04-02","ru":"на странице с кодом к публикации 05 добавлена вторая программа (decompose_gui) с графическим окном и пример её вида: по числам a, начальному b и числу шагов k она считает телескопическое разложение в кубах и показывает результат в окне (можно смотреть только число членов или полный текст разложения).","en":"On the source-code page for publication 05, a second program (decompose_gui) was added with a graphical window and a sample view: given a, starting b, and the number of steps k, it computes the telescopic cube decomposition and shows the result in the window (you can show only the term count or the full expansion)."}]}
+{"entries":[{"date":"2026-04-02","ru":"на странице с кодом к публикации 05 добавлена вторая программа (decompose_gui) с графическим окном и пример её вида: по числам a, начальному b и числу шагов k она считает телескопическое разложение в кубах и показывает результат в окне (можно смотреть только число членов или полный текст разложения).","en":"On the source-code page for publication 05, a second program (decompose_gui) was added with a graphical window and a sample view: given a, starting b, and the number of steps k, it computes the telescopic cube decomposition and shows the result in the window (you can show only the term count or the full expansion).","link":{"href":"code5.html?count=pub5_code#prog-gui","en":"Go to the code page — GUI program","ru":"Перейти к странице кода — программа с окном"}}]}
 </script>
 
 <script>
@@ -193,6 +223,16 @@
             p.innerHTML = '— ' + escapeHtml(text);
             li.appendChild(dateEl);
             li.appendChild(p);
+            if (item.link && item.link.href) {
+                var wrap = document.createElement('p');
+                wrap.className = 'changelog-link-wrap';
+                var a = document.createElement('a');
+                a.href = item.link.href;
+                a.className = 'changelog-jump-link';
+                a.textContent = item.link[lang] || item.link.en || item.link.ru || '';
+                wrap.appendChild(a);
+                li.appendChild(wrap);
+            }
             root.appendChild(li);
         });
     }
