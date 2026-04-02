@@ -30,6 +30,7 @@
         body.ru .lang-en { display: none !important; }
 
         .lang-toggle {
+            color-scheme: light;
             position: fixed;
             top: max(12px, env(safe-area-inset-top, 0px));
             right: max(12px, env(safe-area-inset-right, 0px));
@@ -58,18 +59,21 @@
             border-radius: 0;
             cursor: pointer;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: rgba(56, 189, 248, 0.3);
+            -webkit-appearance: none;
+            appearance: none;
+            -webkit-tap-highlight-color: rgba(245, 158, 11, 0.45);
             transition: background 0.2s ease, color 0.2s ease;
         }
 
         .lang-btn:focus-visible {
-            outline: 2px solid var(--accent-blue);
+            outline: 2px solid #f59e0b;
             outline-offset: 2px;
         }
 
         .lang-btn.active {
-            background: var(--accent-blue);
-            color: #0f172a;
+            background: #f59e0b !important;
+            color: #0f172a !important;
+            font-weight: 700;
         }
 
         .container {
