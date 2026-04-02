@@ -139,6 +139,31 @@
             margin-top: 6px;
         }
 
+        /* ZIP справа; .py кнопки остаются слева как раньше */
+        .source-download-row--split {
+            width: 100%;
+            align-items: flex-end;
+        }
+
+        .source-download-row--split .source-zip-stack {
+            margin-left: auto;
+        }
+
+        .source-zip-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .source-zip-hint {
+            font-size: 0.72rem;
+            line-height: 1.25;
+            color: var(--text-muted);
+            text-align: right;
+            max-width: 220px;
+        }
+
         a.source-dl-link {
             display: inline-flex;
             align-items: center;
@@ -164,6 +189,23 @@
         a.source-dl-link:visited,
         a.source-dl-link:active {
             color: #0f172a;
+        }
+
+        a.source-dl-link--zip {
+            background: rgba(56, 189, 248, 0.22);
+            border-color: rgba(56, 189, 248, 0.55);
+            color: #e0f2fe;
+        }
+
+        a.source-dl-link--zip:hover {
+            background: rgba(56, 189, 248, 0.35);
+            border-color: var(--accent-blue);
+            color: #f8fafc;
+        }
+
+        a.source-dl-link--zip:visited,
+        a.source-dl-link--zip:active {
+            color: #e0f2fe;
         }
 
         pre[class*="language-"] {
@@ -765,18 +807,38 @@ Right: 31 cubes
                 <strong>Full GUI program (<code>decompose_gui_EN.py</code>)</strong><br>
                 The program imports functions from <code>clear_result.py</code>.
                 <br><br>
-                <span class="source-download-row">
+                <span class="source-download-row source-download-row--split">
                     <a class="source-dl-link" href="sources/decompose_gui_EN.py" download>decompose_gui_EN.py</a>
                     <a class="source-dl-link" href="sources/clear_result.py" download>clear_result.py</a>
+                    <span class="source-zip-stack">
+                        <a class="source-dl-link source-dl-link--zip" href="sources/decompose_gui_windows.zip" download="decompose_gui_windows.zip" title="Requires Python 3.9+ with Tkinter and SymPy (pip install sympy). After unzip, run Run_GUI_EN.bat or Run_GUI_RU.bat. / Нужны Python 3.9+, Tkinter и SymPy (pip install sympy). После распаковки — Run_GUI_EN.bat или Run_GUI_RU.bat.">
+                            <span class="lang-en">Download Windows package (ZIP)</span>
+                            <span class="lang-ru">Скачать пакет для Windows (ZIP)</span>
+                        </a>
+                        <span class="source-zip-hint">
+                            <span class="lang-en">Requires Python 3</span>
+                            <span class="lang-ru">Требуется установленный Python 3</span>
+                        </span>
+                    </span>
                 </span>
             </span>
             <span class="lang-ru">
                 <strong>Полная программа GUI (<code>decompose_gui.py</code>)</strong><br>
                 Программа импортирует функции из файла <code>clear_result.py</code>.
                 <br><br>
-                <span class="source-download-row">
+                <span class="source-download-row source-download-row--split">
                     <a class="source-dl-link" href="sources/decompose_gui.py" download>decompose_gui.py</a>
                     <a class="source-dl-link" href="sources/clear_result.py" download>clear_result.py</a>
+                    <span class="source-zip-stack">
+                        <a class="source-dl-link source-dl-link--zip" href="sources/decompose_gui_windows.zip" download="decompose_gui_windows.zip" title="Requires Python 3.9+ with Tkinter and SymPy (pip install sympy). After unzip, run Run_GUI_EN.bat or Run_GUI_RU.bat. / Нужны Python 3.9+, Tkinter и SymPy (pip install sympy). После распаковки — Run_GUI_EN.bat или Run_GUI_RU.bat.">
+                            <span class="lang-en">Download Windows package (ZIP)</span>
+                            <span class="lang-ru">Скачать пакет для Windows (ZIP)</span>
+                        </a>
+                        <span class="source-zip-hint">
+                            <span class="lang-en">Requires Python 3</span>
+                            <span class="lang-ru">Требуется установленный Python 3</span>
+                        </span>
+                    </span>
                 </span>
             </span>
         </div>
