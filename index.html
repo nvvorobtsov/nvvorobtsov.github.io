@@ -113,6 +113,33 @@
             font-weight: 300;
         }
 
+        .changelog-header-wrap {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        .changelog-header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--accent-gold);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 600;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+        }
+
+        .changelog-header-btn:hover {
+            background: rgba(251, 191, 36, 0.22);
+            border-color: var(--accent-gold);
+            transform: translateY(-1px);
+        }
+
         .paper-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -308,6 +335,12 @@
         <div class="subtitle">
             <span class="lang-en">Independent Researcher &bull; Number Theory & Diophantine Equations</span>
             <span class="lang-ru">Независимый исследователь &bull; Теория чисел и диофантовы уравнения</span>
+        </div>
+        <div class="changelog-header-wrap">
+            <a href="changes.html" class="changelog-header-btn">
+                <span class="lang-en">Latest changes</span>
+                <span class="lang-ru">Последние изменения</span>
+            </a>
         </div>
     </header>
 
