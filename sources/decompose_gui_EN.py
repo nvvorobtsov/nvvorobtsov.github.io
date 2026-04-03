@@ -7,6 +7,7 @@ Run from this folder:
 
 import sys
 import traceback
+import webbrowser
 from pathlib import Path
 
 import tkinter as tk
@@ -24,6 +25,8 @@ from clear_result import (  # noqa: E402
     order_sides_for_display,
     wrap_equation_lines,
 )
+
+AUTHOR_SITE_URL = "https://nvvorobtsov.github.io/"
 
 
 def en_cubes_phrase(n: int) -> str:
@@ -436,8 +439,17 @@ def main():
         else:
             tw.insert(tk.END, text)
 
-    btn = ttk.Button(frm, text="Compute", command=run_compute)
-    btn.grid(row=6, column=0, columnspan=2, sticky="w", pady=6)
+    btn_row = ttk.Frame(frm)
+    btn_row.grid(row=6, column=0, columnspan=2, sticky="ew", pady=6)
+    btn_row.columnconfigure(0, weight=1)
+    ttk.Button(btn_row, text="Compute", command=run_compute).grid(row=0, column=0, sticky="w")
+
+    def open_author_site():
+        webbrowser.open(AUTHOR_SITE_URL)
+
+    ttk.Button(btn_row, text="Author's website", command=open_author_site).grid(
+        row=0, column=1, sticky="e"
+    )
 
     out.grid(row=1, column=0, sticky="nsew")
 
