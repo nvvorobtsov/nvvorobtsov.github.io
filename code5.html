@@ -156,12 +156,50 @@
             gap: 4px;
         }
 
-        .source-zip-hint {
+        .source-zip-hint-row {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
             font-size: 0.72rem;
             line-height: 1.25;
+        }
+
+        .source-zip-hit-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: #64748b;
+            line-height: 1;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .source-zip-hit-count .hit-eye {
+            font-size: 0.6rem;
+            opacity: 0.45;
+            line-height: 1;
+        }
+
+        .source-zip-hit-count .hit-num {
+            font-variant-numeric: tabular-nums;
+            min-width: 1ch;
+        }
+
+        .source-zip-hit-count .hit-sep {
+            opacity: 0.5;
+            margin: 0 1px;
+        }
+
+        .source-zip-hint-text {
             color: var(--text-muted);
             text-align: right;
-            max-width: 220px;
+            flex: 1;
+            min-width: 0;
         }
 
         a.source-dl-link {
@@ -815,10 +853,16 @@ Right: 31 cubes
                             <span class="lang-en">Download Windows package (ZIP)</span>
                             <span class="lang-ru">Скачать пакет для Windows (ZIP)</span>
                         </a>
-                        <span class="source-zip-hint">
-                            <span class="lang-en">Requires Python 3</span>
-                            <span class="lang-ru">Требуется установленный Python 3</span>
-                        </span>
+                        <div class="source-zip-hint-row">
+                            <div class="source-zip-hit-count" data-zip-hit-counter title="Total : last 24 h (UTC, all visitors)">
+                                <span class="hit-eye" aria-hidden="true">👁</span>
+                                <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                            </div>
+                            <span class="source-zip-hint-text">
+                                <span class="lang-en">Requires Python 3</span>
+                                <span class="lang-ru">Требуется установленный Python 3</span>
+                            </span>
+                        </div>
                     </span>
                 </span>
             </span>
@@ -834,10 +878,16 @@ Right: 31 cubes
                             <span class="lang-en">Download Windows package (ZIP)</span>
                             <span class="lang-ru">Скачать пакет для Windows (ZIP)</span>
                         </a>
-                        <span class="source-zip-hint">
-                            <span class="lang-en">Requires Python 3</span>
-                            <span class="lang-ru">Требуется установленный Python 3</span>
-                        </span>
+                        <div class="source-zip-hint-row">
+                            <div class="source-zip-hit-count" data-zip-hit-counter title="Total : last 24 h (UTC, all visitors)">
+                                <span class="hit-eye" aria-hidden="true">👁</span>
+                                <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                            </div>
+                            <span class="source-zip-hint-text">
+                                <span class="lang-en">Requires Python 3</span>
+                                <span class="lang-ru">Требуется установленный Python 3</span>
+                            </span>
+                        </div>
                     </span>
                 </span>
             </span>
@@ -857,6 +907,7 @@ Run from this folder:
 
 import sys
 import traceback
+import webbrowser
 from pathlib import Path
 
 import tkinter as tk
@@ -874,6 +925,8 @@ from clear_result import (  # noqa: E402
     order_sides_for_display,
     wrap_equation_lines,
 )
+
+AUTHOR_SITE_URL = &quot;https://nvvorobtsov.github.io/&quot;
 
 
 def en_cubes_phrase(n: int) -&gt; str:
@@ -1286,8 +1339,17 @@ def main():
         else:
             tw.insert(tk.END, text)
 
-    btn = ttk.Button(frm, text=&quot;Compute&quot;, command=run_compute)
-    btn.grid(row=6, column=0, columnspan=2, sticky=&quot;w&quot;, pady=6)
+    btn_row = ttk.Frame(frm)
+    btn_row.grid(row=6, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=6)
+    btn_row.columnconfigure(0, weight=1)
+    ttk.Button(btn_row, text=&quot;Compute&quot;, command=run_compute).grid(row=0, column=0, sticky=&quot;w&quot;)
+
+    def open_author_site():
+        webbrowser.open(AUTHOR_SITE_URL)
+
+    ttk.Button(btn_row, text=&quot;Author's website&quot;, command=open_author_site).grid(
+        row=0, column=1, sticky=&quot;e&quot;
+    )
 
     out.grid(row=1, column=0, sticky=&quot;nsew&quot;)
 
@@ -1310,6 +1372,7 @@ GUI для экспериментов с телескопическим разл
 
 import sys
 import traceback
+import webbrowser
 from pathlib import Path
 
 import tkinter as tk
@@ -1328,6 +1391,8 @@ from clear_result import (  # noqa: E402
     ru_cubes_phrase,
     wrap_equation_lines,
 )
+
+AUTHOR_SITE_URL = &quot;https://nvvorobtsov.github.io/&quot;
 
 
 def _actual_text_widget(st: tk.Widget) -&gt; tk.Text:
@@ -1733,8 +1798,17 @@ def main():
         else:
             tw.insert(tk.END, text)
 
-    btn = ttk.Button(frm, text=&quot;Вычислить&quot;, command=run_compute)
-    btn.grid(row=6, column=0, columnspan=2, sticky=&quot;w&quot;, pady=6)
+    btn_row = ttk.Frame(frm)
+    btn_row.grid(row=6, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=6)
+    btn_row.columnconfigure(0, weight=1)
+    ttk.Button(btn_row, text=&quot;Вычислить&quot;, command=run_compute).grid(row=0, column=0, sticky=&quot;w&quot;)
+
+    def open_author_site():
+        webbrowser.open(AUTHOR_SITE_URL)
+
+    ttk.Button(btn_row, text=&quot;Сайт автора&quot;, command=open_author_site).grid(
+        row=0, column=1, sticky=&quot;e&quot;
+    )
 
     out.grid(row=1, column=0, sticky=&quot;nsew&quot;)
 
@@ -1873,6 +1947,8 @@ if __name__ == &quot;__main__&quot;:
     var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
     var COUNT_QUERY_PARAM = 'count';
     var allowedCounterIds = { pub5_code: true };
+    /* Not listed in index.html COUNTER_IDS — excluded from header sum of 13. */
+    var ZIP_COUNTER_ID = 'pub5_gui_winzip';
 
     function apiHeaders() {
         return {
@@ -1893,6 +1969,66 @@ if __name__ == &quot;__main__&quot;:
         history.replaceState(null, '', next);
     }
 
+    function setZipCounterDisplay(total, last24) {
+        document.querySelectorAll('[data-zip-hit-counter]').forEach(function (wrap) {
+            var tEl = wrap.querySelector('.hit-total');
+            var hEl = wrap.querySelector('.hit-24');
+            if (tEl) tEl.textContent = total;
+            if (hEl) hEl.textContent = last24;
+        });
+    }
+
+    function refreshZipCounter() {
+        fetch(SUPABASE_URL + '/rest/v1/rpc/get_main_link_stats', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: '{}'
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data || typeof data !== 'object') return;
+                var row = data[ZIP_COUNTER_ID];
+                if (row && typeof row === 'object') {
+                    setZipCounterDisplay(
+                        String(Number(row.total) || 0),
+                        String(Number(row.last24) || 0)
+                    );
+                } else {
+                    setZipCounterDisplay('0', '0');
+                }
+            })
+            .catch(function () {
+                setZipCounterDisplay('—', '—');
+            });
+    }
+
+    function incrementZipCounter() {
+        fetch(SUPABASE_URL + '/rest/v1/rpc/register_link_click', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({ counter_id: ZIP_COUNTER_ID }),
+            keepalive: true
+        })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data || typeof data !== 'object') return;
+                var tot = Number(data.total);
+                var h24 = Number(data.last24);
+                if (!isNaN(tot) && !isNaN(h24)) {
+                    setZipCounterDisplay(String(tot), String(h24));
+                }
+            })
+            .catch(function () {});
+    }
+
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest('a.source-dl-link--zip');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (href.indexOf('decompose_gui_windows.zip') === -1) return;
+        incrementZipCounter();
+    });
+
     var params = new URLSearchParams(window.location.search);
     var cid = params.get(COUNT_QUERY_PARAM);
     if (cid && allowedCounterIds[cid]) {
@@ -1904,6 +2040,8 @@ if __name__ == &quot;__main__&quot;:
         }).catch(function () {});
         stripCountFromUrl();
     }
+
+    refreshZipCounter();
 })();
 </script>
 </body>
