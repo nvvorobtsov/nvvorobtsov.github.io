@@ -111,10 +111,12 @@ def try_defactored_equation_lines(L_final, R_final, width=72, *, lang="ru"):
     """Общий gcd оснований кубов по всем членам тождества (в порядке показа).
 
     Если gcd g > 1 — основания делятся на g; в сумме кубов общий множитель g³.
-    Возвращает тройку:
+    Возвращает пятёрку:
       (1) строка про g³ (RU/EN по lang);
       (2) строка «N = факторизация(N) =» для сокращённой суммы N;
-      (3) строки сокращённого тождества (wrap_equation_lines).
+      (3) строки сокращённого тождества (wrap_equation_lines);
+      (4) L2 — основания слева после деления на gcd (в порядке показа);
+      (5) R2 — основания справа после деления на gcd.
 
     lang: \"ru\" | \"en\" — подписи к первой строке блока дефакторизации.
 
@@ -151,7 +153,7 @@ def try_defactored_equation_lines(L_final, R_final, width=72, *, lang="ru"):
         gcd_cube_line = f"Куб НОД оснований (g³): {g3} = {format_factorization(g3)}"
     factor_line = f"{v_left} = {format_factorization(v_left)} ="
     eq_lines = wrap_equation_lines(L2, R2, width)
-    return (gcd_cube_line, factor_line, eq_lines)
+    return (gcd_cube_line, factor_line, eq_lines, L2, R2)
 
 
 def wrap_equation_lines(L_final, R_final, width=72):

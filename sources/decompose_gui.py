@@ -12,9 +12,11 @@ from typing import Optional, Tuple
 import webbrowser
 from pathlib import Path
 
+import sympy as sp
+
 import tkinter as tk
 import tkinter.font as tkfont
-from tkinter import ttk, scrolledtext, messagebox
+from tkinter import ttk, messagebox
 
 _DIR = Path(__file__).resolve().parent
 if str(_DIR) not in sys.path:
@@ -33,6 +35,18 @@ AUTHOR_SITE_URL = "https://nvvorobtsov.github.io/"
 
 # Заголовок блока: g — НОД всех оснований кубов до деления; сокращение на g даёт тождество для суммы, делённой на g³.
 DEFACTOR_SECTION_TITLE = "После дефакторизации (g³ — куб НОД всех оснований):"
+
+TITLE_FACTORED_CUBES = "С полной факторизацией результата*:"
+TITLE_FACTORED_TABLE = "Или с факторизацией оснований результата*:"
+FOOTNOTE_DEFACT_REDUCED = "* Имеется в виду сокращённое тождество после дефакторизации."
+
+TAG_PRIME_TABLE_ROW = "prime_table_row"
+TABLE_PRIME_BLUE = "#1565C0"
+
+
+def _base_is_prime(x) -> bool:
+    v = abs(int(x))
+    return v >= 2 and bool(sp.isprime(v))
 
 
 def _actual_text_widget(st: tk.Widget) -> tk.Text:
@@ -110,16 +124,154 @@ def build_output_parts(data: dict, *, wrap_width: int = 72):
     return header, eq_lines, sep
 
 
+def wrap_factored_cube_equation(L: list, R: list, width: int) -> list:
+    """Строки тождества (как wrap_equation_lines), но основания — полная факторизация в скобках."""
+    tokens = []
+    for i, val in enumerate(L):
+        fx = format_factorization(val)
+        tok = f"({fx})^3"
+        tokens.append(tok if i == 0 else f"+{tok}")
+    tokens.append("=")
+    for i, val in enumerate(R):
+        fx = format_factorization(val)
+        tok = f"({fx})^3"
+        tokens.append(tok if i == 0 else f"+{tok}")
+    lines = []
+    current_line = ""
+    for token in tokens:
+        if token == "=":
+            current_line += " = "
+            continue
+        if len(current_line) + len(token) > width:
+            if current_line.strip():
+                lines.append(current_line.rstrip())
+            current_line = token
+        else:
+            current_line += token
+    if current_line.strip():
+        lines.append(current_line.rstrip())
+    return lines
+
+
+def format_bases_factor_table(L: list, R: list) -> tuple[list[str], list[Optional[str]]]:
+    """Таблица: целое основание | разложение format_factorization (моноширинно).
+
+    Второй список — теги по строкам (None или TAG_PRIME_TABLE_ROW для строк данных с простым основанием).
+    """
+    bases_order = [int(x) for x in L] + [int(x) for x in R]
+    rows = []
+    for x in L:
+        rows.append((str(int(x)), format_factorization(x)))
+    for x in R:
+        rows.append((str(int(x)), format_factorization(x)))
+    h0, h1 = "Основание", "Факторизация"
+    wn = max(len(h0), max((len(r[0]) for r in rows), default=0))
+    wf = max(len(h1), max((len(r[1]) for r in rows), default=0))
+    sep = "+" + "-" * (wn + 2) + "+" + "-" * (wf + 2) + "+"
+    out = [
+        sep,
+        "| " + h0.rjust(wn) + " | " + h1.ljust(wf) + " |",
+        sep,
+    ]
+    tags: list[Optional[str]] = [None, None, None]
+    for i, (n, fac) in enumerate(rows):
+        out.append("| " + n.rjust(wn) + " | " + fac.ljust(wf) + " |")
+        tags.append(TAG_PRIME_TABLE_ROW if _base_is_prime(bases_order[i]) else None)
+    out.append(sep)
+    tags.append(None)
+    return out, tags
+
+
+def _factor_string_tokens(fac_str: str) -> list[str]:
+    s = (fac_str or "").strip()
+    if not s:
+        return []
+    return s.split("*")
+
+
+def format_bases_factor_table_by_columns(
+    L: list,
+    R: list,
+    *,
+    h_base: str = "Основание",
+) -> tuple[list[str], list[Optional[str]]]:
+    """Таблица: основание | фактор 1 | фактор 2 | … (моноширинно, ячейки факторов выровнены вправо).
+
+    Второй список — теги по строкам (как у format_bases_factor_table).
+    """
+    bases_order = [int(x) for x in L] + [int(x) for x in R]
+    rows = []
+    for x in L:
+        rows.append((str(int(x)), format_factorization(x)))
+    for x in R:
+        rows.append((str(int(x)), format_factorization(x)))
+    factor_rows = [_factor_string_tokens(f) for _, f in rows]
+    nf = max((len(fr) for fr in factor_rows), default=0)
+    if nf < 1:
+        nf = 1
+    wn = max(len(h_base), max((len(r[0]) for r in rows), default=0))
+    col_widths = []
+    for j in range(nf):
+        h = str(j + 1)
+        w = len(h)
+        for fr in factor_rows:
+            if j < len(fr):
+                w = max(w, len(fr[j]))
+        col_widths.append(max(w, 1))
+    parts = ["+" + "-" * (wn + 2)] + ["+" + "-" * (cw + 2) for cw in col_widths] + ["+"]
+    sep = "".join(parts)
+    header_line = "| " + h_base.rjust(wn) + " |"
+    for j, cw in enumerate(col_widths):
+        header_line += " " + str(j + 1).center(cw) + " |"
+    out = [sep, header_line, sep]
+    tags: list[Optional[str]] = [None, None, None]
+    for row_i, ((_n, _f), fr) in enumerate(zip(rows, factor_rows)):
+        row_line = "| " + _n.rjust(wn) + " |"
+        for j, cw in enumerate(col_widths):
+            cell = fr[j] if j < len(fr) else ""
+            row_line += " " + cell.rjust(cw) + " |"
+        out.append(row_line)
+        tags.append(TAG_PRIME_TABLE_ROW if _base_is_prime(bases_order[row_i]) else None)
+    out.append(sep)
+    tags.append(None)
+    return out, tags
+
+
+def build_full_factor_display(
+    L2: list,
+    R2: list,
+    wrap_width: int,
+    *,
+    bases_only: bool,
+    factor_columns: bool = False,
+):
+    """(mode, lines, line_tags): line_tags выравнивается с lines или None для режима cubes."""
+    foot = FOOTNOTE_DEFACT_REDUCED
+    if bases_only:
+        if factor_columns:
+            body, body_tags = format_bases_factor_table_by_columns(L2, R2)
+        else:
+            body, body_tags = format_bases_factor_table(L2, R2)
+        lines = [TITLE_FACTORED_TABLE] + body + [foot]
+        line_tags = [None] + body_tags + [None]
+        return ("table", lines, line_tags)
+    body = wrap_factored_cube_equation(L2, R2, wrap_width)
+    lines = [TITLE_FACTORED_CUBES] + body + [foot]
+    return ("cubes", lines, None)
+
+
 def between_separators_one_line(
     data: dict,
     wrap_width: int,
-    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+    defactor_bundle: Optional[Tuple[str, str, list, list, list]] = None,
     omit_raw_decomposition: bool = False,
+    between_tail_lines: Optional[list] = None,
 ) -> str:
     """Текст между линиями === без переносов (как одна строка) для копирования."""
+    tail = ("\n" + "\n".join(between_tail_lines)) if between_tail_lines else ""
     if omit_raw_decomposition and defactor_bundle:
-        d_g3, d_n, d_eq = defactor_bundle
-        return (
+        d_g3, d_n, d_eq, _L2, _R2 = defactor_bundle
+        s = (
             DEFACTOR_SECTION_TITLE
             + "\n"
             + d_g3
@@ -128,11 +280,12 @@ def between_separators_one_line(
             + "\n"
             + "\n".join(d_eq)
         )
+        return s + tail
     header, eq_lines, _ = build_output_parts(data, wrap_width=wrap_width)
     factor_line = header[-1]
     s = factor_line.rstrip() + "".join(eq_lines)
     if defactor_bundle:
-        d_g3, d_n, d_eq = defactor_bundle
+        d_g3, d_n, d_eq, _L2, _R2 = defactor_bundle
         s += (
             "\n"
             + DEFACTOR_SECTION_TITLE
@@ -143,7 +296,7 @@ def between_separators_one_line(
             + "\n"
             + "\n".join(d_eq)
         )
-    return s
+    return s + tail
 
 
 def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -> str:
@@ -180,7 +333,8 @@ def insert_result_with_bold_left_side(
     header: list,
     eq_lines: list,
     sep: str,
-    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+    defactor_bundle: Optional[Tuple[str, str, list, list, list]] = None,
+    full_factor_display: Optional[Tuple[str, list, Optional[list]]] = None,
 ) -> None:
     """В строках тождества левая часть до первого « = » — жирным и синим (#1565C0)."""
     tag = "decomp_left"
@@ -199,13 +353,50 @@ def insert_result_with_bold_left_side(
     _insert_eq_lines_bold_left(tw, eq_lines, tag)
 
     if defactor_bundle:
-        d_g3, d_n, d_eq = defactor_bundle
+        d_g3, d_n, d_eq, _L2, _R2 = defactor_bundle
         if eq_lines:
             tw.insert(tk.END, "\n")
         tw.insert(tk.END, DEFACTOR_SECTION_TITLE + "\n")
         tw.insert(tk.END, d_g3 + "\n")
         tw.insert(tk.END, d_n + "\n")
         _insert_eq_lines_bold_left(tw, d_eq, tag)
+
+    if full_factor_display:
+        mode, lines, line_tags = full_factor_display
+        tw.insert(tk.END, "\n")
+        tw.insert(tk.END, lines[0] + "\n")
+        mid = lines[1:-1]
+        if mode == "cubes":
+            _insert_eq_lines_bold_left(tw, mid, tag)
+        else:
+            if line_tags:
+                try:
+                    bf = tkfont.Font(font=tw.cget("font"))
+                    fam = bf.actual("family")
+                    sz = int(bf.actual("size"))
+                    tw.tag_configure(
+                        TAG_PRIME_TABLE_ROW,
+                        font=(fam, sz, "bold"),
+                        foreground=TABLE_PRIME_BLUE,
+                    )
+                except tk.TclError:
+                    tw.tag_configure(
+                        TAG_PRIME_TABLE_ROW,
+                        font=("Consolas", 10, "bold"),
+                        foreground=TABLE_PRIME_BLUE,
+                    )
+            for i, ln in enumerate(mid):
+                tidx = 1 + i
+                tg = (
+                    line_tags[tidx]
+                    if line_tags and tidx < len(line_tags) and line_tags[tidx]
+                    else None
+                )
+                if tg:
+                    tw.insert(tk.END, ln + "\n", (tg,))
+                else:
+                    tw.insert(tk.END, ln + "\n")
+        tw.insert(tk.END, lines[-1] + "\n")
 
     tw.insert(tk.END, sep + "\n")
 
@@ -220,7 +411,7 @@ def main():
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
     frm.columnconfigure(1, weight=1)
-    frm.rowconfigure(8, weight=1)
+    frm.rowconfigure(9, weight=1)
 
     var_a = tk.IntVar(value=2)
     var_b = tk.IntVar(value=10)
@@ -279,6 +470,45 @@ def main():
     )
     chk_def.grid(row=4, column=0, columnspan=2, sticky="w", pady=(0, 4))
 
+    var_full_factor = tk.BooleanVar(value=False)
+    var_bases_only = tk.BooleanVar(value=True)
+    opt_sub = ttk.Frame(frm)
+    opt_sub.grid(row=5, column=0, columnspan=2, sticky="w", pady=(0, 4))
+    chk_ff = ttk.Checkbutton(
+        opt_sub,
+        text=(
+            "Полная факторизация сокращённого тождества (кубы с разложенными основаниями; "
+            "ниже блок после дефакторизации)"
+        ),
+        variable=var_full_factor,
+    )
+    chk_ff.pack(side=tk.LEFT)
+    chk_bo = ttk.Checkbutton(
+        opt_sub,
+        text="Только основания (таблица, без ^3)",
+        variable=var_bases_only,
+    )
+    chk_bo.pack(side=tk.LEFT, padx=(18, 0))
+
+    var_factor_columns = tk.BooleanVar(value=False)
+    chk_fc = ttk.Checkbutton(
+        opt_sub,
+        text="Факторы по колонкам таблицы",
+        variable=var_factor_columns,
+    )
+    chk_fc.pack(side=tk.LEFT, padx=(18, 0))
+
+    def sync_factor_suboptions(*_args):
+        ff = var_full_factor.get()
+        bo = var_bases_only.get()
+        st_sub = tk.NORMAL if ff else tk.DISABLED
+        chk_bo.configure(state=st_sub)
+        chk_fc.configure(state=tk.NORMAL if (ff and bo) else tk.DISABLED)
+
+    var_full_factor.trace_add("write", sync_factor_suboptions)
+    var_bases_only.trace_add("write", sync_factor_suboptions)
+    sync_factor_suboptions()
+
     ttk.Label(
         frm,
         text=(
@@ -286,7 +516,7 @@ def main():
             "(только если галочка «только число» выключена):"
         ),
         justify=tk.LEFT,
-    ).grid(row=5, column=0, sticky="nw", pady=2)
+    ).grid(row=6, column=0, sticky="nw", pady=2)
     sp_warn = tk.Spinbox(
         frm,
         from_=4,
@@ -295,10 +525,10 @@ def main():
         textvariable=var_warn_max,
         width=12,
     )
-    sp_warn.grid(row=5, column=1, sticky="w", pady=2)
+    sp_warn.grid(row=6, column=1, sticky="w", pady=2)
 
     ex_frame = ttk.LabelFrame(frm, text="Примеры: тройка параметров → число членов (для ориентира)")
-    ex_frame.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(10, 6))
+    ex_frame.grid(row=7, column=0, columnspan=2, sticky="ew", pady=(10, 6))
     ex_frame.columnconfigure(0, weight=1)
 
     ttk.Label(ex_frame, text="Параметры a, b₀, k").grid(row=0, column=0, sticky="w", padx=4, pady=2)
@@ -334,6 +564,7 @@ def main():
         "wrap": None,
         "defactor_bundle": None,
         "omit_raw_decomposition": False,
+        "between_tail_lines": None,
     }
 
     def copy_between_separators() -> None:
@@ -352,11 +583,12 @@ def main():
                 w,
                 clip_block_state.get("defactor_bundle"),
                 clip_block_state.get("omit_raw_decomposition", False),
+                clip_block_state.get("between_tail_lines"),
             )
         )
 
     out_wrap = ttk.Frame(frm)
-    out_wrap.grid(row=8, column=0, columnspan=2, sticky="nsew", pady=(4, 0))
+    out_wrap.grid(row=9, column=0, columnspan=2, sticky="nsew", pady=(4, 0))
     out_wrap.rowconfigure(1, weight=1)
     out_wrap.columnconfigure(0, weight=1)
 
@@ -364,16 +596,29 @@ def main():
     out_top.grid(row=0, column=0, sticky="ew")
     ttk.Label(out_top, text="Результат").pack(side=tk.LEFT)
 
-    out = scrolledtext.ScrolledText(
-        out_wrap,
+    text_holder = ttk.Frame(out_wrap)
+    text_holder.grid(row=1, column=0, sticky="nsew")
+    text_holder.rowconfigure(0, weight=1)
+    text_holder.columnconfigure(0, weight=1)
+
+    v_scroll = ttk.Scrollbar(text_holder, orient=tk.VERTICAL)
+    h_scroll = ttk.Scrollbar(text_holder, orient=tk.HORIZONTAL)
+    tw = tk.Text(
+        text_holder,
         height=28,
         width=88,
         font=("Consolas", 10),
         wrap=tk.NONE,
         exportselection=True,
+        undo=False,
+        xscrollcommand=h_scroll.set,
+        yscrollcommand=v_scroll.set,
     )
-
-    tw = _actual_text_widget(out)
+    v_scroll.config(command=tw.yview)
+    h_scroll.config(command=tw.xview)
+    tw.grid(row=0, column=0, sticky="nsew")
+    v_scroll.grid(row=0, column=1, sticky="ns")
+    h_scroll.grid(row=1, column=0, sticky="ew")
 
     def copy_all_out() -> None:
         clipboard_set(tw.get("1.0", "end-1c"))
@@ -458,10 +703,13 @@ def main():
         text = ""
         header = eq_lines = sep_line = None
         defactor_bundle = None
+        full_factor_display = None
+        between_tail_lines = None
         clip_block_state["data"] = None
         clip_block_state["wrap"] = None
         clip_block_state["defactor_bundle"] = None
         clip_block_state["omit_raw_decomposition"] = False
+        clip_block_state["between_tail_lines"] = None
 
         try:
             data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
@@ -483,6 +731,7 @@ def main():
                     clip_block_state["wrap"] = None
                     clip_block_state["defactor_bundle"] = None
                     clip_block_state["omit_raw_decomposition"] = False
+                    clip_block_state["between_tail_lines"] = None
                     tw.delete("1.0", tk.END)
                     tw.insert(
                         tk.END,
@@ -497,7 +746,7 @@ def main():
                     "factor_str": format_factorization(data["total_val"]),
                 }
 
-            wrap_w = _estimate_wrap_chars(out)
+            wrap_w = _estimate_wrap_chars(tw)
             if only_count.get():
                 text = build_output(data, True, wrap_width=wrap_w)
             else:
@@ -509,6 +758,20 @@ def main():
                 if var_defactor.get() and defactor_bundle is not None:
                     header = header[:-1]
                     eq_lines = []
+                if (
+                    defactor_bundle is not None
+                    and var_full_factor.get()
+                ):
+                    _g3, _n, _eq, L2, R2 = defactor_bundle
+                    full_factor_display = build_full_factor_display(
+                        L2,
+                        R2,
+                        wrap_w,
+                        bases_only=var_bases_only.get(),
+                        factor_columns=var_bases_only.get()
+                        and var_factor_columns.get(),
+                    )
+                    between_tail_lines = list(full_factor_display[1])
                 use_styled = True
         except Exception:
             use_styled = False
@@ -517,7 +780,12 @@ def main():
         tw.delete("1.0", tk.END)
         if use_styled:
             insert_result_with_bold_left_side(
-                tw, header, eq_lines, sep_line, defactor_bundle
+                tw,
+                header,
+                eq_lines,
+                sep_line,
+                defactor_bundle,
+                full_factor_display,
             )
             clip_block_state["data"] = data
             clip_block_state["wrap"] = wrap_w
@@ -525,11 +793,12 @@ def main():
             clip_block_state["omit_raw_decomposition"] = bool(
                 var_defactor.get() and defactor_bundle is not None
             )
+            clip_block_state["between_tail_lines"] = between_tail_lines
         else:
             tw.insert(tk.END, text)
 
     btn_row = ttk.Frame(frm)
-    btn_row.grid(row=7, column=0, columnspan=2, sticky="ew", pady=6)
+    btn_row.grid(row=8, column=0, columnspan=2, sticky="ew", pady=6)
     btn_row.columnconfigure(0, weight=1)
     ttk.Button(btn_row, text="Вычислить", command=run_compute).grid(row=0, column=0, sticky="w")
 
@@ -540,7 +809,6 @@ def main():
         row=0, column=1, sticky="e"
     )
 
-    out.grid(row=1, column=0, sticky="nsew")
 
     for w in (sp_a, sp_b, sp_k, sp_warn):
         w.bind("<Return>", lambda e: run_compute())
