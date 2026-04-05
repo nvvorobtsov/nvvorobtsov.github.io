@@ -466,7 +466,8 @@
                 <button class="copy-btn" onclick="copyCode('code1', event)"><span class="lang-en">Copy Code</span><span class="lang-ru">Копировать код</span></button>
             </div>
             <div class="lang-en">
-                <pre><code class="language-python" id="code1_en">import sympy as sp
+                <pre><code class="language-python" id="code1_en">import math
+import sympy as sp
 import argparse
 from collections import Counter
 
@@ -485,33 +486,37 @@ def Z(a, b):
 
 def format_factorization(total_val):
     factors = sp.factorint(total_val)
-    return "*".join([f"{p}^{e}" if e > 1 else f"{p}" for p, e in sorted(factors.items())])
+    return &quot;*&quot;.join([f&quot;{p}^{e}&quot; if e &gt; 1 else f&quot;{p}&quot; for p, e in sorted(factors.items())])
 
 
-def en_cubes_phrase(n: int) -> str:
-    """Count plus the word cube / cubes in English."""
+def ru_cubes_phrase(n: int) -&gt; str:
+    &quot;&quot;&quot;Число и слово «куб» в правильном числе (1 куб, 2 куба, 5 кубов).&quot;&quot;&quot;
     n = abs(int(n))
-    if n == 1:
-        return "1 cube"
-    return f"{n} cubes"
+    if n % 10 == 1 and n % 100 != 11:
+        w = &quot;куб&quot;
+    elif n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14):
+        w = &quot;куба&quot;
+    else:
+        w = &quot;кубов&quot;
+    return f&quot;{n} {w}&quot;
 
 
 def order_sides_for_display(L_final, R_final):
-    """For display: put the side with fewer cubes on the left (swap when strictly unequal).
+    &quot;&quot;&quot;Для вывода: слева — сторона с меньшим числом кубов (при строгом неравенстве меняем местами).
 
-    Sums of cubes on both sides match; the identity remains valid.
-    """
+    Суммы кубов по обеим сторонам равны, тождество остаётся верным.
+    &quot;&quot;&quot;
     L, R = list(L_final), list(R_final)
-    if len(L) > len(R):
+    if len(L) &gt; len(R):
         return R, L
     return L, R
 
 
 def compute_ramanujan_decomposition(a, b_start, k, *, factorize=True):
-    """Return decomposition data without printing (for CLI and GUI).
+    &quot;&quot;&quot;Возвращает данные разложения без печати (для CLI и GUI).
 
-    factorize=False skips sp.factorint (fast path for term-count checks in the GUI).
-    """
+    factorize=False пропускает sp.factorint (быстро для проверки числа членов в GUI).
+    &quot;&quot;&quot;
     # Collect all 4 polynomials for each step
     b_seq = list(range(b_start, b_start + k))
 
@@ -533,13 +538,13 @@ def compute_ramanujan_decomposition(a, b_start, k, *, factorize=True):
     R_vals = []
 
     for val in left_raw:
-        if val > 0:
+        if val &gt; 0:
             L_vals.append(val)
         elif val &lt; 0:
             R_vals.append(abs(val))
 
     for val in right_raw:
-        if val > 0:
+        if val &gt; 0:
             R_vals.append(val)
         elif val &lt; 0:
             L_vals.append(abs(val))
@@ -559,32 +564,79 @@ def compute_ramanujan_decomposition(a, b_start, k, *, factorize=True):
     factor_str = format_factorization(total_val) if factorize else None
 
     return {
-        "a": a,
-        "b_start": b_start,
-        "k": k,
-        "L_final": L_final,
-        "R_final": R_final,
-        "total_terms": total_terms,
-        "total_val": total_val,
-        "factor_str": factor_str,
+        &quot;a&quot;: a,
+        &quot;b_start&quot;: b_start,
+        &quot;k&quot;: k,
+        &quot;L_final&quot;: L_final,
+        &quot;R_final&quot;: R_final,
+        &quot;total_terms&quot;: total_terms,
+        &quot;total_val&quot;: total_val,
+        &quot;factor_str&quot;: factor_str,
     }
+
+
+def try_defactored_equation_lines(L_final, R_final, width=72, *, lang=&quot;ru&quot;):
+    &quot;&quot;&quot;Общий gcd оснований кубов по всем членам тождества (в порядке показа).
+
+    Если gcd g &gt; 1 — основания делятся на g; в сумме кубов общий множитель g³.
+    Возвращает тройку:
+      (1) строка про g³ (RU/EN по lang);
+      (2) строка «N = факторизация(N) =» для сокращённой суммы N;
+      (3) строки сокращённого тождества (wrap_equation_lines).
+
+    lang: \&quot;ru\&quot; | \&quot;en\&quot; — подписи к первой строке блока дефакторизации.
+
+    Если gcd == 1 — ранний выход при первом же обнулении общей части (инкрементальный gcd).
+
+    Возвращает None, если сокращать нечего или недостаточно оснований.
+    &quot;&quot;&quot;
+    Ld, Rd = order_sides_for_display(L_final, R_final)
+    bases = list(Ld) + list(Rd)
+    if len(bases) &lt; 2:
+        return None
+    g = abs(int(bases[0]))
+    if g == 0:
+        return None
+    for b in bases[1:]:
+        bi = abs(int(b))
+        if bi == 0:
+            return None
+        g = math.gcd(g, bi)
+        if g == 1:
+            return None
+    if g &lt;= 1:
+        return None
+    L2 = [int(x) // g for x in Ld]
+    R2 = [int(x) // g for x in Rd]
+    v_left = sum(x**3 for x in L2)
+    v_right = sum(x**3 for x in R2)
+    if v_left != v_right:
+        return None
+    g3 = g**3
+    if lang == &quot;en&quot;:
+        gcd_cube_line = f&quot;Cubed gcd of bases (g³): {g3} = {format_factorization(g3)}&quot;
+    else:
+        gcd_cube_line = f&quot;Куб НОД оснований (g³): {g3} = {format_factorization(g3)}&quot;
+    factor_line = f&quot;{v_left} = {format_factorization(v_left)} =&quot;
+    eq_lines = wrap_equation_lines(L2, R2, width)
+    return (gcd_cube_line, factor_line, eq_lines)
 
 
 def wrap_equation_lines(L_final, R_final, width=72):
     tokens = []
     for i, val in enumerate(L_final):
-        tokens.append(f"{val}^3" if i == 0 else f"+{val}^3")
-    tokens.append("=")
+        tokens.append(f&quot;{val}^3&quot; if i == 0 else f&quot;+{val}^3&quot;)
+    tokens.append(&quot;=&quot;)
     for i, val in enumerate(R_final):
-        tokens.append(f"{val}^3" if i == 0 else f"+{val}^3")
+        tokens.append(f&quot;{val}^3&quot; if i == 0 else f&quot;+{val}^3&quot;)
 
     lines = []
-    current_line = ""
+    current_line = &quot;&quot;
     for token in tokens:
-        if token == "=":
-            current_line += " = "
+        if token == &quot;=&quot;:
+            current_line += &quot; = &quot;
             continue
-        if len(current_line) + len(token) > width:
+        if len(current_line) + len(token) &gt; width:
             if current_line.strip():
                 lines.append(current_line.rstrip())
             current_line = token
@@ -597,36 +649,37 @@ def wrap_equation_lines(L_final, R_final, width=72):
 
 def generate_ramanujan_decomposition(a, b_start, k):
     data = compute_ramanujan_decomposition(a, b_start, k)
-    L_final = data["L_final"]
-    R_final = data["R_final"]
-    total_terms = data["total_terms"]
-    total_val = data["total_val"]
-    factor_str = data["factor_str"]
+    L_final = data[&quot;L_final&quot;]
+    R_final = data[&quot;R_final&quot;]
+    total_terms = data[&quot;total_terms&quot;]
+    total_val = data[&quot;total_val&quot;]
+    factor_str = data[&quot;factor_str&quot;]
 
-    print(f"Generating decomposition for a = {a}, b0 = {b_start}, k = {k}")
-    print(f"Generated parameters. Sequence length will be: {total_terms} terms.\n")
-    print("Result:")
+    print(f&quot;Разложение: a = {a}, b0 = {b_start}, k = {k}&quot;)
+    print(f&quot;Параметры сформированы. Число членов в последовательности: {total_terms}.\n&quot;)
+    print(&quot;Результат:&quot;)
     L_disp, R_disp = order_sides_for_display(L_final, R_final)
-    print(f"Left: {en_cubes_phrase(len(L_disp))}")
-    print(f"Right: {en_cubes_phrase(len(R_disp))}")
-    print("="*72)
-    print(f"{total_val} = {factor_str} =")
+    print(f&quot;Слева: {ru_cubes_phrase(len(L_disp))}&quot;)
+    print(f&quot;Справа: {ru_cubes_phrase(len(R_disp))}&quot;)
+    print(&quot;=&quot;*72)
+    print(f&quot;{total_val} = {factor_str} =&quot;)
     for line in wrap_equation_lines(L_disp, R_disp, 72):
         print(line)
-    print("="*72)
+    print(&quot;=&quot;*72)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate Ramanujan cube decompositions.")
-    parser.add_argument("--a", type=int, default=2, help="Parameter a (default: 2)")
-    parser.add_argument("--b", type=int, default=10, help="Starting value for b (default: 10)")
-    parser.add_argument("--k", type=int, default=5, help="Number of steps (default: 5)")
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=&quot;Generate Ramanujan cube decompositions.&quot;)
+    parser.add_argument(&quot;--a&quot;, type=int, default=2, help=&quot;Parameter a (default: 2)&quot;)
+    parser.add_argument(&quot;--b&quot;, type=int, default=10, help=&quot;Starting value for b (default: 10)&quot;)
+    parser.add_argument(&quot;--k&quot;, type=int, default=5, help=&quot;Number of steps (default: 5)&quot;)
 
     args = parser.parse_args()
     generate_ramanujan_decomposition(args.a, args.b, args.k)
 </code></pre>
             </div>
             <div class="lang-ru">
-                <pre><code class="language-python" id="code1_ru">import sympy as sp
+                <pre><code class="language-python" id="code1_ru">import math
+import sympy as sp
 import argparse
 from collections import Counter
 
@@ -645,37 +698,37 @@ def Z(a, b):
 
 def format_factorization(total_val):
     factors = sp.factorint(total_val)
-    return "*".join([f"{p}^{e}" if e > 1 else f"{p}" for p, e in sorted(factors.items())])
+    return &quot;*&quot;.join([f&quot;{p}^{e}&quot; if e &gt; 1 else f&quot;{p}&quot; for p, e in sorted(factors.items())])
 
 
-def ru_cubes_phrase(n: int) -> str:
-    """Число и слово «куб» в правильном числе (1 куб, 2 куба, 5 кубов)."""
+def ru_cubes_phrase(n: int) -&gt; str:
+    &quot;&quot;&quot;Число и слово «куб» в правильном числе (1 куб, 2 куба, 5 кубов).&quot;&quot;&quot;
     n = abs(int(n))
     if n % 10 == 1 and n % 100 != 11:
-        w = "куб"
+        w = &quot;куб&quot;
     elif n % 10 in (2, 3, 4) and n % 100 not in (12, 13, 14):
-        w = "куба"
+        w = &quot;куба&quot;
     else:
-        w = "кубов"
-    return f"{n} {w}"
+        w = &quot;кубов&quot;
+    return f&quot;{n} {w}&quot;
 
 
 def order_sides_for_display(L_final, R_final):
-    """Для вывода: слева — сторона с меньшим числом кубов (при строгом неравенстве меняем местами).
+    &quot;&quot;&quot;Для вывода: слева — сторона с меньшим числом кубов (при строгом неравенстве меняем местами).
 
     Суммы кубов по обеим сторонам равны, тождество остаётся верным.
-    """
+    &quot;&quot;&quot;
     L, R = list(L_final), list(R_final)
-    if len(L) > len(R):
+    if len(L) &gt; len(R):
         return R, L
     return L, R
 
 
 def compute_ramanujan_decomposition(a, b_start, k, *, factorize=True):
-    """Возвращает данные разложения без печати (для CLI и GUI).
+    &quot;&quot;&quot;Возвращает данные разложения без печати (для CLI и GUI).
 
     factorize=False пропускает sp.factorint (быстро для проверки числа членов в GUI).
-    """
+    &quot;&quot;&quot;
     # Collect all 4 polynomials for each step
     b_seq = list(range(b_start, b_start + k))
 
@@ -697,13 +750,13 @@ def compute_ramanujan_decomposition(a, b_start, k, *, factorize=True):
     R_vals = []
 
     for val in left_raw:
-        if val > 0:
+        if val &gt; 0:
             L_vals.append(val)
         elif val &lt; 0:
             R_vals.append(abs(val))
 
     for val in right_raw:
-        if val > 0:
+        if val &gt; 0:
             R_vals.append(val)
         elif val &lt; 0:
             L_vals.append(abs(val))
@@ -723,32 +776,79 @@ def compute_ramanujan_decomposition(a, b_start, k, *, factorize=True):
     factor_str = format_factorization(total_val) if factorize else None
 
     return {
-        "a": a,
-        "b_start": b_start,
-        "k": k,
-        "L_final": L_final,
-        "R_final": R_final,
-        "total_terms": total_terms,
-        "total_val": total_val,
-        "factor_str": factor_str,
+        &quot;a&quot;: a,
+        &quot;b_start&quot;: b_start,
+        &quot;k&quot;: k,
+        &quot;L_final&quot;: L_final,
+        &quot;R_final&quot;: R_final,
+        &quot;total_terms&quot;: total_terms,
+        &quot;total_val&quot;: total_val,
+        &quot;factor_str&quot;: factor_str,
     }
+
+
+def try_defactored_equation_lines(L_final, R_final, width=72, *, lang=&quot;ru&quot;):
+    &quot;&quot;&quot;Общий gcd оснований кубов по всем членам тождества (в порядке показа).
+
+    Если gcd g &gt; 1 — основания делятся на g; в сумме кубов общий множитель g³.
+    Возвращает тройку:
+      (1) строка про g³ (RU/EN по lang);
+      (2) строка «N = факторизация(N) =» для сокращённой суммы N;
+      (3) строки сокращённого тождества (wrap_equation_lines).
+
+    lang: \&quot;ru\&quot; | \&quot;en\&quot; — подписи к первой строке блока дефакторизации.
+
+    Если gcd == 1 — ранний выход при первом же обнулении общей части (инкрементальный gcd).
+
+    Возвращает None, если сокращать нечего или недостаточно оснований.
+    &quot;&quot;&quot;
+    Ld, Rd = order_sides_for_display(L_final, R_final)
+    bases = list(Ld) + list(Rd)
+    if len(bases) &lt; 2:
+        return None
+    g = abs(int(bases[0]))
+    if g == 0:
+        return None
+    for b in bases[1:]:
+        bi = abs(int(b))
+        if bi == 0:
+            return None
+        g = math.gcd(g, bi)
+        if g == 1:
+            return None
+    if g &lt;= 1:
+        return None
+    L2 = [int(x) // g for x in Ld]
+    R2 = [int(x) // g for x in Rd]
+    v_left = sum(x**3 for x in L2)
+    v_right = sum(x**3 for x in R2)
+    if v_left != v_right:
+        return None
+    g3 = g**3
+    if lang == &quot;en&quot;:
+        gcd_cube_line = f&quot;Cubed gcd of bases (g³): {g3} = {format_factorization(g3)}&quot;
+    else:
+        gcd_cube_line = f&quot;Куб НОД оснований (g³): {g3} = {format_factorization(g3)}&quot;
+    factor_line = f&quot;{v_left} = {format_factorization(v_left)} =&quot;
+    eq_lines = wrap_equation_lines(L2, R2, width)
+    return (gcd_cube_line, factor_line, eq_lines)
 
 
 def wrap_equation_lines(L_final, R_final, width=72):
     tokens = []
     for i, val in enumerate(L_final):
-        tokens.append(f"{val}^3" if i == 0 else f"+{val}^3")
-    tokens.append("=")
+        tokens.append(f&quot;{val}^3&quot; if i == 0 else f&quot;+{val}^3&quot;)
+    tokens.append(&quot;=&quot;)
     for i, val in enumerate(R_final):
-        tokens.append(f"{val}^3" if i == 0 else f"+{val}^3")
+        tokens.append(f&quot;{val}^3&quot; if i == 0 else f&quot;+{val}^3&quot;)
 
     lines = []
-    current_line = ""
+    current_line = &quot;&quot;
     for token in tokens:
-        if token == "=":
-            current_line += " = "
+        if token == &quot;=&quot;:
+            current_line += &quot; = &quot;
             continue
-        if len(current_line) + len(token) > width:
+        if len(current_line) + len(token) &gt; width:
             if current_line.strip():
                 lines.append(current_line.rstrip())
             current_line = token
@@ -761,29 +861,29 @@ def wrap_equation_lines(L_final, R_final, width=72):
 
 def generate_ramanujan_decomposition(a, b_start, k):
     data = compute_ramanujan_decomposition(a, b_start, k)
-    L_final = data["L_final"]
-    R_final = data["R_final"]
-    total_terms = data["total_terms"]
-    total_val = data["total_val"]
-    factor_str = data["factor_str"]
+    L_final = data[&quot;L_final&quot;]
+    R_final = data[&quot;R_final&quot;]
+    total_terms = data[&quot;total_terms&quot;]
+    total_val = data[&quot;total_val&quot;]
+    factor_str = data[&quot;factor_str&quot;]
 
-    print(f"Разложение: a = {a}, b0 = {b_start}, k = {k}")
-    print(f"Параметры сформированы. Число членов в последовательности: {total_terms}.\n")
-    print("Результат:")
+    print(f&quot;Разложение: a = {a}, b0 = {b_start}, k = {k}&quot;)
+    print(f&quot;Параметры сформированы. Число членов в последовательности: {total_terms}.\n&quot;)
+    print(&quot;Результат:&quot;)
     L_disp, R_disp = order_sides_for_display(L_final, R_final)
-    print(f"Слева: {ru_cubes_phrase(len(L_disp))}")
-    print(f"Справа: {ru_cubes_phrase(len(R_disp))}")
-    print("="*72)
-    print(f"{total_val} = {factor_str} =")
+    print(f&quot;Слева: {ru_cubes_phrase(len(L_disp))}&quot;)
+    print(f&quot;Справа: {ru_cubes_phrase(len(R_disp))}&quot;)
+    print(&quot;=&quot;*72)
+    print(f&quot;{total_val} = {factor_str} =&quot;)
     for line in wrap_equation_lines(L_disp, R_disp, 72):
         print(line)
-    print("="*72)
+    print(&quot;=&quot;*72)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate Ramanujan cube decompositions.")
-    parser.add_argument("--a", type=int, default=2, help="Parameter a (default: 2)")
-    parser.add_argument("--b", type=int, default=10, help="Starting value for b (default: 10)")
-    parser.add_argument("--k", type=int, default=5, help="Number of steps (default: 5)")
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=&quot;Generate Ramanujan cube decompositions.&quot;)
+    parser.add_argument(&quot;--a&quot;, type=int, default=2, help=&quot;Parameter a (default: 2)&quot;)
+    parser.add_argument(&quot;--b&quot;, type=int, default=10, help=&quot;Starting value for b (default: 10)&quot;)
+    parser.add_argument(&quot;--k&quot;, type=int, default=5, help=&quot;Number of steps (default: 5)&quot;)
 
     args = parser.parse_args()
     generate_ramanujan_decomposition(args.a, args.b, args.k)
@@ -899,14 +999,16 @@ Right: 31 cubes
             </div>
             <div class="lang-en">
                 <pre class="language-python"><code class="language-python" id="code_gui_en">&quot;&quot;&quot;
-GUI for Ramanujan telescopic cube decomposition experiments (logic in perl/cmd/clear_result.py).
+GUI for Ramanujan telescopic cube decomposition experiments.
+Place clear_result.py in the same folder (download both from publication 5 on the site).
 
-Run from this folder:
+Run:
   python decompose_gui_EN.py
 &quot;&quot;&quot;
 
 import sys
 import traceback
+from typing import Optional, Tuple
 import webbrowser
 from pathlib import Path
 
@@ -914,23 +1016,26 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, scrolledtext, messagebox
 
-_ROOT = Path(__file__).resolve().parent.parent
-_CMD = _ROOT / &quot;perl&quot; / &quot;cmd&quot;
-if str(_CMD) not in sys.path:
-    sys.path.insert(0, str(_CMD))
+_DIR = Path(__file__).resolve().parent
+if str(_DIR) not in sys.path:
+    sys.path.insert(0, str(_DIR))
 
 from clear_result import (  # noqa: E402
     compute_ramanujan_decomposition,
     format_factorization,
     order_sides_for_display,
+    try_defactored_equation_lines,
     wrap_equation_lines,
 )
 
 AUTHOR_SITE_URL = &quot;https://nvvorobtsov.github.io/&quot;
 
+# g = gcd of all bases before division; factoring out g from each base divides the cube sum by g³.
+DEFACTOR_SECTION_TITLE = &quot;After defactorization (g³ — cube of gcd of all bases):&quot;
+
 
 def en_cubes_phrase(n: int) -&gt; str:
-    &quot;&quot;&quot;English count + &#x27;cube&#x27; / &#x27;cubes&#x27;.&quot;&quot;&quot;
+    &quot;&quot;&quot;English count + 'cube' / 'cubes'.&quot;&quot;&quot;
     n = abs(int(n))
     if n == 1:
         return &quot;1 cube&quot;
@@ -947,7 +1052,7 @@ def _actual_text_widget(st: tk.Widget) -&gt; tk.Text:
     for ch in st.winfo_children():
         if isinstance(ch, tk.Text):
             return ch
-    return st
+    return st  # non-standard wrapper fallback
 
 
 def _estimate_wrap_chars(text_w: tk.Widget) -&gt; int:
@@ -998,34 +1103,63 @@ def build_output_parts(data: dict, *, wrap_width: int = 72):
     Ld, Rd = order_sides_for_display(data[&quot;L_final&quot;], data[&quot;R_final&quot;])
     header = [
         (
-            f&quot;Generating decomposition for a = {data[&#x27;a&#x27;]}, &quot;
-            f&quot;b0 = {data[&#x27;b_start&#x27;]}, k = {data[&#x27;k&#x27;]}&quot;
+            f&quot;Generating decomposition for a = {data['a']}, &quot;
+            f&quot;b0 = {data['b_start']}, k = {data['k']}&quot;
         ),
-        f&quot;Generated parameters. Sequence length will be: {data[&#x27;total_terms&#x27;]} terms.&quot;,
+        f&quot;Generated parameters. Sequence length will be: {data['total_terms']} terms.&quot;,
         &quot;&quot;,
         &quot;Result:&quot;,
         f&quot;Left: {en_cubes_phrase(len(Ld))}&quot;,
         f&quot;Right: {en_cubes_phrase(len(Rd))}&quot;,
         sep,
-        f&quot;{data[&#x27;total_val&#x27;]} = {data[&#x27;factor_str&#x27;]} =&quot;,
+        f&quot;{data['total_val']} = {data['factor_str']} =&quot;,
     ]
     eq_lines = wrap_equation_lines(Ld, Rd, wrap_width)
     return header, eq_lines, sep
 
 
-def between_separators_one_line(data: dict, wrap_width: int) -&gt; str:
-    &quot;&quot;&quot;Factorization line + identity between === lines, single string (no wraps).&quot;&quot;&quot;
+def between_separators_one_line(
+    data: dict,
+    wrap_width: int,
+    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+    omit_raw_decomposition: bool = False,
+) -&gt; str:
+    &quot;&quot;&quot;Text between === lines as one string (no wraps) for clipboard.&quot;&quot;&quot;
+    if omit_raw_decomposition and defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        return (
+            DEFACTOR_SECTION_TITLE
+            + &quot;\n&quot;
+            + d_g3
+            + &quot;\n&quot;
+            + d_n
+            + &quot;\n&quot;
+            + &quot;\n&quot;.join(d_eq)
+        )
     header, eq_lines, _ = build_output_parts(data, wrap_width=wrap_width)
     factor_line = header[-1]
-    return factor_line.rstrip() + &quot;&quot;.join(eq_lines)
+    s = factor_line.rstrip() + &quot;&quot;.join(eq_lines)
+    if defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        s += (
+            &quot;\n&quot;
+            + DEFACTOR_SECTION_TITLE
+            + &quot;\n&quot;
+            + d_g3
+            + &quot;\n&quot;
+            + d_n
+            + &quot;\n&quot;
+            + &quot;\n&quot;.join(d_eq)
+        )
+    return s
 
 
 def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -&gt; str:
     if term_count_only:
         Ld, Rd = order_sides_for_display(data[&quot;L_final&quot;], data[&quot;R_final&quot;])
         return (
-            f&quot;a = {data[&#x27;a&#x27;]}, b0 = {data[&#x27;b_start&#x27;]}, k = {data[&#x27;k&#x27;]}\n&quot;
-            f&quot;Terms in decomposition (after cancellations): {data[&#x27;total_terms&#x27;]}\n&quot;
+            f&quot;a = {data['a']}, b0 = {data['b_start']}, k = {data['k']}\n&quot;
+            f&quot;Terms in decomposition (after cancellations): {data['total_terms']}\n&quot;
             f&quot;Left: {en_cubes_phrase(len(Ld))}\n&quot;
             f&quot;Right: {en_cubes_phrase(len(Rd))}\n&quot;
         )
@@ -1033,8 +1167,30 @@ def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -&g
     return &quot;\n&quot;.join(h + e + [s])
 
 
-def insert_result_with_bold_left_side(tw: tk.Text, header: list, eq_lines: list, sep: str) -&gt; None:
-    &quot;&quot;&quot;In identity lines, the left segment before the first &#x27; = &#x27; is bold and blue (#1565C0).&quot;&quot;&quot;
+def _insert_eq_lines_bold_left(tw: tk.Text, lines: list, tag: str) -&gt; None:
+    &quot;&quot;&quot;Left segment before first ' = ' in bold (tag).&quot;&quot;&quot;
+    left_zone = True
+    for line in lines:
+        if left_zone:
+            if &quot; = &quot; in line:
+                left_part, _, rest = line.partition(&quot; = &quot;)
+                tw.insert(tk.END, left_part, (tag,))
+                tw.insert(tk.END, &quot; = &quot; + rest + &quot;\n&quot;)
+                left_zone = False
+            else:
+                tw.insert(tk.END, line + &quot;\n&quot;, (tag,))
+        else:
+            tw.insert(tk.END, line + &quot;\n&quot;)
+
+
+def insert_result_with_bold_left_side(
+    tw: tk.Text,
+    header: list,
+    eq_lines: list,
+    sep: str,
+    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+) -&gt; None:
+    &quot;&quot;&quot;In identity lines, the left segment before the first ' = ' is bold and blue (#1565C0).&quot;&quot;&quot;
     tag = &quot;decomp_left&quot;
     blue = &quot;#1565C0&quot;
     try:
@@ -1048,18 +1204,16 @@ def insert_result_with_bold_left_side(tw: tk.Text, header: list, eq_lines: list,
     for line in header:
         tw.insert(tk.END, line + &quot;\n&quot;)
 
-    left_zone = True
-    for line in eq_lines:
-        if left_zone:
-            if &quot; = &quot; in line:
-                left_part, _, rest = line.partition(&quot; = &quot;)
-                tw.insert(tk.END, left_part, (tag,))
-                tw.insert(tk.END, &quot; = &quot; + rest + &quot;\n&quot;)
-                left_zone = False
-            else:
-                tw.insert(tk.END, line + &quot;\n&quot;, (tag,))
-        else:
-            tw.insert(tk.END, line + &quot;\n&quot;)
+    _insert_eq_lines_bold_left(tw, eq_lines, tag)
+
+    if defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        if eq_lines:
+            tw.insert(tk.END, &quot;\n&quot;)
+        tw.insert(tk.END, DEFACTOR_SECTION_TITLE + &quot;\n&quot;)
+        tw.insert(tk.END, d_g3 + &quot;\n&quot;)
+        tw.insert(tk.END, d_n + &quot;\n&quot;)
+        _insert_eq_lines_bold_left(tw, d_eq, tag)
 
     tw.insert(tk.END, sep + &quot;\n&quot;)
 
@@ -1074,7 +1228,7 @@ def main():
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
     frm.columnconfigure(1, weight=1)
-    frm.rowconfigure(7, weight=1)
+    frm.rowconfigure(8, weight=1)
 
     var_a = tk.IntVar(value=2)
     var_b = tk.IntVar(value=10)
@@ -1122,14 +1276,25 @@ def main():
     )
     chk.grid(row=3, column=0, columnspan=2, sticky=&quot;w&quot;, pady=(8, 4))
 
+    var_defactor = tk.BooleanVar(value=True)
+    chk_def = ttk.Checkbutton(
+        frm,
+        text=(
+            &quot;Defactorization check (g³ = (gcd of bases)³, N = factorization(N) =, reduced &quot;
+            &quot;identity; if gcd&gt;1 the raw expansion is hidden; if gcd=1 show full output)&quot;
+        ),
+        variable=var_defactor,
+    )
+    chk_def.grid(row=4, column=0, columnspan=2, sticky=&quot;w&quot;, pady=(0, 4))
+
     ttk.Label(
         frm,
         text=(
             &quot;Max. terms in decomposition — warn on large output\n&quot;
-            &quot;(only when \&quot;term count only\&quot; is unchecked):&quot;
+            '(only when &quot;term count only&quot; is unchecked):'
         ),
         justify=tk.LEFT,
-    ).grid(row=4, column=0, sticky=&quot;nw&quot;, pady=2)
+    ).grid(row=5, column=0, sticky=&quot;nw&quot;, pady=2)
     sp_warn = tk.Spinbox(
         frm,
         from_=4,
@@ -1138,10 +1303,10 @@ def main():
         textvariable=var_warn_max,
         width=12,
     )
-    sp_warn.grid(row=4, column=1, sticky=&quot;w&quot;, pady=2)
+    sp_warn.grid(row=5, column=1, sticky=&quot;w&quot;, pady=2)
 
     ex_frame = ttk.LabelFrame(frm, text=&quot;Examples: (a, b0, k) → term count (reference)&quot;)
-    ex_frame.grid(row=5, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=(10, 6))
+    ex_frame.grid(row=6, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=(10, 6))
     ex_frame.columnconfigure(0, weight=1)
 
     ttk.Label(ex_frame, text=&quot;Parameters a, b0, k&quot;).grid(row=0, column=0, sticky=&quot;w&quot;, padx=4, pady=2)
@@ -1172,7 +1337,12 @@ def main():
         root.clipboard_append(text)
         root.update()
 
-    clip_block_state = {&quot;data&quot;: None, &quot;wrap&quot;: None}
+    clip_block_state = {
+        &quot;data&quot;: None,
+        &quot;wrap&quot;: None,
+        &quot;defactor_bundle&quot;: None,
+        &quot;omit_raw_decomposition&quot;: False,
+    }
 
     def copy_between_separators() -&gt; None:
         d = clip_block_state[&quot;data&quot;]
@@ -1180,14 +1350,21 @@ def main():
         if d is None or w is None:
             messagebox.showinfo(
                 &quot;No block&quot;,
-                &quot;Run a full computation first (do not use \&quot;term count only\&quot;), &quot;
+                'Run a full computation first (do not use &quot;term count only&quot;), '
                 &quot;so text between the separator lines is available.&quot;,
             )
             return
-        clipboard_set(between_separators_one_line(d, w))
+        clipboard_set(
+            between_separators_one_line(
+                d,
+                w,
+                clip_block_state.get(&quot;defactor_bundle&quot;),
+                clip_block_state.get(&quot;omit_raw_decomposition&quot;, False),
+            )
+        )
 
     out_wrap = ttk.Frame(frm)
-    out_wrap.grid(row=7, column=0, columnspan=2, sticky=&quot;nsew&quot;, pady=(4, 0))
+    out_wrap.grid(row=8, column=0, columnspan=2, sticky=&quot;nsew&quot;, pady=(4, 0))
     out_wrap.rowconfigure(1, weight=1)
     out_wrap.columnconfigure(0, weight=1)
 
@@ -1234,6 +1411,7 @@ def main():
 
     tw.bind(&quot;&lt;Button-3&gt;&quot;, show_ctx)
 
+    # Copy all — Segoe MDL2 Copy glyph
     copy_all_btn = tk.Button(
         out_top,
         text=&quot;\uE8C8&quot;,
@@ -1246,6 +1424,7 @@ def main():
         takefocus=False,
     )
     copy_all_btn.pack(side=tk.RIGHT, padx=(8, 0))
+    # Between === as one line (no wrap)
     copy_between_btn = tk.Button(
         out_top,
         text=&quot;\u2261&quot;,
@@ -1286,8 +1465,11 @@ def main():
         use_styled = False
         text = &quot;&quot;
         header = eq_lines = sep_line = None
+        defactor_bundle = None
         clip_block_state[&quot;data&quot;] = None
         clip_block_state[&quot;wrap&quot;] = None
+        clip_block_state[&quot;defactor_bundle&quot;] = None
+        clip_block_state[&quot;omit_raw_decomposition&quot;] = False
 
         try:
             data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
@@ -1297,7 +1479,7 @@ def main():
                 ok = messagebox.askyesno(
                     &quot;Large output&quot;,
                     (
-                        f&quot;Terms in decomposition: {data[&#x27;total_terms&#x27;]}\n&quot;
+                        f&quot;Terms in decomposition: {data['total_terms']}\n&quot;
                         f&quot;This exceeds the threshold ({warn_max}). Full output and &quot;
                         f&quot;factorization may take a long time.\n\n&quot;
                         f&quot;Continue?&quot;
@@ -1307,10 +1489,12 @@ def main():
                 if not ok:
                     clip_block_state[&quot;data&quot;] = None
                     clip_block_state[&quot;wrap&quot;] = None
+                    clip_block_state[&quot;defactor_bundle&quot;] = None
+                    clip_block_state[&quot;omit_raw_decomposition&quot;] = False
                     tw.delete(&quot;1.0&quot;, tk.END)
                     tw.insert(
                         tk.END,
-                        f&quot;Cancelled. Would have had {data[&#x27;total_terms&#x27;]} terms &quot;
+                        f&quot;Cancelled. Would have had {data['total_terms']} terms &quot;
                         f&quot;(warning threshold: {warn_max}).\n&quot;,
                     )
                     return
@@ -1326,6 +1510,13 @@ def main():
                 text = build_output(data, True, wrap_width=wrap_w)
             else:
                 header, eq_lines, sep_line = build_output_parts(data, wrap_width=wrap_w)
+                if var_defactor.get():
+                    defactor_bundle = try_defactored_equation_lines(
+                        data[&quot;L_final&quot;], data[&quot;R_final&quot;], wrap_w, lang=&quot;en&quot;
+                    )
+                if var_defactor.get() and defactor_bundle is not None:
+                    header = header[:-1]
+                    eq_lines = []
                 use_styled = True
         except Exception:
             use_styled = False
@@ -1333,14 +1524,20 @@ def main():
 
         tw.delete(&quot;1.0&quot;, tk.END)
         if use_styled:
-            insert_result_with_bold_left_side(tw, header, eq_lines, sep_line)
+            insert_result_with_bold_left_side(
+                tw, header, eq_lines, sep_line, defactor_bundle
+            )
             clip_block_state[&quot;data&quot;] = data
             clip_block_state[&quot;wrap&quot;] = wrap_w
+            clip_block_state[&quot;defactor_bundle&quot;] = defactor_bundle
+            clip_block_state[&quot;omit_raw_decomposition&quot;] = bool(
+                var_defactor.get() and defactor_bundle is not None
+            )
         else:
             tw.insert(tk.END, text)
 
     btn_row = ttk.Frame(frm)
-    btn_row.grid(row=6, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=6)
+    btn_row.grid(row=7, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=6)
     btn_row.columnconfigure(0, weight=1)
     ttk.Button(btn_row, text=&quot;Compute&quot;, command=run_compute).grid(row=0, column=0, sticky=&quot;w&quot;)
 
@@ -1364,14 +1561,16 @@ if __name__ == &quot;__main__&quot;:
             </div>
             <div class="lang-ru">
                 <pre class="language-python"><code class="language-python" id="code_gui_ru">&quot;&quot;&quot;
-GUI для экспериментов с телескопическим разложением (логика в perl/cmd/clear_result.py).
+GUI для экспериментов с телескопическим разложением.
+Файл clear_result.py должен лежать в той же папке (скачайте оба с сайта публикации 5).
 
-Запуск из этой папки:
+Запуск:
   python decompose_gui.py
 &quot;&quot;&quot;
 
 import sys
 import traceback
+from typing import Optional, Tuple
 import webbrowser
 from pathlib import Path
 
@@ -1379,20 +1578,23 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, scrolledtext, messagebox
 
-_ROOT = Path(__file__).resolve().parent.parent
-_CMD = _ROOT / &quot;perl&quot; / &quot;cmd&quot;
-if str(_CMD) not in sys.path:
-    sys.path.insert(0, str(_CMD))
+_DIR = Path(__file__).resolve().parent
+if str(_DIR) not in sys.path:
+    sys.path.insert(0, str(_DIR))
 
 from clear_result import (  # noqa: E402
     compute_ramanujan_decomposition,
     format_factorization,
     order_sides_for_display,
     ru_cubes_phrase,
+    try_defactored_equation_lines,
     wrap_equation_lines,
 )
 
 AUTHOR_SITE_URL = &quot;https://nvvorobtsov.github.io/&quot;
+
+# Заголовок блока: g — НОД всех оснований кубов до деления; сокращение на g даёт тождество для суммы, делённой на g³.
+DEFACTOR_SECTION_TITLE = &quot;После дефакторизации (g³ — куб НОД всех оснований):&quot;
 
 
 def _actual_text_widget(st: tk.Widget) -&gt; tk.Text:
@@ -1456,33 +1658,62 @@ def build_output_parts(data: dict, *, wrap_width: int = 72):
     Ld, Rd = order_sides_for_display(data[&quot;L_final&quot;], data[&quot;R_final&quot;])
     header = [
         (
-            f&quot;Разложение: a = {data[&#x27;a&#x27;]}, b₀ = {data[&#x27;b_start&#x27;]}, k = {data[&#x27;k&#x27;]}&quot;
+            f&quot;Разложение: a = {data['a']}, b₀ = {data['b_start']}, k = {data['k']}&quot;
         ),
-        f&quot;Параметры сформированы. Число членов в последовательности: {data[&#x27;total_terms&#x27;]}.&quot;,
+        f&quot;Параметры сформированы. Число членов в последовательности: {data['total_terms']}.&quot;,
         &quot;&quot;,
         &quot;Результат:&quot;,
         f&quot;Слева: {ru_cubes_phrase(len(Ld))}&quot;,
         f&quot;Справа: {ru_cubes_phrase(len(Rd))}&quot;,
         sep,
-        f&quot;{data[&#x27;total_val&#x27;]} = {data[&#x27;factor_str&#x27;]} =&quot;,
+        f&quot;{data['total_val']} = {data['factor_str']} =&quot;,
     ]
     eq_lines = wrap_equation_lines(Ld, Rd, wrap_width)
     return header, eq_lines, sep
 
 
-def between_separators_one_line(data: dict, wrap_width: int) -&gt; str:
-    &quot;&quot;&quot;Строка факторизации + тождество между линиями === без переносов (как одна строка).&quot;&quot;&quot;
+def between_separators_one_line(
+    data: dict,
+    wrap_width: int,
+    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+    omit_raw_decomposition: bool = False,
+) -&gt; str:
+    &quot;&quot;&quot;Текст между линиями === без переносов (как одна строка) для копирования.&quot;&quot;&quot;
+    if omit_raw_decomposition and defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        return (
+            DEFACTOR_SECTION_TITLE
+            + &quot;\n&quot;
+            + d_g3
+            + &quot;\n&quot;
+            + d_n
+            + &quot;\n&quot;
+            + &quot;\n&quot;.join(d_eq)
+        )
     header, eq_lines, _ = build_output_parts(data, wrap_width=wrap_width)
     factor_line = header[-1]
-    return factor_line.rstrip() + &quot;&quot;.join(eq_lines)
+    s = factor_line.rstrip() + &quot;&quot;.join(eq_lines)
+    if defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        s += (
+            &quot;\n&quot;
+            + DEFACTOR_SECTION_TITLE
+            + &quot;\n&quot;
+            + d_g3
+            + &quot;\n&quot;
+            + d_n
+            + &quot;\n&quot;
+            + &quot;\n&quot;.join(d_eq)
+        )
+    return s
 
 
 def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -&gt; str:
     if term_count_only:
         Ld, Rd = order_sides_for_display(data[&quot;L_final&quot;], data[&quot;R_final&quot;])
         return (
-            f&quot;a = {data[&#x27;a&#x27;]}, b₀ = {data[&#x27;b_start&#x27;]}, k = {data[&#x27;k&#x27;]}\n&quot;
-            f&quot;Членов в разложении (после сокращений): {data[&#x27;total_terms&#x27;]}\n&quot;
+            f&quot;a = {data['a']}, b₀ = {data['b_start']}, k = {data['k']}\n&quot;
+            f&quot;Членов в разложении (после сокращений): {data['total_terms']}\n&quot;
             f&quot;Слева: {ru_cubes_phrase(len(Ld))}\n&quot;
             f&quot;Справа: {ru_cubes_phrase(len(Rd))}\n&quot;
         )
@@ -1490,7 +1721,29 @@ def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -&g
     return &quot;\n&quot;.join(h + e + [s])
 
 
-def insert_result_with_bold_left_side(tw: tk.Text, header: list, eq_lines: list, sep: str) -&gt; None:
+def _insert_eq_lines_bold_left(tw: tk.Text, lines: list, tag: str) -&gt; None:
+    &quot;&quot;&quot;Левая часть до первого « = » — жирным (tag).&quot;&quot;&quot;
+    left_zone = True
+    for line in lines:
+        if left_zone:
+            if &quot; = &quot; in line:
+                left_part, _, rest = line.partition(&quot; = &quot;)
+                tw.insert(tk.END, left_part, (tag,))
+                tw.insert(tk.END, &quot; = &quot; + rest + &quot;\n&quot;)
+                left_zone = False
+            else:
+                tw.insert(tk.END, line + &quot;\n&quot;, (tag,))
+        else:
+            tw.insert(tk.END, line + &quot;\n&quot;)
+
+
+def insert_result_with_bold_left_side(
+    tw: tk.Text,
+    header: list,
+    eq_lines: list,
+    sep: str,
+    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+) -&gt; None:
     &quot;&quot;&quot;В строках тождества левая часть до первого « = » — жирным и синим (#1565C0).&quot;&quot;&quot;
     tag = &quot;decomp_left&quot;
     blue = &quot;#1565C0&quot;
@@ -1505,18 +1758,16 @@ def insert_result_with_bold_left_side(tw: tk.Text, header: list, eq_lines: list,
     for line in header:
         tw.insert(tk.END, line + &quot;\n&quot;)
 
-    left_zone = True
-    for line in eq_lines:
-        if left_zone:
-            if &quot; = &quot; in line:
-                left_part, _, rest = line.partition(&quot; = &quot;)
-                tw.insert(tk.END, left_part, (tag,))
-                tw.insert(tk.END, &quot; = &quot; + rest + &quot;\n&quot;)
-                left_zone = False
-            else:
-                tw.insert(tk.END, line + &quot;\n&quot;, (tag,))
-        else:
-            tw.insert(tk.END, line + &quot;\n&quot;)
+    _insert_eq_lines_bold_left(tw, eq_lines, tag)
+
+    if defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        if eq_lines:
+            tw.insert(tk.END, &quot;\n&quot;)
+        tw.insert(tk.END, DEFACTOR_SECTION_TITLE + &quot;\n&quot;)
+        tw.insert(tk.END, d_g3 + &quot;\n&quot;)
+        tw.insert(tk.END, d_n + &quot;\n&quot;)
+        _insert_eq_lines_bold_left(tw, d_eq, tag)
 
     tw.insert(tk.END, sep + &quot;\n&quot;)
 
@@ -1531,7 +1782,7 @@ def main():
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
     frm.columnconfigure(1, weight=1)
-    frm.rowconfigure(7, weight=1)
+    frm.rowconfigure(8, weight=1)
 
     var_a = tk.IntVar(value=2)
     var_b = tk.IntVar(value=10)
@@ -1579,6 +1830,17 @@ def main():
     )
     chk.grid(row=3, column=0, columnspan=2, sticky=&quot;w&quot;, pady=(8, 4))
 
+    var_defactor = tk.BooleanVar(value=True)
+    chk_def = ttk.Checkbutton(
+        frm,
+        text=(
+            &quot;Проверка дефакторизации (g³ = (НОД оснований)³, N = факторизация(N) =, сокращённое &quot;
+            &quot;тождество; при НОД&gt;1 сырое разложение не показывается; при НОД=1 — полный вывод)&quot;
+        ),
+        variable=var_defactor,
+    )
+    chk_def.grid(row=4, column=0, columnspan=2, sticky=&quot;w&quot;, pady=(0, 4))
+
     ttk.Label(
         frm,
         text=(
@@ -1586,7 +1848,7 @@ def main():
             &quot;(только если галочка «только число» выключена):&quot;
         ),
         justify=tk.LEFT,
-    ).grid(row=4, column=0, sticky=&quot;nw&quot;, pady=2)
+    ).grid(row=5, column=0, sticky=&quot;nw&quot;, pady=2)
     sp_warn = tk.Spinbox(
         frm,
         from_=4,
@@ -1595,10 +1857,10 @@ def main():
         textvariable=var_warn_max,
         width=12,
     )
-    sp_warn.grid(row=4, column=1, sticky=&quot;w&quot;, pady=2)
+    sp_warn.grid(row=5, column=1, sticky=&quot;w&quot;, pady=2)
 
     ex_frame = ttk.LabelFrame(frm, text=&quot;Примеры: тройка параметров → число членов (для ориентира)&quot;)
-    ex_frame.grid(row=5, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=(10, 6))
+    ex_frame.grid(row=6, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=(10, 6))
     ex_frame.columnconfigure(0, weight=1)
 
     ttk.Label(ex_frame, text=&quot;Параметры a, b₀, k&quot;).grid(row=0, column=0, sticky=&quot;w&quot;, padx=4, pady=2)
@@ -1629,7 +1891,12 @@ def main():
         root.clipboard_append(text)
         root.update()
 
-    clip_block_state = {&quot;data&quot;: None, &quot;wrap&quot;: None}
+    clip_block_state = {
+        &quot;data&quot;: None,
+        &quot;wrap&quot;: None,
+        &quot;defactor_bundle&quot;: None,
+        &quot;omit_raw_decomposition&quot;: False,
+    }
 
     def copy_between_separators() -&gt; None:
         d = clip_block_state[&quot;data&quot;]
@@ -1641,10 +1908,17 @@ def main():
                 &quot;чтобы появился текст между линиями из знаков =.&quot;,
             )
             return
-        clipboard_set(between_separators_one_line(d, w))
+        clipboard_set(
+            between_separators_one_line(
+                d,
+                w,
+                clip_block_state.get(&quot;defactor_bundle&quot;),
+                clip_block_state.get(&quot;omit_raw_decomposition&quot;, False),
+            )
+        )
 
     out_wrap = ttk.Frame(frm)
-    out_wrap.grid(row=7, column=0, columnspan=2, sticky=&quot;nsew&quot;, pady=(4, 0))
+    out_wrap.grid(row=8, column=0, columnspan=2, sticky=&quot;nsew&quot;, pady=(4, 0))
     out_wrap.rowconfigure(1, weight=1)
     out_wrap.columnconfigure(0, weight=1)
 
@@ -1745,8 +2019,11 @@ def main():
         use_styled = False
         text = &quot;&quot;
         header = eq_lines = sep_line = None
+        defactor_bundle = None
         clip_block_state[&quot;data&quot;] = None
         clip_block_state[&quot;wrap&quot;] = None
+        clip_block_state[&quot;defactor_bundle&quot;] = None
+        clip_block_state[&quot;omit_raw_decomposition&quot;] = False
 
         try:
             data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
@@ -1756,7 +2033,7 @@ def main():
                 ok = messagebox.askyesno(
                     &quot;Большой вывод&quot;,
                     (
-                        f&quot;Членов в разложении: {data[&#x27;total_terms&#x27;]}\n&quot;
+                        f&quot;Членов в разложении: {data['total_terms']}\n&quot;
                         f&quot;Это больше порога ({warn_max}). Полный вывод и факторизация &quot;
                         f&quot;могут занять заметное время.\n\n&quot;
                         f&quot;Продолжить?&quot;
@@ -1766,10 +2043,12 @@ def main():
                 if not ok:
                     clip_block_state[&quot;data&quot;] = None
                     clip_block_state[&quot;wrap&quot;] = None
+                    clip_block_state[&quot;defactor_bundle&quot;] = None
+                    clip_block_state[&quot;omit_raw_decomposition&quot;] = False
                     tw.delete(&quot;1.0&quot;, tk.END)
                     tw.insert(
                         tk.END,
-                        f&quot;Отменено. Членов было бы: {data[&#x27;total_terms&#x27;]} &quot;
+                        f&quot;Отменено. Членов было бы: {data['total_terms']} &quot;
                         f&quot;(порог предупреждения: {warn_max}).\n&quot;,
                     )
                     return
@@ -1785,6 +2064,13 @@ def main():
                 text = build_output(data, True, wrap_width=wrap_w)
             else:
                 header, eq_lines, sep_line = build_output_parts(data, wrap_width=wrap_w)
+                if var_defactor.get():
+                    defactor_bundle = try_defactored_equation_lines(
+                        data[&quot;L_final&quot;], data[&quot;R_final&quot;], wrap_w
+                    )
+                if var_defactor.get() and defactor_bundle is not None:
+                    header = header[:-1]
+                    eq_lines = []
                 use_styled = True
         except Exception:
             use_styled = False
@@ -1792,14 +2078,20 @@ def main():
 
         tw.delete(&quot;1.0&quot;, tk.END)
         if use_styled:
-            insert_result_with_bold_left_side(tw, header, eq_lines, sep_line)
+            insert_result_with_bold_left_side(
+                tw, header, eq_lines, sep_line, defactor_bundle
+            )
             clip_block_state[&quot;data&quot;] = data
             clip_block_state[&quot;wrap&quot;] = wrap_w
+            clip_block_state[&quot;defactor_bundle&quot;] = defactor_bundle
+            clip_block_state[&quot;omit_raw_decomposition&quot;] = bool(
+                var_defactor.get() and defactor_bundle is not None
+            )
         else:
             tw.insert(tk.END, text)
 
     btn_row = ttk.Frame(frm)
-    btn_row.grid(row=6, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=6)
+    btn_row.grid(row=7, column=0, columnspan=2, sticky=&quot;ew&quot;, pady=6)
     btn_row.columnconfigure(0, weight=1)
     ttk.Button(btn_row, text=&quot;Вычислить&quot;, command=run_compute).grid(row=0, column=0, sticky=&quot;w&quot;)
 

@@ -1,3 +1,4 @@
+import math
 import sympy as sp
 import argparse
 from collections import Counter
@@ -104,6 +105,53 @@ def compute_ramanujan_decomposition(a, b_start, k, *, factorize=True):
         "total_val": total_val,
         "factor_str": factor_str,
     }
+
+
+def try_defactored_equation_lines(L_final, R_final, width=72, *, lang="ru"):
+    """Общий gcd оснований кубов по всем членам тождества (в порядке показа).
+
+    Если gcd g > 1 — основания делятся на g; в сумме кубов общий множитель g³.
+    Возвращает тройку:
+      (1) строка про g³ (RU/EN по lang);
+      (2) строка «N = факторизация(N) =» для сокращённой суммы N;
+      (3) строки сокращённого тождества (wrap_equation_lines).
+
+    lang: \"ru\" | \"en\" — подписи к первой строке блока дефакторизации.
+
+    Если gcd == 1 — ранний выход при первом же обнулении общей части (инкрементальный gcd).
+
+    Возвращает None, если сокращать нечего или недостаточно оснований.
+    """
+    Ld, Rd = order_sides_for_display(L_final, R_final)
+    bases = list(Ld) + list(Rd)
+    if len(bases) < 2:
+        return None
+    g = abs(int(bases[0]))
+    if g == 0:
+        return None
+    for b in bases[1:]:
+        bi = abs(int(b))
+        if bi == 0:
+            return None
+        g = math.gcd(g, bi)
+        if g == 1:
+            return None
+    if g <= 1:
+        return None
+    L2 = [int(x) // g for x in Ld]
+    R2 = [int(x) // g for x in Rd]
+    v_left = sum(x**3 for x in L2)
+    v_right = sum(x**3 for x in R2)
+    if v_left != v_right:
+        return None
+    g3 = g**3
+    if lang == "en":
+        gcd_cube_line = f"Cubed gcd of bases (g³): {g3} = {format_factorization(g3)}"
+    else:
+        gcd_cube_line = f"Куб НОД оснований (g³): {g3} = {format_factorization(g3)}"
+    factor_line = f"{v_left} = {format_factorization(v_left)} ="
+    eq_lines = wrap_equation_lines(L2, R2, width)
+    return (gcd_cube_line, factor_line, eq_lines)
 
 
 def wrap_equation_lines(L_final, R_final, width=72):

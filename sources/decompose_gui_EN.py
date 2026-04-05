@@ -1,12 +1,14 @@
 """
-GUI for Ramanujan telescopic cube decomposition experiments (logic in perl/cmd/clear_result.py).
+GUI for Ramanujan telescopic cube decomposition experiments.
+Place clear_result.py in the same folder (download both from publication 5 on the site).
 
-Run from this folder:
+Run:
   python decompose_gui_EN.py
 """
 
 import sys
 import traceback
+from typing import Optional, Tuple
 import webbrowser
 from pathlib import Path
 
@@ -14,19 +16,22 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, scrolledtext, messagebox
 
-_ROOT = Path(__file__).resolve().parent.parent
-_CMD = _ROOT / "perl" / "cmd"
-if str(_CMD) not in sys.path:
-    sys.path.insert(0, str(_CMD))
+_DIR = Path(__file__).resolve().parent
+if str(_DIR) not in sys.path:
+    sys.path.insert(0, str(_DIR))
 
 from clear_result import (  # noqa: E402
     compute_ramanujan_decomposition,
     format_factorization,
     order_sides_for_display,
+    try_defactored_equation_lines,
     wrap_equation_lines,
 )
 
 AUTHOR_SITE_URL = "https://nvvorobtsov.github.io/"
+
+# g = gcd of all bases before division; factoring out g from each base divides the cube sum by g³.
+DEFACTOR_SECTION_TITLE = "After defactorization (g³ — cube of gcd of all bases):"
 
 
 def en_cubes_phrase(n: int) -> str:
@@ -47,7 +52,7 @@ def _actual_text_widget(st: tk.Widget) -> tk.Text:
     for ch in st.winfo_children():
         if isinstance(ch, tk.Text):
             return ch
-    return st
+    return st  # non-standard wrapper fallback
 
 
 def _estimate_wrap_chars(text_w: tk.Widget) -> int:
@@ -113,11 +118,40 @@ def build_output_parts(data: dict, *, wrap_width: int = 72):
     return header, eq_lines, sep
 
 
-def between_separators_one_line(data: dict, wrap_width: int) -> str:
-    """Factorization line + identity between === lines, single string (no wraps)."""
+def between_separators_one_line(
+    data: dict,
+    wrap_width: int,
+    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+    omit_raw_decomposition: bool = False,
+) -> str:
+    """Text between === lines as one string (no wraps) for clipboard."""
+    if omit_raw_decomposition and defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        return (
+            DEFACTOR_SECTION_TITLE
+            + "\n"
+            + d_g3
+            + "\n"
+            + d_n
+            + "\n"
+            + "\n".join(d_eq)
+        )
     header, eq_lines, _ = build_output_parts(data, wrap_width=wrap_width)
     factor_line = header[-1]
-    return factor_line.rstrip() + "".join(eq_lines)
+    s = factor_line.rstrip() + "".join(eq_lines)
+    if defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        s += (
+            "\n"
+            + DEFACTOR_SECTION_TITLE
+            + "\n"
+            + d_g3
+            + "\n"
+            + d_n
+            + "\n"
+            + "\n".join(d_eq)
+        )
+    return s
 
 
 def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -> str:
@@ -133,7 +167,29 @@ def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -> 
     return "\n".join(h + e + [s])
 
 
-def insert_result_with_bold_left_side(tw: tk.Text, header: list, eq_lines: list, sep: str) -> None:
+def _insert_eq_lines_bold_left(tw: tk.Text, lines: list, tag: str) -> None:
+    """Left segment before first ' = ' in bold (tag)."""
+    left_zone = True
+    for line in lines:
+        if left_zone:
+            if " = " in line:
+                left_part, _, rest = line.partition(" = ")
+                tw.insert(tk.END, left_part, (tag,))
+                tw.insert(tk.END, " = " + rest + "\n")
+                left_zone = False
+            else:
+                tw.insert(tk.END, line + "\n", (tag,))
+        else:
+            tw.insert(tk.END, line + "\n")
+
+
+def insert_result_with_bold_left_side(
+    tw: tk.Text,
+    header: list,
+    eq_lines: list,
+    sep: str,
+    defactor_bundle: Optional[Tuple[str, str, list]] = None,
+) -> None:
     """In identity lines, the left segment before the first ' = ' is bold and blue (#1565C0)."""
     tag = "decomp_left"
     blue = "#1565C0"
@@ -148,18 +204,16 @@ def insert_result_with_bold_left_side(tw: tk.Text, header: list, eq_lines: list,
     for line in header:
         tw.insert(tk.END, line + "\n")
 
-    left_zone = True
-    for line in eq_lines:
-        if left_zone:
-            if " = " in line:
-                left_part, _, rest = line.partition(" = ")
-                tw.insert(tk.END, left_part, (tag,))
-                tw.insert(tk.END, " = " + rest + "\n")
-                left_zone = False
-            else:
-                tw.insert(tk.END, line + "\n", (tag,))
-        else:
-            tw.insert(tk.END, line + "\n")
+    _insert_eq_lines_bold_left(tw, eq_lines, tag)
+
+    if defactor_bundle:
+        d_g3, d_n, d_eq = defactor_bundle
+        if eq_lines:
+            tw.insert(tk.END, "\n")
+        tw.insert(tk.END, DEFACTOR_SECTION_TITLE + "\n")
+        tw.insert(tk.END, d_g3 + "\n")
+        tw.insert(tk.END, d_n + "\n")
+        _insert_eq_lines_bold_left(tw, d_eq, tag)
 
     tw.insert(tk.END, sep + "\n")
 
@@ -174,7 +228,7 @@ def main():
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
     frm.columnconfigure(1, weight=1)
-    frm.rowconfigure(7, weight=1)
+    frm.rowconfigure(8, weight=1)
 
     var_a = tk.IntVar(value=2)
     var_b = tk.IntVar(value=10)
@@ -222,14 +276,25 @@ def main():
     )
     chk.grid(row=3, column=0, columnspan=2, sticky="w", pady=(8, 4))
 
+    var_defactor = tk.BooleanVar(value=True)
+    chk_def = ttk.Checkbutton(
+        frm,
+        text=(
+            "Defactorization check (g³ = (gcd of bases)³, N = factorization(N) =, reduced "
+            "identity; if gcd>1 the raw expansion is hidden; if gcd=1 show full output)"
+        ),
+        variable=var_defactor,
+    )
+    chk_def.grid(row=4, column=0, columnspan=2, sticky="w", pady=(0, 4))
+
     ttk.Label(
         frm,
         text=(
             "Max. terms in decomposition — warn on large output\n"
-            "(only when \"term count only\" is unchecked):"
+            '(only when "term count only" is unchecked):'
         ),
         justify=tk.LEFT,
-    ).grid(row=4, column=0, sticky="nw", pady=2)
+    ).grid(row=5, column=0, sticky="nw", pady=2)
     sp_warn = tk.Spinbox(
         frm,
         from_=4,
@@ -238,10 +303,10 @@ def main():
         textvariable=var_warn_max,
         width=12,
     )
-    sp_warn.grid(row=4, column=1, sticky="w", pady=2)
+    sp_warn.grid(row=5, column=1, sticky="w", pady=2)
 
     ex_frame = ttk.LabelFrame(frm, text="Examples: (a, b0, k) → term count (reference)")
-    ex_frame.grid(row=5, column=0, columnspan=2, sticky="ew", pady=(10, 6))
+    ex_frame.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(10, 6))
     ex_frame.columnconfigure(0, weight=1)
 
     ttk.Label(ex_frame, text="Parameters a, b0, k").grid(row=0, column=0, sticky="w", padx=4, pady=2)
@@ -272,7 +337,12 @@ def main():
         root.clipboard_append(text)
         root.update()
 
-    clip_block_state = {"data": None, "wrap": None}
+    clip_block_state = {
+        "data": None,
+        "wrap": None,
+        "defactor_bundle": None,
+        "omit_raw_decomposition": False,
+    }
 
     def copy_between_separators() -> None:
         d = clip_block_state["data"]
@@ -280,14 +350,21 @@ def main():
         if d is None or w is None:
             messagebox.showinfo(
                 "No block",
-                "Run a full computation first (do not use \"term count only\"), "
+                'Run a full computation first (do not use "term count only"), '
                 "so text between the separator lines is available.",
             )
             return
-        clipboard_set(between_separators_one_line(d, w))
+        clipboard_set(
+            between_separators_one_line(
+                d,
+                w,
+                clip_block_state.get("defactor_bundle"),
+                clip_block_state.get("omit_raw_decomposition", False),
+            )
+        )
 
     out_wrap = ttk.Frame(frm)
-    out_wrap.grid(row=7, column=0, columnspan=2, sticky="nsew", pady=(4, 0))
+    out_wrap.grid(row=8, column=0, columnspan=2, sticky="nsew", pady=(4, 0))
     out_wrap.rowconfigure(1, weight=1)
     out_wrap.columnconfigure(0, weight=1)
 
@@ -334,6 +411,7 @@ def main():
 
     tw.bind("<Button-3>", show_ctx)
 
+    # Copy all — Segoe MDL2 Copy glyph
     copy_all_btn = tk.Button(
         out_top,
         text="\uE8C8",
@@ -346,6 +424,7 @@ def main():
         takefocus=False,
     )
     copy_all_btn.pack(side=tk.RIGHT, padx=(8, 0))
+    # Between === as one line (no wrap)
     copy_between_btn = tk.Button(
         out_top,
         text="\u2261",
@@ -386,8 +465,11 @@ def main():
         use_styled = False
         text = ""
         header = eq_lines = sep_line = None
+        defactor_bundle = None
         clip_block_state["data"] = None
         clip_block_state["wrap"] = None
+        clip_block_state["defactor_bundle"] = None
+        clip_block_state["omit_raw_decomposition"] = False
 
         try:
             data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
@@ -407,6 +489,8 @@ def main():
                 if not ok:
                     clip_block_state["data"] = None
                     clip_block_state["wrap"] = None
+                    clip_block_state["defactor_bundle"] = None
+                    clip_block_state["omit_raw_decomposition"] = False
                     tw.delete("1.0", tk.END)
                     tw.insert(
                         tk.END,
@@ -426,6 +510,13 @@ def main():
                 text = build_output(data, True, wrap_width=wrap_w)
             else:
                 header, eq_lines, sep_line = build_output_parts(data, wrap_width=wrap_w)
+                if var_defactor.get():
+                    defactor_bundle = try_defactored_equation_lines(
+                        data["L_final"], data["R_final"], wrap_w, lang="en"
+                    )
+                if var_defactor.get() and defactor_bundle is not None:
+                    header = header[:-1]
+                    eq_lines = []
                 use_styled = True
         except Exception:
             use_styled = False
@@ -433,14 +524,20 @@ def main():
 
         tw.delete("1.0", tk.END)
         if use_styled:
-            insert_result_with_bold_left_side(tw, header, eq_lines, sep_line)
+            insert_result_with_bold_left_side(
+                tw, header, eq_lines, sep_line, defactor_bundle
+            )
             clip_block_state["data"] = data
             clip_block_state["wrap"] = wrap_w
+            clip_block_state["defactor_bundle"] = defactor_bundle
+            clip_block_state["omit_raw_decomposition"] = bool(
+                var_defactor.get() and defactor_bundle is not None
+            )
         else:
             tw.insert(tk.END, text)
 
     btn_row = ttk.Frame(frm)
-    btn_row.grid(row=6, column=0, columnspan=2, sticky="ew", pady=6)
+    btn_row.grid(row=7, column=0, columnspan=2, sticky="ew", pady=6)
     btn_row.columnconfigure(0, weight=1)
     ttk.Button(btn_row, text="Compute", command=run_compute).grid(row=0, column=0, sticky="w")
 
