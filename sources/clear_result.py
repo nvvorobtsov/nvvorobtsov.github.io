@@ -17,7 +17,10 @@ def Z(a, b):
 
 
 def format_factorization(total_val):
-    factors = sp.factorint(total_val)
+    v = int(total_val)
+    if abs(v) == 1:
+        return str(v)
+    factors = sp.factorint(v)
     return "*".join([f"{p}^{e}" if e > 1 else f"{p}" for p, e in sorted(factors.items())])
 
 

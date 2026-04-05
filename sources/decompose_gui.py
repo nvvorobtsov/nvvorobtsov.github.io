@@ -44,8 +44,11 @@ TAG_PRIME_TABLE_ROW = "prime_table_row"
 TABLE_PRIME_BLUE = "#1565C0"
 
 
-def _base_is_prime(x) -> bool:
+def _highlight_prime_or_unit_base(x) -> bool:
+    """Подсветка строки таблицы: простое основание или 1 (у 1 нет нетривиальной факторизации)."""
     v = abs(int(x))
+    if v == 1:
+        return True
     return v >= 2 and bool(sp.isprime(v))
 
 
@@ -176,7 +179,7 @@ def format_bases_factor_table(L: list, R: list) -> tuple[list[str], list[Optiona
     tags: list[Optional[str]] = [None, None, None]
     for i, (n, fac) in enumerate(rows):
         out.append("| " + n.rjust(wn) + " | " + fac.ljust(wf) + " |")
-        tags.append(TAG_PRIME_TABLE_ROW if _base_is_prime(bases_order[i]) else None)
+        tags.append(TAG_PRIME_TABLE_ROW if _highlight_prime_or_unit_base(bases_order[i]) else None)
     out.append(sep)
     tags.append(None)
     return out, tags
@@ -231,7 +234,7 @@ def format_bases_factor_table_by_columns(
             cell = fr[j] if j < len(fr) else ""
             row_line += " " + cell.rjust(cw) + " |"
         out.append(row_line)
-        tags.append(TAG_PRIME_TABLE_ROW if _base_is_prime(bases_order[row_i]) else None)
+        tags.append(TAG_PRIME_TABLE_ROW if _highlight_prime_or_unit_base(bases_order[row_i]) else None)
     out.append(sep)
     tags.append(None)
     return out, tags

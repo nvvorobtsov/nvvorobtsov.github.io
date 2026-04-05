@@ -485,7 +485,10 @@ def Z(a, b):
 
 
 def format_factorization(total_val):
-    factors = sp.factorint(total_val)
+    v = int(total_val)
+    if abs(v) == 1:
+        return str(v)
+    factors = sp.factorint(v)
     return &quot;*&quot;.join([f&quot;{p}^{e}&quot; if e &gt; 1 else f&quot;{p}&quot; for p, e in sorted(factors.items())])
 
 
@@ -699,7 +702,10 @@ def Z(a, b):
 
 
 def format_factorization(total_val):
-    factors = sp.factorint(total_val)
+    v = int(total_val)
+    if abs(v) == 1:
+        return str(v)
+    factors = sp.factorint(v)
     return &quot;*&quot;.join([f&quot;{p}^{e}&quot; if e &gt; 1 else f&quot;{p}&quot; for p, e in sorted(factors.items())])
 
 
@@ -1047,8 +1053,11 @@ TAG_PRIME_TABLE_ROW = &quot;prime_table_row&quot;
 TABLE_PRIME_BLUE = &quot;#1565C0&quot;
 
 
-def _base_is_prime(x) -&gt; bool:
+def _highlight_prime_or_unit_base(x) -&gt; bool:
+    &quot;&quot;&quot;Highlight table row: prime base or 1 (no nontrivial factorization).&quot;&quot;&quot;
     v = abs(int(x))
+    if v == 1:
+        return True
     return v &gt;= 2 and bool(sp.isprime(v))
 
 
@@ -1242,7 +1251,7 @@ def format_bases_factor_table_by_columns(
             cell = fr[j] if j &lt; len(fr) else &quot;&quot;
             row_line += &quot; &quot; + cell.rjust(cw) + &quot; |&quot;
         out.append(row_line)
-        tags.append(TAG_PRIME_TABLE_ROW if _base_is_prime(bases_order[row_i]) else None)
+        tags.append(TAG_PRIME_TABLE_ROW if _highlight_prime_or_unit_base(bases_order[row_i]) else None)
     out.append(sep)
     tags.append(None)
     return out, tags
@@ -1877,8 +1886,11 @@ TAG_PRIME_TABLE_ROW = &quot;prime_table_row&quot;
 TABLE_PRIME_BLUE = &quot;#1565C0&quot;
 
 
-def _base_is_prime(x) -&gt; bool:
+def _highlight_prime_or_unit_base(x) -&gt; bool:
+    &quot;&quot;&quot;Подсветка строки таблицы: простое основание или 1 (у 1 нет нетривиальной факторизации).&quot;&quot;&quot;
     v = abs(int(x))
+    if v == 1:
+        return True
     return v &gt;= 2 and bool(sp.isprime(v))
 
 
@@ -2009,7 +2021,7 @@ def format_bases_factor_table(L: list, R: list) -&gt; tuple[list[str], list[Opti
     tags: list[Optional[str]] = [None, None, None]
     for i, (n, fac) in enumerate(rows):
         out.append(&quot;| &quot; + n.rjust(wn) + &quot; | &quot; + fac.ljust(wf) + &quot; |&quot;)
-        tags.append(TAG_PRIME_TABLE_ROW if _base_is_prime(bases_order[i]) else None)
+        tags.append(TAG_PRIME_TABLE_ROW if _highlight_prime_or_unit_base(bases_order[i]) else None)
     out.append(sep)
     tags.append(None)
     return out, tags
@@ -2064,7 +2076,7 @@ def format_bases_factor_table_by_columns(
             cell = fr[j] if j &lt; len(fr) else &quot;&quot;
             row_line += &quot; &quot; + cell.rjust(cw) + &quot; |&quot;
         out.append(row_line)
-        tags.append(TAG_PRIME_TABLE_ROW if _base_is_prime(bases_order[row_i]) else None)
+        tags.append(TAG_PRIME_TABLE_ROW if _highlight_prime_or_unit_base(bases_order[row_i]) else None)
     out.append(sep)
     tags.append(None)
     return out, tags
