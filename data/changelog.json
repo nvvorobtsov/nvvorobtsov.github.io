@@ -1,6 +1,16 @@
 {
   "entries": [
     {
+      "date": "2026-04-10",
+      "ru": "главная: добавлена публикация 06 (кубическая PTE), колонки перестроены — слева 6–4, справа 3–1; интерактивная двуязычная обложка publication6.html; Zenodo 10.5281/zenodo.19490895; счётчики pub6_cover и pub6_zenodo.",
+      "en": "Home: added publication 06 (cubic PTE), columns rebalanced (left 6–4, right 3–1); bilingual interactive cover publication6.html; Zenodo 10.5281/zenodo.19490895; hit counters pub6_cover and pub6_zenodo.",
+      "link": {
+        "href": "publication6.html?count=pub6_cover",
+        "en": "Open publication 6 cover",
+        "ru": "Обложка публикации 6"
+      }
+    },
+    {
       "date": "2026-04-05",
       "ru": "программа decompose_gui (публ. 05): опциональный блок полной факторизации сокращённого тождества после дефакторизации; таблица оснований — выравнивание столбца «Основание» вправо, опция разнести множители по колонкам, горизонтальная прокрутка области результата; строки с простым основанием в таблице подсвечиваются синим и жирным. Обновлены исходники в sources/, встроенные листинги на code5.html и архив decompose_gui_windows.zip; синхронизирована англоязычная версия GUI.",
       "en": "decompose_gui (pub. 05): optional full factorization of the reduced identity after defactorization; bases table — right-aligned base column, optional factors in separate columns, horizontal scrolling for the output pane; rows with a prime base are blue bold. Updated sources/, embedded listings in code5.html, decompose_gui_windows.zip, and the English GUI.",

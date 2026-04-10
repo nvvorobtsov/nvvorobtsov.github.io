@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publication 6 — Cubic PTE (Nick Vorobtsov)</title>
+    <style>
+        :root {
+            --gold: #c5a059;
+            --dark-bg: #050810;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(197, 160, 89, 0.3);
+            --text: #cbd5e1;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background-color: var(--dark-bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.5;
+        }
+
+        body.en .lang-ru { display: none !important; }
+        body.ru .lang-en { display: none !important; }
+        body.en main.pub6-main-ru { display: none !important; }
+        body.ru main.pub6-main-en { display: none !important; }
+
+        .lang-toggle {
+            color-scheme: light;
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top, 0px));
+            right: max(12px, env(safe-area-inset-right, 0px));
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid #334155;
+            border-radius: 22px;
+            display: flex;
+            overflow: hidden;
+            z-index: 10000;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+        }
+        .lang-btn {
+            margin: 0;
+            padding: 12px 18px;
+            min-width: 48px;
+            min-height: 48px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            color: #94a3b8;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+        .lang-btn:focus-visible { outline: 2px solid #f59e0b; outline-offset: 2px; }
+        .lang-btn.active {
+            background: #f59e0b !important;
+            color: #0f172a !important;
+            font-weight: 700;
+        }
+
+        .container { max-width: 1600px; margin: 0 auto; padding: 40px 60px; }
+
+        header { text-align: center; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+        .author-tag { color: var(--gold); text-transform: uppercase; letter-spacing: 5px; font-weight: bold; margin-bottom: 15px; }
+        .version-pill {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #0f172a;
+            background: linear-gradient(135deg, rgba(197,160,89,0.95), rgba(251, 191, 36, 0.85));
+            border: 1px solid rgba(197, 160, 89, 0.5);
+        }
+        h1 { font-size: clamp(1.5rem, 4vw, 3rem); margin: 0; font-family: 'Georgia', serif; color: #fff; line-height: 1.2; }
+
+        .parameter-hero {
+            display: flex; flex-wrap: wrap;
+            justify-content: center; align-items: center;
+            margin: 30px 0; gap: 24px;
+        }
+        .param-card {
+            background: linear-gradient(135deg, rgba(197,160,89,0.2), rgba(0,0,0,0));
+            border: 2px solid var(--gold);
+            padding: 15px 50px; border-radius: 12px;
+            font-size: clamp(1.5rem, 4vw, 2.8rem); font-family: 'Georgia', serif; color: #fff;
+        }
+
+        .hero-identity {
+            background: var(--panel-bg); padding: 40px; text-align: center;
+            border-radius: 15px; border: 1px solid var(--border); margin-bottom: 30px;
+        }
+        .hero-identity .label {
+            color: var(--gold); margin-bottom: 15px; letter-spacing: 5px; font-weight: bold;
+        }
+        .big-math { font-size: clamp(2.2rem, 8vw, 5rem); font-family: 'Georgia', serif; color: #fff; }
+        .cube { color: #ff4d4d; vertical-align: super; font-size: 0.6em; }
+
+        .grid-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        @media (max-width: 900px) {
+            .grid-sections { grid-template-columns: 1fr; }
+            .container { padding: 24px 18px; }
+        }
+        .card { background: var(--panel-bg); padding: 30px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
+        .card h2 { color: var(--gold); border-bottom: 1px solid var(--border); margin-top: 0; padding-bottom: 10px; font-size: 1.5rem; }
+        .mono { font-family: 'Courier New', monospace; font-size: 1.05rem; color: #fff; line-height: 1.7; }
+
+        .poly-box {
+            background: rgba(0,0,0,0.5); padding: 35px; border-radius: 10px;
+            text-align: center; border: 1px dashed var(--border); margin-bottom: 30px;
+        }
+        .poly-text { font-family: 'Courier New', monospace; font-size: clamp(1rem, 2.5vw, 1.8rem); color: #fff; word-break: break-word; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.2); }
+        table th, table td { border: 1px solid rgba(255,255,255,0.1); padding: 15px; text-align: left; }
+        table th { color: var(--gold); background: rgba(197, 160, 89, 0.1); font-size: 0.9rem; }
+
+        .biblio { font-size: 0.9rem; color: #94a3b8; list-style: none; padding: 0; }
+        .biblio li { margin-bottom: 12px; padding-left: 0; }
+        .biblio a { color: var(--gold); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
+        .biblio a:hover { border-bottom: 1px solid var(--gold); }
+
+        footer { text-align: center; padding: 60px 0 40px; border-top: 1px solid var(--border); }
+        .footer-actions { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: center; margin-bottom: 24px; }
+        .zenodo-btn {
+            display: inline-block; background: var(--gold); color: #000; padding: 22px 50px;
+            text-decoration: none; font-weight: bold; font-size: 1.25rem;
+            border-radius: 8px; transition: 0.4s;
+        }
+        .zenodo-btn:hover { background: #fff; box-shadow: 0 0 50px var(--gold); }
+        .secondary-btn {
+            display: inline-block;
+            padding: 16px 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .secondary-btn:hover {
+            background: rgba(197, 160, 89, 0.12);
+            border-color: var(--gold);
+        }
+        .footer-note { font-size: 0.85rem; color: #64748b; max-width: 720px; margin: 0 auto; }
+    </style>
+</head>
+<body class="en">
+
+<div class="lang-toggle" role="group" aria-label="Language">
+    <button type="button" class="lang-btn active" id="btn-en" aria-pressed="true" onclick="setLanguage('en')">EN</button>
+    <button type="button" class="lang-btn" id="btn-ru" aria-pressed="false" onclick="setLanguage('ru')">RU</button>
+</div>
+
+<div class="container">
+    <header>
+        <div class="author-tag"><span class="lang-en">Nikolai Vorobtsov</span><span class="lang-ru">Николай Воробцов</span></div>
+        <h1><span class="lang-en">Parametric Symmetry in the Cubic Prouhet–Tarry–Escott Problem: <br>A Family of Non-Ideal Isolated Solutions</span><span class="lang-ru">Параметрическая симметрия в кубической задаче Пруэта–Тарри–Эскотта: <br>семейство неидеальных изолированных решений</span></h1>
+        <div class="version-pill"><span class="lang-en">MANUSCRIPT V3 · INTERACTIVE COVER</span><span class="lang-ru">РУКОПИСЬ V3 · ИНТЕРАКТИВНАЯ ОБЛОЖКА</span></div>
+    </header>
+
+    <main class="pub6-main-en">
+        <div class="parameter-hero">
+            <div style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px;">Defining parameter</div>
+            <div class="param-card">x = 10<sup>b</sup></div>
+            <div style="font-size: 1rem; color: #8892b0;">Formal polynomial in x; then substitute e.g. real b (see manuscript on Zenodo for complex branches).</div>
+        </div>
+
+        <section class="hero-identity" aria-labelledby="cubic-identity-heading-en">
+            <div id="cubic-identity-heading-en" class="label">CUBIC IDENTITY (k = 3 ONLY)</div>
+            <div class="big-math">
+                Σ S<sub>1</sub><span class="cube">3</span> = Σ S<sub>2</sub><span class="cube">3</span>
+            </div>
+            <p style="margin: 24px 0 0; font-size: 0.95rem; color: #94a3b8; max-width: 720px; margin-left: auto; margin-right: auto;">
+                Power sums for k = 1, 2, and 4 do <em>not</em> match. The equality is a degree-6 polynomial identity in x (sum of cubes of quadratics).
+            </p>
+        </section>
+
+        <section class="card" style="margin-bottom: 30px;" aria-labelledby="origin-heading-en">
+            <h2 id="origin-heading-en">Computational origin (v3)</h2>
+            <p style="font-size: 0.95rem; margin-top: 0;">
+                Observed in the author’s telescopic cube experiments: GUI <span class="mono">decompose_gui.py</span> with pipeline <span class="mono">clear_result</span>,
+                parameter triple <span class="mono">a = 3</span>, <span class="mono">b₀ = 10ⁿ − 1</span> (string of n nines), <span class="mono">k = 3</span>.
+                The closed form below explains the recurring digit structure in those outputs.
+            </p>
+        </section>
+
+        <div class="grid-sections">
+            <section class="card" aria-labelledby="s1-heading-en">
+                <h2 id="s1-heading-en">Group S<sub>1</sub> (quadratics in x)</h2>
+                <div class="mono">
+                    a1 = 1.5x² − 1.5x − 364<br>
+                    b1 = 1.5x² + 1.5x − 364<br>
+                    c1 = 1.5x² + 4.5x − 361<br>
+                    d1 = 4.5x² − 130.5x + 1218
+                </div>
+            </section>
+            <section class="card" aria-labelledby="s2-heading-en">
+                <h2 id="s2-heading-en">Group S<sub>2</sub> (quadratics in x)</h2>
+                <div class="mono">
+                    a2 = 1.5x² − 82.5x + 770<br>
+                    b2 = 1.5x² − 79.5x + 689<br>
+                    c2 = 1.5x² − 76.5x + 611<br>
+                    d2 = 4.5x² − 103.5x + 867
+                </div>
+            </section>
+        </div>
+
+        <section class="poly-box" aria-labelledby="poly-heading-en">
+            <div id="poly-heading-en" style="color: var(--gold); margin-bottom: 15px; letter-spacing: 3px; font-size: 1.1rem;">INVARIANT POLYNOMIAL P(x) — BOTH SIDES</div>
+            <div class="poly-text">
+                101.25x⁶ − 7897.5x⁵ + 296662.5x⁴ − 6528600x³ + 84008171.25x² − 579040312.5x + 1663429263
+            </div>
+        </section>
+
+        <section class="card" style="margin-bottom: 30px;" aria-labelledby="table-heading-en">
+            <h2 id="table-heading-en">Numerical checks (x = 10<sup>b</sup>)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>b</th>
+                        <th>x</th>
+                        <th>Sets (integers)</th>
+                        <th>Σ cubes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>10</td>
+                        <td class="mono" style="font-size: 0.85rem;">S₁: {−229, −199, −166, 363} · S₂: {95, 44, 46, 282}</td>
+                        <td class="mono" style="font-size: 0.85rem;">1,175,699,568</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>100</td>
+                        <td class="mono" style="font-size: 0.85rem;">S₁: {14486, …, 33168} · S₂: {7520, …, 35517}</td>
+                        <td class="mono" style="font-size: 0.85rem;">93,812,683,264,263</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>1000</td>
+                        <td class="mono" style="font-size: 0.85rem;">Eight large integers from the quadratics</td>
+                        <td class="mono" style="font-size: 0.85rem;">100,463,556,121,586,812,763</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="grid-sections">
+            <section class="card" aria-labelledby="abstract-heading-en">
+                <h2 id="abstract-heading-en">Abstract (v3)</h2>
+                <p style="font-size: 0.95rem; margin-top: 0;">
+                    Isolated cubic PTE-type identity between two 4-point multisets of quadratics in x, proved as a polynomial in ℚ[x].
+                    Motivated by runs with <span class="mono">a=3</span>, <span class="mono">b₀=10ⁿ−1</span>, <span class="mono">k=3</span>.
+                    Includes non-ideality for k = 1, 2, 4, a SymPy reproducibility snippet, and careful notes on complex 10<sup>b</sup> (log branch).
+                </p>
+            </section>
+            <section class="card" aria-labelledby="refs-heading-en">
+                <h2 id="refs-heading-en">References</h2>
+                <ul class="biblio">
+                    <li>[3] Vorobtsov, N. (2026). <i>Telescoping Ramanujan Identities</i>. Zenodo.<br><a href="https://zenodo.org/records/19053976" target="_blank" rel="noopener">zenodo.org/records/19053976</a></li>
+                    <li>[4] Vorobtsov, N. (2026). <i>Euler’s In-cubes</i>. Zenodo.<br><a href="https://zenodo.org/records/19055351" target="_blank" rel="noopener">zenodo.org/records/19055351</a></li>
+                    <li>[8] Vorobtsov, N. (2026). Cubic PTE (this work, latest Zenodo version).<br><a href="https://doi.org/10.5281/zenodo.19490895" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19490895</a></li>
+                    <li>[7] <i>Research portal</i>.<br><a href="https://nvvorobtsov.github.io" target="_blank" rel="noopener">nvvorobtsov.github.io</a></li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <main class="pub6-main-ru">
+        <div class="parameter-hero">
+            <div style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px;">Параметр</div>
+            <div class="param-card">x = 10<sup>b</sup></div>
+            <div style="font-size: 1rem; color: #8892b0;">Сначала формальный многочлен от x; подстановка 10<sup>b</sup> — см. оговорки в рукописи на Zenodo (ветви log в ℂ).</div>
+        </div>
+
+        <section class="hero-identity" aria-labelledby="cubic-identity-heading-ru">
+            <div id="cubic-identity-heading-ru" class="label">КУБИЧЕСКОЕ ТОЖДЕСТВО (ТОЛЬКО k = 3)</div>
+            <div class="big-math">
+                Σ S<sub>1</sub><span class="cube">3</span> = Σ S<sub>2</sub><span class="cube">3</span>
+            </div>
+            <p style="margin: 24px 0 0; font-size: 0.95rem; color: #94a3b8; max-width: 720px; margin-left: auto; margin-right: auto;">
+                Суммы степеней при k = 1, 2 и 4 на двух сторонах <em>не совпадают</em>. Равенство — тождество многочлена степени 6 по x (суммы кубов квадратиков).
+            </p>
+        </section>
+
+        <section class="card" style="margin-bottom: 30px;" aria-labelledby="origin-heading-ru">
+            <h2 id="origin-heading-ru">Вычислительное происхождение (v3)</h2>
+            <p style="font-size: 0.95rem; margin-top: 0;">
+                Обнаружено в телескопических экспериментах с кубами: интерфейс <span class="mono">decompose_gui.py</span>, конвейер <span class="mono">clear_result</span>,
+                тройка параметров <span class="mono">a = 3</span>, <span class="mono">b₀ = 10ⁿ − 1</span> (n девяток), <span class="mono">k = 3</span>.
+                Замкнутая форма ниже объясняет устойчивые шаблоны значащих цифр в выводе программы.
+            </p>
+        </section>
+
+        <div class="grid-sections">
+            <section class="card" aria-labelledby="s1-heading-ru">
+                <h2 id="s1-heading-ru">Группа S<sub>1</sub> (квадратики по x)</h2>
+                <div class="mono">
+                    a1 = 1.5x² − 1.5x − 364<br>
+                    b1 = 1.5x² + 1.5x − 364<br>
+                    c1 = 1.5x² + 4.5x − 361<br>
+                    d1 = 4.5x² − 130.5x + 1218
+                </div>
+            </section>
+            <section class="card" aria-labelledby="s2-heading-ru">
+                <h2 id="s2-heading-ru">Группа S<sub>2</sub> (квадратики по x)</h2>
+                <div class="mono">
+                    a2 = 1.5x² − 82.5x + 770<br>
+                    b2 = 1.5x² − 79.5x + 689<br>
+                    c2 = 1.5x² − 76.5x + 611<br>
+                    d2 = 4.5x² − 103.5x + 867
+                </div>
+            </section>
+        </div>
+
+        <section class="poly-box" aria-labelledby="poly-heading-ru">
+            <div id="poly-heading-ru" style="color: var(--gold); margin-bottom: 15px; letter-spacing: 3px; font-size: 1.1rem;">ИНВАРИАНТНЫЙ МНОГОЧЛЕН P(x) — ОБЕ СТОРОНЫ</div>
+            <div class="poly-text">
+                101.25x⁶ − 7897.5x⁵ + 296662.5x⁴ − 6528600x³ + 84008171.25x² − 579040312.5x + 1663429263
+            </div>
+        </section>
+
+        <section class="card" style="margin-bottom: 30px;" aria-labelledby="table-heading-ru">
+            <h2 id="table-heading-ru">Численные проверки (x = 10<sup>b</sup>)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>b</th>
+                        <th>x</th>
+                        <th>Наборы (целые)</th>
+                        <th>Σ кубов</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>10</td>
+                        <td class="mono" style="font-size: 0.85rem;">S₁: {−229, −199, −166, 363} · S₂: {95, 44, 46, 282}</td>
+                        <td class="mono" style="font-size: 0.85rem;">1,175,699,568</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>100</td>
+                        <td class="mono" style="font-size: 0.85rem;">S₁: {14486, …, 33168} · S₂: {7520, …, 35517}</td>
+                        <td class="mono" style="font-size: 0.85rem;">93,812,683,264,263</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>1000</td>
+                        <td class="mono" style="font-size: 0.85rem;">Восемь больших целых из квадратиков</td>
+                        <td class="mono" style="font-size: 0.85rem;">100,463,556,121,586,812,763</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div class="grid-sections">
+            <section class="card" aria-labelledby="abstract-heading-ru">
+                <h2 id="abstract-heading-ru">Аннотация (v3)</h2>
+                <p style="font-size: 0.95rem; margin-top: 0;">
+                    Изолированное кубическое тождество PTE-типа между двумя 4-точечными мультимножествами квадратиков от x, доказуемое в ℚ[x].
+                    Мотивация — прогоны с <span class="mono">a=3</span>, <span class="mono">b₀=10ⁿ−1</span>, <span class="mono">k=3</span>.
+                    В рукописи: неидеальность для k = 1, 2, 4, фрагмент SymPy, оговорки про комплексное 10<sup>b</sup>.
+                </p>
+            </section>
+            <section class="card" aria-labelledby="refs-heading-ru">
+                <h2 id="refs-heading-ru">Литература</h2>
+                <ul class="biblio">
+                    <li>[3] Vorobtsov, N. (2026). <i>Telescoping Ramanujan Identities</i>. Zenodo.<br><a href="https://zenodo.org/records/19053976" target="_blank" rel="noopener">zenodo.org/records/19053976</a></li>
+                    <li>[4] Vorobtsov, N. (2026). <i>Euler’s In-cubes</i>. Zenodo.<br><a href="https://zenodo.org/records/19055351" target="_blank" rel="noopener">zenodo.org/records/19055351</a></li>
+                    <li>[8] Vorobtsov, N. (2026). Препринт по кубической PTE (актуальная версия Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19490895" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19490895</a></li>
+                    <li>[7] <i>Математический портал</i>.<br><a href="https://nvvorobtsov.github.io" target="_blank" rel="noopener">nvvorobtsov.github.io</a></li>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-actions">
+            <a href="https://zenodo.org/records/19490895" target="_blank" rel="noopener" class="zenodo-btn"><span class="lang-en">OPEN IN ZENODO (DOI 10.5281/zenodo.19490895)</span><span class="lang-ru">ОТКРЫТЬ В ZENODO (DOI 10.5281/zenodo.19490895)</span></a>
+            <a href="index.html" class="secondary-btn"><span class="lang-en">← Main page</span><span class="lang-ru">← Главная</span></a>
+        </div>
+        <p class="footer-note"><span class="lang-en">PDF and LaTeX sources are attached to the Zenodo record. Press Esc to go back in history.</span><span class="lang-ru">PDF и исходники LaTeX — в записи Zenodo. Клавиша Esc — назад по истории браузера.</span></p>
+    </footer>
+</div>
+
+<script>
+    document.addEventListener('keyup', function (e) {
+        if (e.key === 'Escape') window.history.back();
+    });
+</script>
+<script>
+(function () {
+    var SUPABASE_URL = 'https://ottgavgusjmuexofeuys.supabase.co';
+    var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
+    var COUNT_QUERY_PARAM = 'count';
+    /* Same counter as index.html “Interactive cover” for publication 6 (changelog jump links). */
+    var allowedCounterIds = { pub6_cover: true };
+
+    function apiHeaders() {
+        return {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function stripCountFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        if (!params.has(COUNT_QUERY_PARAM)) return;
+        params.delete(COUNT_QUERY_PARAM);
+        var q = params.toString();
+        var path = window.location.pathname;
+        var hash = window.location.hash || '';
+        var next = path + (q ? '?' + q : '') + hash;
+        history.replaceState(null, '', next);
+    }
+
+    function applyCountFromQuery() {
+        var params = new URLSearchParams(window.location.search);
+        var cid = params.get(COUNT_QUERY_PARAM);
+        if (!cid || !allowedCounterIds[cid]) return;
+        fetch(SUPABASE_URL + '/rest/v1/rpc/register_link_click', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({ counter_id: cid }),
+            keepalive: true
+        }).catch(function () {});
+        stripCountFromUrl();
+    }
+
+    applyCountFromQuery();
+})();
+</script>
+<script>
+    function setLanguage(lang) {
+        document.body.className = lang;
+        localStorage.setItem('preferredLang', lang);
+        var btnRu = document.getElementById('btn-ru');
+        var btnEn = document.getElementById('btn-en');
+        if (btnRu && btnEn) {
+            if (lang === 'ru') {
+                btnRu.classList.add('active');
+                btnEn.classList.remove('active');
+                btnRu.setAttribute('aria-pressed', 'true');
+                btnEn.setAttribute('aria-pressed', 'false');
+                document.documentElement.lang = 'ru';
+            } else {
+                btnEn.classList.add('active');
+                btnRu.classList.remove('active');
+                btnEn.setAttribute('aria-pressed', 'true');
+                btnRu.setAttribute('aria-pressed', 'false');
+                document.documentElement.lang = 'en';
+            }
+        }
+    }
+    window.addEventListener('pageshow', function () {
+        setLanguage(localStorage.getItem('preferredLang') || 'en');
+    });
+</script>
+</body>
+</html>

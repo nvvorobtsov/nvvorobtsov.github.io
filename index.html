@@ -344,7 +344,7 @@
         </div>
     </header>
 
-    <div class="header-stats" title="Sum of all 13 publication link counters (total : last 24 h UTC)">
+    <div class="header-stats" title="Sum of all 15 publication link counters (total : last 24 h UTC)">
         <div class="header-stats-row">
             <span class="hit-eye" aria-hidden="true">👁</span>
             <span class="header-sum-num" aria-live="polite">
@@ -355,6 +355,41 @@
 
     <div class="publications">
         <div class="pub-col">
+        <!-- Публикация 6 -->
+        <div class="paper-card">
+            <div class="paper-number">
+                <span class="lang-en">PUBLICATION 06 &bull; 2026</span>
+                <span class="lang-ru">ПУБЛИКАЦИЯ 06 &bull; 2026</span>
+            </div>
+            <h2 class="paper-title">
+                <span class="lang-en">Parametric Symmetry in the Cubic Prouhet–Tarry–Escott Problem: A Family of Non-Ideal Isolated Solutions</span>
+                <span class="lang-ru">Параметрическая симметрия в кубической задаче Пруэта–Тарри–Эскотта: семейство неидеальных изолированных решений</span>
+            </h2>
+            <div class="paper-desc">
+                <span class="lang-en">Isolated cubic (k = 3) PTE-type identity from quadratic polynomials in x = 10ᵇ, motivated by telescopic cube experiments (a = 3, b₀ = 10ⁿ − 1, k = 3). Not ideal: power sums differ for k = 1, 2, 4.</span>
+                <span class="lang-ru">Изолированное кубическое (k = 3) тождество PTE-типа от квадратичных многочленов при x = 10ᵇ; мотивация — телескопические эксперименты (a = 3, b₀ = 10ⁿ − 1, k = 3). Неидеальное: суммы степеней при k = 1, 2, 4 не совпадают.</span>
+            </div>
+            <div class="links">
+                <div class="btn-with-count" data-counter-id="pub6_cover">
+                    <a href="publication6.html" class="btn btn-primary">
+                        <span class="lang-en">Interactive Cover</span>
+                        <span class="lang-ru">Интерактивная обложка</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub6_zenodo">
+                    <a href="https://zenodo.org/records/19490895" target="_blank" rel="noopener" class="btn">Zenodo (DOI)</a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Публикация 5 -->
         <div class="paper-card">
             <div class="paper-number">
@@ -435,6 +470,8 @@
             </div>
         </div>
 
+        </div>
+        <div class="pub-col">
         <!-- Публикация 3 -->
         <div class="paper-card">
             <div class="paper-number">
@@ -469,8 +506,7 @@
                 </div>
             </div>
         </div>
-        </div>
-        <div class="pub-col">
+
         <!-- Публикация 2 -->
         <div class="paper-card">
             <div class="paper-number">
@@ -602,6 +638,7 @@
     var SUPABASE_URL = 'https://ottgavgusjmuexofeuys.supabase.co';
     var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
     var COUNTER_IDS = [
+        'pub6_cover', 'pub6_zenodo',
         'pub5_cover', 'pub5_code', 'pub5_zenodo',
         'pub4_cover', 'pub4_zenodo',
         'pub3_cover', 'pub3_zenodo',
