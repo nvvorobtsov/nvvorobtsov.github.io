@@ -2,6 +2,11 @@
   "entries": [
     {
       "date": "2026-04-10",
+      "ru": "публикация 06: расширенная GUI decompose_gui_EXT (и decompose_gui_EXT_EN) — параметрическая форма (квадратики в x, P(x), опциональное авто-дополнение к блоку кубов). На главной и в подвале publication6.html — прямое скачивание decompose_gui_EXT_windows.zip; в каталоге sources/ лежат исходники .py и архив; добавлен счётчик pub6_ext_zip.",
+      "en": "Publication 06: extended GUI decompose_gui_EXT (and decompose_gui_EXT_EN) with parametric mode (quadratics in x, P(x), optional auto-append to the cube block). The home page and publication6.html footer offer a direct download of decompose_gui_EXT_windows.zip; sources/ holds the .py files and the zip; hit counter pub6_ext_zip added."
+    },
+    {
+      "date": "2026-04-10",
       "ru": "главная: добавлена публикация 06 (кубическая PTE), колонки перестроены — слева 6–4, справа 3–1; интерактивная двуязычная обложка publication6.html; Zenodo 10.5281/zenodo.19490895; счётчики pub6_cover и pub6_zenodo.",
       "en": "Home: added publication 06 (cubic PTE), columns rebalanced (left 6–4, right 3–1); bilingual interactive cover publication6.html; Zenodo 10.5281/zenodo.19490895; hit counters pub6_cover and pub6_zenodo.",
       "link": {
