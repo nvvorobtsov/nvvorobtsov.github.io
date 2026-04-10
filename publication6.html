@@ -152,6 +152,36 @@
             border-color: var(--gold);
         }
         .footer-note { font-size: 0.85rem; color: #64748b; max-width: 720px; margin: 0 auto; }
+
+        .footer-dl-row {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn-with-count {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-hit-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: ui-monospace, monospace;
+            font-size: 0.65rem;
+            color: #64748b;
+        }
+        .btn-hit-count .hit-sep { opacity: 0.5; margin: 0 1px; }
+        .footer-dl-hint {
+            max-width: 340px;
+            text-align: center;
+            font-size: 0.72rem;
+            line-height: 1.4;
+            color: #64748b;
+            margin: 4px 0 0;
+        }
     </style>
 </head>
 <body class="en">
@@ -391,6 +421,18 @@
             <a href="https://zenodo.org/records/19490895" target="_blank" rel="noopener" class="zenodo-btn"><span class="lang-en">OPEN IN ZENODO (DOI 10.5281/zenodo.19490895)</span><span class="lang-ru">ОТКРЫТЬ В ZENODO (DOI 10.5281/zenodo.19490895)</span></a>
             <a href="index.html" class="secondary-btn"><span class="lang-en">← Main page</span><span class="lang-ru">← Главная</span></a>
         </div>
+        <div class="footer-dl-row">
+            <div class="btn-with-count" data-counter-id="pub6_ext_zip">
+                <a href="sources/decompose_gui_EXT_windows.zip" download="decompose_gui_EXT_windows.zip" class="secondary-btn">
+                    <span class="lang-en">Download GUI + parametric form (ZIP)</span>
+                    <span class="lang-ru">Скачать GUI + параметрическая форма (ZIP)</span>
+                </a>
+                <div class="btn-hit-count" title="Total : last 24 h (UTC)">
+                    <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                </div>
+                <p class="footer-dl-hint"><span class="lang-en">Same program as in publication 5, extended: parametric quadratics in x, P(x), and optional auto-append. Needs Python 3.9+ and SymPy.</span><span class="lang-ru">Та же программа, что в публ. 5, с дополнением: параметрическая форма, P(x), авто-блок. Нужны Python 3.9+ и SymPy.</span></p>
+            </div>
+        </div>
         <p class="footer-note"><span class="lang-en">PDF and LaTeX sources are attached to the Zenodo record. Press Esc to go back in history.</span><span class="lang-ru">PDF и исходники LaTeX — в записи Zenodo. Клавиша Esc — назад по истории браузера.</span></p>
     </footer>
 </div>
@@ -406,7 +448,7 @@
     var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
     var COUNT_QUERY_PARAM = 'count';
     /* Same counter as index.html “Interactive cover” for publication 6 (changelog jump links). */
-    var allowedCounterIds = { pub6_cover: true };
+    var allowedCounterIds = { pub6_cover: true, pub6_ext_zip: true };
 
     function apiHeaders() {
         return {
@@ -441,6 +483,78 @@
     }
 
     applyCountFromQuery();
+})();
+</script>
+<script>
+(function () {
+    var SUPABASE_URL = 'https://ottgavgusjmuexofeuys.supabase.co';
+    var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
+    var COUNTER_ID = 'pub6_ext_zip';
+
+    function apiHeaders() {
+        return {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function setZipCount(total, last24) {
+        var wrap = document.querySelector('.btn-with-count[data-counter-id="' + COUNTER_ID + '"]');
+        if (!wrap) return;
+        var tEl = wrap.querySelector('.hit-total');
+        var hEl = wrap.querySelector('.hit-24');
+        if (tEl) tEl.textContent = total;
+        if (hEl) hEl.textContent = last24;
+    }
+
+    function refreshZipCount() {
+        fetch(SUPABASE_URL + '/rest/v1/rpc/get_main_link_stats', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: '{}'
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var row = data && data[COUNTER_ID];
+                if (row && typeof row === 'object') {
+                    setZipCount(String(Number(row.total) || 0), String(Number(row.last24) || 0));
+                } else {
+                    setZipCount('0', '0');
+                }
+            })
+            .catch(function () { setZipCount('—', '—'); });
+    }
+
+    function incrementZip() {
+        fetch(SUPABASE_URL + '/rest/v1/rpc/register_link_click', {
+            method: 'POST',
+            headers: apiHeaders(),
+            body: JSON.stringify({ counter_id: COUNTER_ID }),
+            keepalive: true
+        })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (data && typeof data === 'object') {
+                    var tot = Number(data.total);
+                    var h24 = Number(data.last24);
+                    if (!isNaN(tot) && !isNaN(h24)) {
+                        setZipCount(String(tot), String(h24));
+                    }
+                }
+            })
+            .catch(function () {});
+    }
+
+    var wrap = document.querySelector('.btn-with-count[data-counter-id="' + COUNTER_ID + '"]');
+    if (wrap) {
+        wrap.addEventListener('click', function (e) {
+            var a = e.target.closest('a.secondary-btn');
+            if (!a || !a.href) return;
+            incrementZip();
+        });
+    }
+    refreshZipCount();
 })();
 </script>
 <script>

@@ -246,6 +246,15 @@
             color: var(--text-main);
         }
 
+        .btn-with-count .dl-hint {
+            max-width: 280px;
+            text-align: center;
+            font-size: 0.68rem;
+            line-height: 1.35;
+            color: #64748b;
+            font-weight: 400;
+        }
+
         .btn-hit-count .hit-sep {
             opacity: 0.5;
             margin: 0 1px;
@@ -344,7 +353,7 @@
         </div>
     </header>
 
-    <div class="header-stats" title="Sum of all 15 publication link counters (total : last 24 h UTC)">
+    <div class="header-stats" title="Sum of all 17 publication link counters (total : last 24 h UTC)">
         <div class="header-stats-row">
             <span class="hit-eye" aria-hidden="true">👁</span>
             <span class="header-sum-num" aria-live="polite">
@@ -386,6 +395,18 @@
                         <span class="hit-eye" aria-hidden="true">👁</span>
                         <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
                     </div>
+                </div>
+                <div class="btn-with-count" data-counter-id="pub6_ext_zip">
+                    <a href="sources/decompose_gui_EXT_windows.zip" download="decompose_gui_EXT_windows.zip" class="btn" title="Python 3.9+ · SymPy · same folder as clear_result.py">
+                        <span class="lang-en">Download GUI + parametric form (ZIP)</span>
+                        <span class="lang-ru">Скачать GUI + параметрическая форма (ZIP)</span>
+                    </a>
+                    <div class="btn-hit-count" title="Total : last 24 h (UTC, all visitors)">
+                        <span class="hit-eye" aria-hidden="true">👁</span>
+                        <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
+                    </div>
+                    <div class="dl-hint lang-en">decompose_gui_EXT — publication 5 GUI plus parametric quadratics / P(x) for cubic PTE-style experiments.</div>
+                    <div class="dl-hint lang-ru">decompose_gui_EXT — то же окно, что в публ. 5, плюс параметрическая форма (квадратики, P(x)).</div>
                 </div>
             </div>
         </div>
@@ -638,7 +659,7 @@
     var SUPABASE_URL = 'https://ottgavgusjmuexofeuys.supabase.co';
     var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
     var COUNTER_IDS = [
-        'pub6_cover', 'pub6_zenodo',
+        'pub6_cover', 'pub6_zenodo', 'pub6_ext_zip',
         'pub5_cover', 'pub5_code', 'pub5_zenodo',
         'pub4_cover', 'pub4_zenodo',
         'pub3_cover', 'pub3_zenodo',
