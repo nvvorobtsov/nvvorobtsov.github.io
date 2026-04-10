@@ -81,6 +81,22 @@
             border: 1px solid rgba(197, 160, 89, 0.5);
         }
         h1 { font-size: clamp(1.5rem, 4vw, 3rem); margin: 0; font-family: 'Georgia', serif; color: #fff; line-height: 1.2; }
+        .subtitle {
+            font-size: clamp(1rem, 2.2vw, 1.35rem);
+            color: #94a3b8;
+            font-weight: 400;
+            margin: 14px 0 0;
+            font-family: 'Georgia', serif;
+            line-height: 1.35;
+        }
+        .v4-card {
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            background: rgba(56, 189, 248, 0.06);
+            margin-bottom: 30px;
+        }
+        .v4-card h2 { color: #7dd3fc; border-bottom-color: rgba(56, 189, 248, 0.35); }
+        .v4-card ul { margin: 0; padding-left: 1.25rem; color: #e2e8f0; font-size: 0.95rem; }
+        .v4-card li { margin-bottom: 8px; }
 
         .parameter-hero {
             display: flex; flex-wrap: wrap;
@@ -194,15 +210,16 @@
 <div class="container">
     <header>
         <div class="author-tag"><span class="lang-en">Nikolai Vorobtsov</span><span class="lang-ru">Николай Воробцов</span></div>
-        <h1><span class="lang-en">Parametric Symmetry in the Cubic Prouhet–Tarry–Escott Problem: <br>A Family of Non-Ideal Isolated Solutions</span><span class="lang-ru">Параметрическая симметрия в кубической задаче Пруэта–Тарри–Эскотта: <br>семейство неидеальных изолированных решений</span></h1>
-        <div class="version-pill"><span class="lang-en">MANUSCRIPT V3 · INTERACTIVE COVER</span><span class="lang-ru">РУКОПИСЬ V3 · ИНТЕРАКТИВНАЯ ОБЛОЖКА</span></div>
+        <h1><span class="lang-en">Parametric Symmetry in the Cubic Prouhet–Tarry–Escott Problem</span><span class="lang-ru">Параметрическая симметрия в кубической задаче Пруэта–Тарри–Эскотта</span></h1>
+        <p class="subtitle"><span class="lang-en">A non-ideal template and infinite arithmetic families (manuscript v4)</span><span class="lang-ru">Неидеальный шаблон и бесконечные арифметические семейства (рукопись v4)</span></p>
+        <div class="version-pill" title="Zenodo DOI 10.5281/zenodo.19498770"><span class="lang-en">MANUSCRIPT V4 · INTERACTIVE COVER</span><span class="lang-ru">РУКОПИСЬ V4 · ИНТЕРАКТИВНАЯ ОБЛОЖКА</span></div>
     </header>
 
     <main class="pub6-main-en">
         <div class="parameter-hero">
             <div style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px;">Defining parameter</div>
             <div class="param-card">x = 10<sup>b</sup></div>
-            <div style="font-size: 1rem; color: #8892b0;">Formal polynomial in x; then substitute e.g. real b (see manuscript on Zenodo for complex branches).</div>
+            <div style="font-size: 1rem; color: #8892b0;">One quadratic template in ℚ[x]; each integer b gives a new integer pair (S₁, S₂) with the same cube sum.</div>
         </div>
 
         <section class="hero-identity" aria-labelledby="cubic-identity-heading-en">
@@ -211,12 +228,22 @@
                 Σ S<sub>1</sub><span class="cube">3</span> = Σ S<sub>2</sub><span class="cube">3</span>
             </div>
             <p style="margin: 24px 0 0; font-size: 0.95rem; color: #94a3b8; max-width: 720px; margin-left: auto; margin-right: auto;">
-                Power sums for k = 1, 2, and 4 do <em>not</em> match. The equality is a degree-6 polynomial identity in x (sum of cubes of quadratics).
+                Power sums for k = 1, 2, and 4 do <em>not</em> match as polynomials. “Isolated” refers to PTE depth in k, not to a finite set of integer solutions: b = 1, 2, 3, … all work.
             </p>
         </section>
 
+        <section class="card v4-card" aria-labelledby="v4-section-heading-en">
+            <h2 id="v4-section-heading-en">New in manuscript §4 (v4)</h2>
+            <ul>
+                <li><strong>Setting:</strong> cubic-only identity for two 4-point multisets of quadratics; non-ideality stated as a uniform property in ℚ[x].</li>
+                <li><strong>Parameters:</strong> formal x; arithmetic ladder x = 10<sup>b</sup>; telescopic reconstruction at scales 10<sup>n₁</sup>, 10<sup>n₂</sup>, 10<sup>n₃</sup> (default 7,6,5 in code) and scanning other (a, k) via <span class="mono">scan_parametric_pte.py</span>.</li>
+                <li><strong>Proof skeleton:</strong> Lagrange interpolation → closure D(x) ≡ 0 → inherited non-ideality.</li>
+                <li><strong>GUI:</strong> <span class="mono">decompose_gui_EXT</span> as the experimental side of the same pipeline.</li>
+            </ul>
+        </section>
+
         <section class="card" style="margin-bottom: 30px;" aria-labelledby="origin-heading-en">
-            <h2 id="origin-heading-en">Computational origin (v3)</h2>
+            <h2 id="origin-heading-en">Computational origin</h2>
             <p style="font-size: 0.95rem; margin-top: 0;">
                 Observed in the author’s telescopic cube experiments: GUI <span class="mono">decompose_gui.py</span> with pipeline <span class="mono">clear_result</span>,
                 parameter triple <span class="mono">a = 3</span>, <span class="mono">b₀ = 10ⁿ − 1</span> (string of n nines), <span class="mono">k = 3</span>.
@@ -288,11 +315,10 @@
 
         <div class="grid-sections">
             <section class="card" aria-labelledby="abstract-heading-en">
-                <h2 id="abstract-heading-en">Abstract (v3)</h2>
+                <h2 id="abstract-heading-en">Abstract (v4)</h2>
                 <p style="font-size: 0.95rem; margin-top: 0;">
-                    Isolated cubic PTE-type identity between two 4-point multisets of quadratics in x, proved as a polynomial in ℚ[x].
-                    Motivated by runs with <span class="mono">a=3</span>, <span class="mono">b₀=10ⁿ−1</span>, <span class="mono">k=3</span>.
-                    Includes non-ideality for k = 1, 2, 4, a SymPy reproducibility snippet, and careful notes on complex 10<sup>b</sup> (log branch).
+                    Same explicit (3, 3) template as v3, plus a full §4 on families: one polynomial identity in ℚ[x] yields infinitely many integer pairs (S₁, S₂) at x = 10<sup>b</sup>;
+                    interpolation scales (7,6,5) and <span class="mono">scan_parametric_pte.py</span> link the proof skeleton to the code. Non-ideality for k = 1, 2, 4 and the SymPy snippet play the same role as before.
                 </p>
             </section>
             <section class="card" aria-labelledby="refs-heading-en">
@@ -300,7 +326,7 @@
                 <ul class="biblio">
                     <li>[3] Vorobtsov, N. (2026). <i>Telescoping Ramanujan Identities</i>. Zenodo.<br><a href="https://zenodo.org/records/19053976" target="_blank" rel="noopener">zenodo.org/records/19053976</a></li>
                     <li>[4] Vorobtsov, N. (2026). <i>Euler’s In-cubes</i>. Zenodo.<br><a href="https://zenodo.org/records/19055351" target="_blank" rel="noopener">zenodo.org/records/19055351</a></li>
-                    <li>[8] Vorobtsov, N. (2026). Cubic PTE (this work, latest Zenodo version).<br><a href="https://doi.org/10.5281/zenodo.19490895" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19490895</a></li>
+                    <li>[8] Vorobtsov, N. (2026). Cubic PTE (this work, manuscript v4 on Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19498770" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19498770</a></li>
                     <li>[7] <i>Research portal</i>.<br><a href="https://nvvorobtsov.github.io" target="_blank" rel="noopener">nvvorobtsov.github.io</a></li>
                 </ul>
             </section>
@@ -311,7 +337,7 @@
         <div class="parameter-hero">
             <div style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 3px;">Параметр</div>
             <div class="param-card">x = 10<sup>b</sup></div>
-            <div style="font-size: 1rem; color: #8892b0;">Сначала формальный многочлен от x; подстановка 10<sup>b</sup> — см. оговорки в рукописи на Zenodo (ветви log в ℂ).</div>
+            <div style="font-size: 1rem; color: #8892b0;">Один квадратичный шаблон в ℚ[x]; каждое целое b даёт новую целочисленную пару (S₁, S₂) с тем же Σ кубов.</div>
         </div>
 
         <section class="hero-identity" aria-labelledby="cubic-identity-heading-ru">
@@ -320,12 +346,22 @@
                 Σ S<sub>1</sub><span class="cube">3</span> = Σ S<sub>2</sub><span class="cube">3</span>
             </div>
             <p style="margin: 24px 0 0; font-size: 0.95rem; color: #94a3b8; max-width: 720px; margin-left: auto; margin-right: auto;">
-                Суммы степеней при k = 1, 2 и 4 на двух сторонах <em>не совпадают</em>. Равенство — тождество многочлена степени 6 по x (суммы кубов квадратиков).
+                «Изолированное» здесь — про глубину PTE по k, а не про конечность целочисленных решений: b = 1, 2, 3, … все подходят.
             </p>
         </section>
 
+        <section class="card v4-card" aria-labelledby="v4-section-heading-ru">
+            <h2 id="v4-section-heading-ru">Новое в §4 рукописи (v4)</h2>
+            <ul>
+                <li><strong>Постановка:</strong> тождество только для кубов у двух 4-точечных мультимножеств квадратиков; неидеальность — равномерно в ℚ[x].</li>
+                <li><strong>Параметры:</strong> формальный x; арифметическая лестница x = 10<sup>b</sup>; телескопическое восстановление в масштабах 10<sup>n₁</sup>, 10<sup>n₂</sup>, 10<sup>n₃</sup> (в коде по умолчанию 7,6,5) и перебор других (a, k) через <span class="mono">scan_parametric_pte.py</span>.</li>
+                <li><strong>Скелет доказательства:</strong> интерполяция Лагранжа → замыкание D(x) ≡ 0 → наследуемая неидеальность.</li>
+                <li><strong>GUI:</strong> <span class="mono">decompose_gui_EXT</span> как экспериментальная сторона той же схемы.</li>
+            </ul>
+        </section>
+
         <section class="card" style="margin-bottom: 30px;" aria-labelledby="origin-heading-ru">
-            <h2 id="origin-heading-ru">Вычислительное происхождение (v3)</h2>
+            <h2 id="origin-heading-ru">Вычислительное происхождение</h2>
             <p style="font-size: 0.95rem; margin-top: 0;">
                 Обнаружено в телескопических экспериментах с кубами: интерфейс <span class="mono">decompose_gui.py</span>, конвейер <span class="mono">clear_result</span>,
                 тройка параметров <span class="mono">a = 3</span>, <span class="mono">b₀ = 10ⁿ − 1</span> (n девяток), <span class="mono">k = 3</span>.
@@ -397,11 +433,10 @@
 
         <div class="grid-sections">
             <section class="card" aria-labelledby="abstract-heading-ru">
-                <h2 id="abstract-heading-ru">Аннотация (v3)</h2>
+                <h2 id="abstract-heading-ru">Аннотация (v4)</h2>
                 <p style="font-size: 0.95rem; margin-top: 0;">
-                    Изолированное кубическое тождество PTE-типа между двумя 4-точечными мультимножествами квадратиков от x, доказуемое в ℚ[x].
-                    Мотивация — прогоны с <span class="mono">a=3</span>, <span class="mono">b₀=10ⁿ−1</span>, <span class="mono">k=3</span>.
-                    В рукописи: неидеальность для k = 1, 2, 4, фрагмент SymPy, оговорки про комплексное 10<sup>b</sup>.
+                    Тот же явный шаблон (3, 3), что в v3, плюс полный §4 о семействах: одно многочленное тождество в ℚ[x] порождает бесконечно много целочисленных пар (S₁, S₂) при x = 10<sup>b</sup>;
+                    масштабы интерполяции (7,6,5) и <span class="mono">scan_parametric_pte.py</span> связывают скелет доказательства с кодом. Неидеальность при k = 1, 2, 4 и фрагмент SymPy по смыслу те же.
                 </p>
             </section>
             <section class="card" aria-labelledby="refs-heading-ru">
@@ -409,7 +444,7 @@
                 <ul class="biblio">
                     <li>[3] Vorobtsov, N. (2026). <i>Telescoping Ramanujan Identities</i>. Zenodo.<br><a href="https://zenodo.org/records/19053976" target="_blank" rel="noopener">zenodo.org/records/19053976</a></li>
                     <li>[4] Vorobtsov, N. (2026). <i>Euler’s In-cubes</i>. Zenodo.<br><a href="https://zenodo.org/records/19055351" target="_blank" rel="noopener">zenodo.org/records/19055351</a></li>
-                    <li>[8] Vorobtsov, N. (2026). Препринт по кубической PTE (актуальная версия Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19490895" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19490895</a></li>
+                    <li>[8] Vorobtsov, N. (2026). Препринт по кубической PTE (рукопись v4, Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19498770" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19498770</a></li>
                     <li>[7] <i>Математический портал</i>.<br><a href="https://nvvorobtsov.github.io" target="_blank" rel="noopener">nvvorobtsov.github.io</a></li>
                 </ul>
             </section>
@@ -418,7 +453,7 @@
 
     <footer>
         <div class="footer-actions">
-            <a href="https://zenodo.org/records/19490895" target="_blank" rel="noopener" class="zenodo-btn"><span class="lang-en">OPEN IN ZENODO (DOI 10.5281/zenodo.19490895)</span><span class="lang-ru">ОТКРЫТЬ В ZENODO (DOI 10.5281/zenodo.19490895)</span></a>
+            <a href="https://zenodo.org/records/19498770" target="_blank" rel="noopener" class="zenodo-btn"><span class="lang-en">OPEN IN ZENODO (DOI 10.5281/zenodo.19498770)</span><span class="lang-ru">ОТКРЫТЬ В ZENODO (DOI 10.5281/zenodo.19498770)</span></a>
             <a href="index.html" class="secondary-btn"><span class="lang-en">← Main page</span><span class="lang-ru">← Главная</span></a>
         </div>
         <div class="footer-dl-row">

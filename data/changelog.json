@@ -1,6 +1,11 @@
 {
   "entries": [
     {
+      "date": "2026-04-11",
+      "ru": "публикация 06: рукопись v4 на Zenodo (DOI 10.5281/zenodo.19498770); обложка publication6.html — v4 (§4, уточнение «изолированности», новый заголовок); кнопка Zenodo на главной ведёт на новую версию записи.",
+      "en": "Publication 06: manuscript v4 on Zenodo (DOI 10.5281/zenodo.19498770); publication6.html cover updated to v4 (§4, clarified “isolated” wording, new title); main-page Zenodo button points to the new record version."
+    },
+    {
       "date": "2026-04-10",
       "ru": "публикация 06: расширенная GUI decompose_gui_EXT (и decompose_gui_EXT_EN) — параметрическая форма (квадратики в x, P(x), опциональное авто-дополнение к блоку кубов). На главной и в подвале publication6.html — прямое скачивание decompose_gui_EXT_windows.zip; в каталоге sources/ лежат исходники .py и архив; добавлен счётчик pub6_ext_zip.",
       "en": "Publication 06: extended GUI decompose_gui_EXT (and decompose_gui_EXT_EN) with parametric mode (quadratics in x, P(x), optional auto-append to the cube block). The home page and publication6.html footer offer a direct download of decompose_gui_EXT_windows.zip; sources/ holds the .py files and the zip; hit counter pub6_ext_zip added."
