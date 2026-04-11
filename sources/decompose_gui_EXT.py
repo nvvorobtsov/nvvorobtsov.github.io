@@ -1,9 +1,8 @@
 """
-GUI для телескопического разложения кубов + параметрическая форма (квадратики по x; см. публ. 06).
-Файл clear_result.py должен лежать в той же папке (в архиве decompose_gui_EXT_windows.zip или с публ. 5).
+GUI для экспериментов с телескопическим разложением (логика в perl/cmd/clear_result.py).
 
-Запуск:
-  python decompose_gui_EXT.py
+Запуск из этой папки:
+  python decompose_gui.py
 """
 
 import sys
@@ -18,9 +17,10 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, messagebox
 
-_DIR = Path(__file__).resolve().parent
-if str(_DIR) not in sys.path:
-    sys.path.insert(0, str(_DIR))
+_ROOT = Path(__file__).resolve().parent.parent
+_CMD = _ROOT / "perl" / "cmd"
+if str(_CMD) not in sys.path:
+    sys.path.insert(0, str(_CMD))
 
 from clear_result import (  # noqa: E402
     compute_ramanujan_decomposition,
@@ -514,13 +514,61 @@ def b0_is_all_nines(b0: int) -> bool:
     return s == "9" * len(s)
 
 
+def b0_middle_uniform_for_parametric(b0: int) -> bool:
+    """b₀ > 2 цифр; после отбрасывания первой и последней цифры средняя часть — только «9» или только «0».
+
+    Короткие b₀ с такой серединой (например 290) намеренно допускаются: те же крайние цифры и однородное
+    «ядро» задают семейство «телескопируемого» масштаба (290, 2990, 29990, …), а три пробы b₀ при
+    длинах 7/6/5 цифр фиксируют три точки для интерполяции по x = 10⁷, 10⁶, 10⁵.
+    """
+    if b0 <= 0:
+        return False
+    s = str(b0)
+    if len(s) <= 2:
+        return False
+    mid = s[1:-1]
+    if not mid:
+        return False
+    return len(set(mid)) == 1 and mid[0] in ("0", "9")
+
+
+def b0_parametric_probe_eligible(b0: int) -> bool:
+    """Условие на b₀ для параметрической формы: все девятки или однородное «среднее» (только 0 или только 9)."""
+    return b0_is_all_nines(b0) or b0_middle_uniform_for_parametric(b0)
+
+
+def parametric_probe_b0_triple(b0_template: int) -> tuple[int, int, int]:
+    """Три значения b₀ для масштабов 10⁷, 10⁶, 10⁵ (высокая → низкая проба).
+
+    Классика (все девятки): 10⁷−1, 10⁶−1, 10⁵−1.
+    Иначе: первая и последняя цифры как у b₀_template, среднее — (T−2) одинаковых цифр c (та же, что в «середине»
+    исходного b₀), для T = 7, 6, 5 (например 192 → 1999992, 199992, 19992).
+    """
+    b0_template = int(b0_template)
+    if b0_template <= 0:
+        raise ValueError("b0_template must be positive")
+    if b0_is_all_nines(b0_template):
+        return (10**7 - 1, 10**6 - 1, 10**5 - 1)
+    s = str(b0_template)
+    if len(s) <= 2 or not b0_middle_uniform_for_parametric(b0_template):
+        raise ValueError("b0_template does not match parametric mask")
+    mid = s[1:-1]
+    c = mid[0]
+    f, lch = s[0], s[-1]
+    out: list[int] = []
+    for total_digits in (7, 6, 5):
+        m = total_digits - 2
+        out.append(int(f + c * m + lch))
+    return (out[0], out[1], out[2])
+
+
 # Имена оснований в блоке параметрической формы — a…z (не более 26 кубов на сторону).
 PARAMETRIC_MAX_CUBES_PER_SIDE = 26
 
 
 def parametric_form_eligible_for_last_run(data: dict) -> bool:
     """Условия активации кнопки «Параметрическая форма» по данным последнего полного расчёта."""
-    if not b0_is_all_nines(data["b_start"]):
+    if not b0_parametric_probe_eligible(data["b_start"]):
         return False
     Ld, Rd = order_sides_for_display(data["L_final"], data["R_final"])
     nL, nR = len(Ld), len(Rd)
@@ -529,15 +577,14 @@ def parametric_form_eligible_for_last_run(data: dict) -> bool:
     return 1 <= nL <= PARAMETRIC_MAX_CUBES_PER_SIDE
 
 
-# Три масштаба: x = 10⁷, 10⁶, 10⁵ при b₀ = 10ⁿ − 1 (внутренний расчёт; в интерфейсе — проверка на n=6).
-_PARAMETRIC_N_DIGITS = (7, 6, 5)
+# Три масштаба интерполяции по x = 10⁷, 10⁶, 10⁵; соответствующие b₀ — из parametric_probe_b0_triple.
+_PARAMETRIC_X_EXPONENTS = (7, 6, 5)
 
 
 def _sorted_display_sides(
-    a: int, k: int, n_digits: int
+    a: int, k: int, b0_probe: int
 ) -> tuple[list[int], list[int]]:
-    b0 = 10**n_digits - 1
-    data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
+    data = compute_ramanujan_decomposition(a, b0_probe, k, factorize=False)
     Ld, Rd = order_sides_for_display(data["L_final"], data["R_final"])
     return sorted(int(x) for x in Ld), sorted(int(x) for x in Rd)
 
@@ -545,15 +592,19 @@ def _sorted_display_sides(
 def build_parametric_analysis_block(
     a: int,
     k: int,
+    b0_template: int,
     *,
     show_p_factor_table: bool = False,
     p_factor_by_columns: bool = False,
 ) -> list[tuple[str, Optional[str]]]:
     """Строки блока параметрической формы; (текст, TAG_PARAMETRIC_SHOUT) для редких сумм/сумм квадратов."""
-    sides: list[tuple[list[int], list[int]]] = []
-    for n in _PARAMETRIC_N_DIGITS:
-        sides.append(_sorted_display_sides(a, k, n))
-    n_hi, n_mid, n_lo = _PARAMETRIC_N_DIGITS
+    b_hi, b_mid, b_lo = parametric_probe_b0_triple(b0_template)
+    sides: list[tuple[list[int], list[int]]] = [
+        _sorted_display_sides(a, k, b_hi),
+        _sorted_display_sides(a, k, b_mid),
+        _sorted_display_sides(a, k, b_lo),
+    ]
+    n_hi, n_mid, n_lo = _PARAMETRIC_X_EXPONENTS
     x_hi, x_mid, x_lo = 10**n_hi, 10**n_mid, 10**n_lo
     L0, R0 = sides[0]
     if len(L0) != len(R0):
@@ -568,7 +619,7 @@ def build_parametric_analysis_block(
         Li, Ri = sides[i]
         if len(Li) != len(L0) or len(Ri) != len(R0):
             raise ParametricAnalysisError(
-                "Число кубов на сторонах меняется с масштабом b₀ (10ⁿ−1); "
+                "Число кубов на сторонах меняется при переходе между пробами b₀; "
                 "сопоставление по индексу невозможно."
             )
     x_sym = sp.Symbol("x")
@@ -597,12 +648,12 @@ def build_parametric_analysis_block(
     for idx, p in enumerate(L_polys):
         if int(p.subs(x_sym, x_mid)) != sides[1][0][idx]:
             raise ParametricAnalysisError(
-                "Проверка b₀ = 10⁶−1: значения S1 не совпали с вычислением."
+                f"Проверка на средней пробе b₀ = {b_mid}: значения S1 не совпали с вычислением."
             )
     for idx, p in enumerate(R_polys):
         if int(p.subs(x_sym, x_mid)) != sides[1][1][idx]:
             raise ParametricAnalysisError(
-                "Проверка b₀ = 10⁶−1: значения S2 не совпали с вычислением."
+                f"Проверка на средней пробе b₀ = {b_mid}: значения S2 не совпали с вычислением."
             )
     sum_L3 = sp.expand(sum(p**3 for p in L_polys))
     sum_R3 = sp.expand(sum(p**3 for p in R_polys))
@@ -622,12 +673,12 @@ def build_parametric_analysis_block(
     rows: list[tuple[str, Optional[str]]] = [
         ("", None),
         (
-            "— Параметрическая форма (внутренний расчёт при b₀ = 10⁷−1, 10⁶−1, 10⁵−1; "
-            "проверено совпадение при b₀ = 10⁶−1) —",
+            "— Параметрическая форма (три расчёта при пробах b₀ для масштабов 10⁷, 10⁶, 10⁵; "
+            f"пробы: {b_hi}, {b_mid}, {b_lo}; согласованность проверяется при b₀ = {b_mid}) —",
             None,
         ),
         (
-            f"a = {a},  k = {k}   (x соответствует степени десяти: при b₀ = 10ⁿ−1 подставляйте x = 10ⁿ)",
+            f"a = {a},  k = {k}   (интерполяция по x = 10⁷, 10⁶, 10⁵; подставляйте x = 10ⁿ согласно масштабу)",
             None,
         ),
         ("", None),
@@ -1027,7 +1078,7 @@ def main():
         "defactor_bundle": None,
         "omit_raw_decomposition": False,
         "between_tail_lines": None,
-        "nines_probe_eligible": None,  # (a, b₀, k): девятки в b₀, |L|=|R|≤26
+        "nines_probe_eligible": None,  # (a, b₀, k): маска b₀ для параметрики, |L|=|R|≤26
         "param_btn": None,
     }
 
@@ -1139,7 +1190,7 @@ def main():
     )
     copy_between_btn.pack(side=tk.RIGHT, padx=(0, 4))
 
-    def run_parametric_append_for_state(a_st: int, k_st: int) -> None:
+    def run_parametric_append_for_state(a_st: int, b0_st: int, k_st: int) -> None:
         """Добавить блок параметрической формы (кнопка и авто после «Вычислить»)."""
         try:
             root.configure(cursor="watch")
@@ -1147,6 +1198,7 @@ def main():
             rows = build_parametric_analysis_block(
                 a_st,
                 k_st,
+                b0_st,
                 show_p_factor_table=var_p_factor_table.get(),
                 p_factor_by_columns=var_p_factor_table.get()
                 and var_p_factor_columns.get(),
@@ -1316,8 +1368,8 @@ def main():
                 var_auto_parametric.get()
                 and clip_block_state.get("nines_probe_eligible")
             ):
-                a_auto, _, k_auto = clip_block_state["nines_probe_eligible"]
-                run_parametric_append_for_state(a_auto, k_auto)
+                a_auto, b0_auto, k_auto = clip_block_state["nines_probe_eligible"]
+                run_parametric_append_for_state(a_auto, b0_auto, k_auto)
         else:
             tw.insert(tk.END, text)
             tw.update_idletasks()
@@ -1368,28 +1420,31 @@ def main():
         if not e:
             messagebox.showinfo(
                 "Параметрическая форма",
-                "Сначала выполните «Вычислить» с полным выводом при b₀ из одних девяток "
-                "(9, 99, 999, …), при этом число кубов слева и справа должно совпадать и быть "
-                f"не больше {PARAMETRIC_MAX_CUBES_PER_SIDE} на сторону.",
+                "Сначала выполните «Вычислить» с полным выводом, когда b₀ либо состоит из одних "
+                "девяток (9, 99, 999, …), либо имеет более двух цифр и «середина» (без первой и "
+                "последней цифры) — только девятки или только нули (например 192, 2995, 101, "
+                "3000000006). Число кубов слева и справа должно совпадать и быть не больше "
+                f"{PARAMETRIC_MAX_CUBES_PER_SIDE} на сторону.",
             )
             return
-        a_st, _b_st, k_st = e
+        a_st, b_st, k_st = e
         try:
             cur_a = var_a.get()
+            cur_b = var_b.get()
             cur_k = var_k.get()
         except tk.TclError:
             messagebox.showerror("Параметры", "Некорректные числа в полях.")
             return
-        if cur_a != a_st or cur_k != k_st:
+        if cur_a != a_st or cur_b != b_st or cur_k != k_st:
             messagebox.showwarning(
                 "Параметры изменились",
                 (
-                    f"Последний подходящий расчёт был при a = {a_st}, k = {k_st}. "
+                    f"Последний подходящий расчёт был при a = {a_st}, b₀ = {b_st}, k = {k_st}. "
                     "Верните эти значения или снова нажмите «Вычислить»."
                 ),
             )
             return
-        run_parametric_append_for_state(a_st, k_st)
+        run_parametric_append_for_state(a_st, b_st, k_st)
 
     btn_param.configure(command=run_parametric_analysis)
 

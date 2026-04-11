@@ -1,6 +1,6 @@
 """
 GUI: Ramanujan telescopic cube decomposition + parametric form (quadratics in x; see publication 06).
-Keep clear_result.py in the same folder (in decompose_gui_EXT_windows.zip or from publication 5).
+Keep clear_result.py in perl/cmd (same folder layout as decompose_gui_EXT_windows.zip or publication 5).
 
 Run:
   python decompose_gui_EXT_EN.py
@@ -18,9 +18,10 @@ import tkinter as tk
 import tkinter.font as tkfont
 from tkinter import ttk, messagebox
 
-_DIR = Path(__file__).resolve().parent
-if str(_DIR) not in sys.path:
-    sys.path.insert(0, str(_DIR))
+_ROOT = Path(__file__).resolve().parent.parent
+_CMD = _ROOT / "perl" / "cmd"
+if str(_CMD) not in sys.path:
+    sys.path.insert(0, str(_CMD))
 
 from clear_result import (  # noqa: E402
     compute_ramanujan_decomposition,
@@ -32,7 +33,7 @@ from clear_result import (  # noqa: E402
 
 AUTHOR_SITE_URL = "https://nvvorobtsov.github.io/"
 
-# Заголовок блока: g — НОД всех оснований кубов до деления; сокращение на g даёт тождество для суммы, делённой на g³.
+# Block header: g — gcd of all cube bases before division; dividing by g gives the identity for the sum divided by g³.
 DEFACTOR_SECTION_TITLE = "After defactorization (g³ — cube of gcd of all bases):"
 
 TITLE_FACTORED_CUBES = "With full factorization of the reduced identity*:"
@@ -49,7 +50,6 @@ def en_cubes_phrase(n: int) -> str:
     if n == 1:
         return "1 cube"
     return f"{n} cubes"
-
 
 
 def _highlight_prime_or_unit_base(x) -> bool:
@@ -123,7 +123,7 @@ def build_output_parts(data: dict, *, wrap_width: int = 72):
         (
             f"Decomposition: a = {data['a']}, b₀ = {data['b_start']}, k = {data['k']}"
         ),
-        f"Parameters built. Number of terms in the sequence: {data['total_terms']}.",
+        f"Parameters built. Terms in the sequence: {data['total_terms']}.",
         "",
         "Result:",
         f"Left: {en_cubes_phrase(len(Ld))}",
@@ -136,7 +136,7 @@ def build_output_parts(data: dict, *, wrap_width: int = 72):
 
 
 def wrap_factored_cube_equation(L: list, R: list, width: int) -> list:
-    """Identity lines (like wrap_equation_lines) with fully factored bases in parentheses."""
+    """Identity lines (like wrap_equation_lines), but bases are full factorizations in parentheses."""
     tokens = []
     for i, val in enumerate(L):
         fx = format_factorization(val)
@@ -165,9 +165,9 @@ def wrap_factored_cube_equation(L: list, R: list, width: int) -> list:
 
 
 def format_bases_factor_table(L: list, R: list) -> tuple[list[str], list[Optional[str]]]:
-    """Table: integer base | format_factorization layout (monospace).
+    """Table: integer base | format_factorization (monospace).
 
-    Second list — per-line tags (None or TAG_PRIME_TABLE_ROW for data rows with a prime base).
+    Second list — row tags (None or TAG_PRIME_TABLE_ROW for data rows with a prime base).
     """
     bases_order = [int(x) for x in L] + [int(x) for x in R]
     rows = []
@@ -201,7 +201,7 @@ def _factor_string_tokens(fac_str: str) -> list[str]:
 
 
 def _invariant_fac_tokens_for_columns(fac_str: str) -> list[str]:
-    """Factor tokens for column layout; fraction «num / den» splits on « / »."""
+    """Factor tokens for column table; fraction «num / den» splits on « / »."""
     s = (fac_str or "").strip()
     if not s:
         return []
@@ -214,7 +214,7 @@ def _invariant_fac_tokens_for_columns(fac_str: str) -> list[str]:
 def _invariant_P_coef_factor_pairs(
     P: sp.Expr, x_sym: sp.Symbol
 ) -> list[tuple[str, str]]:
-    """Pairs (coefficient string, factorization string) by powers of x high to low; skip zeros."""
+    """Pairs (coefficient string, factorization string) by x degree high→low; skip zeros."""
     poly = sp.Poly(sp.expand(P), x_sym, domain="QQ")
     pairs = sorted(poly.terms(), key=lambda t: t[0][0], reverse=True)
     out: list[tuple[str, str]] = []
@@ -244,7 +244,7 @@ def format_invariant_P_factor_table(
     *,
     by_columns: bool = False,
 ) -> tuple[list[str], list[Optional[str]]]:
-    """Factor table for invariant P(x) coefficients: like bases, factor tokens in columns — right-aligned."""
+    """Factor table for coefficients of invariant P(x): like bases table; column factors right-aligned."""
     rows_data = _invariant_P_coef_factor_pairs(P, x_sym)
     if not rows_data:
         return ([], [])
@@ -320,7 +320,7 @@ def format_bases_factor_table_by_columns(
 ) -> tuple[list[str], list[Optional[str]]]:
     """Table: base | factor 1 | factor 2 | … (monospace, factor cells right-aligned).
 
-    Second list — per-line tags (same as format_bases_factor_table).
+    Second list — row tags (same as format_bases_factor_table).
     """
     bases_order = [int(x) for x in L] + [int(x) for x in R]
     rows = []
@@ -390,11 +390,11 @@ def between_separators_one_line(
     omit_raw_decomposition: bool = False,
     between_tail_lines: Optional[list] = None,
 ) -> str:
-    """Single-line identity (as between === in the output): no line breaks, no block headers.
+    """One identity line (as between === in output): no wraps, no block headings.
 
-    If defactorization is present — only the reduced identity (N = … = …^3+…), without the
-    g³ line and without the “After defactorization…” title. Otherwise — the raw identity.
-    The tail with the full-factorization table is not included in the clipboard buffer.
+    With defactorization — only the reduced identity (N = … = …^3+…), no g³ line and no
+    “After defactorization…” title. Otherwise — raw identity. Tail with full-factorization
+    table is not copied to the clipboard.
     """
     _ = omit_raw_decomposition  # API for copy_between_separators; choice via defactor_bundle
     _ = between_tail_lines
@@ -420,7 +420,7 @@ def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -> 
 
 
 class ParametricAnalysisError(Exception):
-    """Failed to recover quadratics in x = 10ⁿ for b₀ = 10ⁿ − 1."""
+    """Could not recover quadratics in x from the parametric b₀ probes."""
 
 
 # Rare identities Σ S1 = Σ S2 / Σ S1² = Σ S2² — large red bold text in the result pane.
@@ -434,7 +434,7 @@ def parametric_block_has_shout(rows: list[tuple[str, Optional[str]]]) -> bool:
 def insert_parametric_analysis_lines(
     tw: tk.Text, rows: list[tuple[str, Optional[str]]]
 ) -> None:
-    """Insert parametric block; lines with TAG_PARAMETRIC_SHOUT are the “shout”."""
+    """Insert parametric block; TAG_PARAMETRIC_SHOUT lines are the “shout” styling."""
     try:
         base = tkfont.Font(font=tw.cget("font"))
         fam = base.actual("family")
@@ -522,13 +522,61 @@ def b0_is_all_nines(b0: int) -> bool:
     return s == "9" * len(s)
 
 
+def b0_middle_uniform_for_parametric(b0: int) -> bool:
+    """b₀ has >2 digits; after dropping first and last digit the middle is only «9» or only «0».
+
+    Short b₀ with such a middle (e.g. 290) are allowed on purpose: same edge digits and a uniform
+    “core” define a telescoping scale family (290, 2990, 29990, …), and three b₀ probes at
+    7/6/5 digit lengths fix three points for interpolation at x = 10⁷, 10⁶, 10⁵.
+    """
+    if b0 <= 0:
+        return False
+    s = str(b0)
+    if len(s) <= 2:
+        return False
+    mid = s[1:-1]
+    if not mid:
+        return False
+    return len(set(mid)) == 1 and mid[0] in ("0", "9")
+
+
+def b0_parametric_probe_eligible(b0: int) -> bool:
+    """b₀ condition for parametric mode: all nines, or uniform “middle” (only 0 or only 9)."""
+    return b0_is_all_nines(b0) or b0_middle_uniform_for_parametric(b0)
+
+
+def parametric_probe_b0_triple(b0_template: int) -> tuple[int, int, int]:
+    """Three b₀ values for scales 10⁷, 10⁶, 10⁵ (high → low probe).
+
+    Classic (all nines): 10⁷−1, 10⁶−1, 10⁵−1.
+    Otherwise: first and last digits as in b₀_template, middle — (T−2) copies of digit c (same as the “middle”
+    of the original b₀), for T = 7, 6, 5 (e.g. 192 → 1999992, 199992, 19992).
+    """
+    b0_template = int(b0_template)
+    if b0_template <= 0:
+        raise ValueError("b0_template must be positive")
+    if b0_is_all_nines(b0_template):
+        return (10**7 - 1, 10**6 - 1, 10**5 - 1)
+    s = str(b0_template)
+    if len(s) <= 2 or not b0_middle_uniform_for_parametric(b0_template):
+        raise ValueError("b0_template does not match parametric mask")
+    mid = s[1:-1]
+    c = mid[0]
+    f, lch = s[0], s[-1]
+    out: list[int] = []
+    for total_digits in (7, 6, 5):
+        m = total_digits - 2
+        out.append(int(f + c * m + lch))
+    return (out[0], out[1], out[2])
+
+
 # Parametric block base names — a…z (at most 26 cubes per side).
 PARAMETRIC_MAX_CUBES_PER_SIDE = 26
 
 
 def parametric_form_eligible_for_last_run(data: dict) -> bool:
-    """When the «Parametric form» button may activate from the last full run."""
-    if not b0_is_all_nines(data["b_start"]):
+    """When the “Parametric form” button may be enabled from the last full run."""
+    if not b0_parametric_probe_eligible(data["b_start"]):
         return False
     Ld, Rd = order_sides_for_display(data["L_final"], data["R_final"])
     nL, nR = len(Ld), len(Rd)
@@ -537,15 +585,14 @@ def parametric_form_eligible_for_last_run(data: dict) -> bool:
     return 1 <= nL <= PARAMETRIC_MAX_CUBES_PER_SIDE
 
 
-# Three scales: x = 10⁷, 10⁶, 10⁵ with b₀ = 10ⁿ − 1 (internal; UI check at n=6).
-_PARAMETRIC_N_DIGITS = (7, 6, 5)
+# Three interpolation scales x = 10⁷, 10⁶, 10⁵; matching b₀ from parametric_probe_b0_triple.
+_PARAMETRIC_X_EXPONENTS = (7, 6, 5)
 
 
 def _sorted_display_sides(
-    a: int, k: int, n_digits: int
+    a: int, k: int, b0_probe: int
 ) -> tuple[list[int], list[int]]:
-    b0 = 10**n_digits - 1
-    data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
+    data = compute_ramanujan_decomposition(a, b0_probe, k, factorize=False)
     Ld, Rd = order_sides_for_display(data["L_final"], data["R_final"])
     return sorted(int(x) for x in Ld), sorted(int(x) for x in Rd)
 
@@ -553,15 +600,19 @@ def _sorted_display_sides(
 def build_parametric_analysis_block(
     a: int,
     k: int,
+    b0_template: int,
     *,
     show_p_factor_table: bool = False,
     p_factor_by_columns: bool = False,
 ) -> list[tuple[str, Optional[str]]]:
-    """Lines for the parametric block; TAG_PARAMETRIC_SHOUT marks rare linear/quadratic sum identities."""
-    sides: list[tuple[list[int], list[int]]] = []
-    for n in _PARAMETRIC_N_DIGITS:
-        sides.append(_sorted_display_sides(a, k, n))
-    n_hi, n_mid, n_lo = _PARAMETRIC_N_DIGITS
+    """Lines for parametric block; (text, TAG_PARAMETRIC_SHOUT) for rare linear/square sums."""
+    b_hi, b_mid, b_lo = parametric_probe_b0_triple(b0_template)
+    sides: list[tuple[list[int], list[int]]] = [
+        _sorted_display_sides(a, k, b_hi),
+        _sorted_display_sides(a, k, b_mid),
+        _sorted_display_sides(a, k, b_lo),
+    ]
+    n_hi, n_mid, n_lo = _PARAMETRIC_X_EXPONENTS
     x_hi, x_mid, x_lo = 10**n_hi, 10**n_mid, 10**n_lo
     L0, R0 = sides[0]
     if len(L0) != len(R0):
@@ -570,14 +621,14 @@ def build_parametric_analysis_block(
         )
     if len(L0) > PARAMETRIC_MAX_CUBES_PER_SIDE:
         raise ParametricAnalysisError(
-            f"Too many cubes on one side (limit {PARAMETRIC_MAX_CUBES_PER_SIDE})."
+            f"Too many cubes on a side (limit {PARAMETRIC_MAX_CUBES_PER_SIDE})."
         )
     for i in (1, 2):
         Li, Ri = sides[i]
         if len(Li) != len(L0) or len(Ri) != len(R0):
             raise ParametricAnalysisError(
-                "Cube counts change with b₀ scale (10ⁿ−1); "
-                "index matching is impossible."
+                "Cube counts change across b₀ probes; "
+                "index-wise matching is impossible."
             )
     x_sym = sp.Symbol("x")
     L_polys: list[sp.Expr] = []
@@ -605,17 +656,17 @@ def build_parametric_analysis_block(
     for idx, p in enumerate(L_polys):
         if int(p.subs(x_sym, x_mid)) != sides[1][0][idx]:
             raise ParametricAnalysisError(
-                "Check b₀ = 10⁶−1: S1 values do not match computation."
+                f"Check at middle probe b₀ = {b_mid}: S1 values do not match the computation."
             )
     for idx, p in enumerate(R_polys):
         if int(p.subs(x_sym, x_mid)) != sides[1][1][idx]:
             raise ParametricAnalysisError(
-                "Check b₀ = 10⁶−1: S2 values do not match computation."
+                f"Check at middle probe b₀ = {b_mid}: S2 values do not match the computation."
             )
     sum_L3 = sp.expand(sum(p**3 for p in L_polys))
     sum_R3 = sp.expand(sum(p**3 for p in R_polys))
     if sp.expand(sum_L3 - sum_R3) != 0:
-        raise ParametricAnalysisError("Cube sums of S1 and S2 polynomials do not match.")
+        raise ParametricAnalysisError("Sums of cubes of S1 and S2 polynomials do not match.")
     P = sum_L3
     sum_L1 = sp.expand(sum(L_polys))
     sum_R1 = sp.expand(sum(R_polys))
@@ -630,12 +681,12 @@ def build_parametric_analysis_block(
     rows: list[tuple[str, Optional[str]]] = [
         ("", None),
         (
-            "— Parametric form (internal runs at b₀ = 10⁷−1, 10⁶−1, 10⁵−1; "
-            "checked at b₀ = 10⁶−1) —",
+            "— Parametric form (three runs at b₀ probes for scales 10⁷, 10⁶, 10⁵; "
+            f"probes: {b_hi}, {b_mid}, {b_lo}; consistency checked at b₀ = {b_mid}) —",
             None,
         ),
         (
-            f"a = {a},  k = {k}   (x is a power of 10: for b₀ = 10ⁿ−1 substitute x = 10ⁿ)",
+            f"a = {a},  k = {k}   (interpolation in x = 10⁷, 10⁶, 10⁵; substitute x = 10ⁿ to match scale)",
             None,
         ),
         ("", None),
@@ -665,11 +716,11 @@ def build_parametric_analysis_block(
                 tg = ft_tags[i] if i < len(ft_tags) else None
                 rows.append((ln, tg))
     rows.append(("", None))
-    rows.append(("Extra identities on sums (not cubes):", None))
+    rows.append(("Extra identities for sums (not in cubes):", None))
     if lin_ok:
         rows.append(
             (
-                "!!! ATTENTION !!!  Σ S1 = Σ S2  — IDENTITY HOLDS  —  UNUSUAL !!!",
+                "!!! WARNING !!!  Σ S1 = Σ S2  HOLDS  —  UNUSUAL !!!",
                 TAG_PARAMETRIC_SHOUT,
             ),
         )
@@ -678,7 +729,7 @@ def build_parametric_analysis_block(
     if sq_ok:
         rows.append(
             (
-                "!!! ATTENTION !!!  Σ S1² = Σ S2²  — IDENTITY HOLDS  —  UNUSUAL !!!",
+                "!!! WARNING !!!  Σ S1² = Σ S2²  HOLDS  —  UNUSUAL !!!",
                 TAG_PARAMETRIC_SHOUT,
             ),
         )
@@ -688,7 +739,7 @@ def build_parametric_analysis_block(
 
 
 def _insert_eq_lines_bold_left(tw: tk.Text, lines: list, tag: str) -> None:
-    """Left of the first « = » in bold (tag)."""
+    """Left part up to first « = » in bold (tag)."""
     left_zone = True
     for line in lines:
         if left_zone:
@@ -711,7 +762,7 @@ def insert_result_with_bold_left_side(
     defactor_bundle: Optional[Tuple[str, str, list, list, list]] = None,
     full_factor_display: Optional[Tuple[str, list, Optional[list]]] = None,
 ) -> None:
-    """In identity lines, left of the first « = » is bold blue (#1565C0)."""
+    """In identity lines, left part up to first « = » — bold blue (#1565C0)."""
     tag = "decomp_left"
     blue = "#1565C0"
     try:
@@ -778,7 +829,7 @@ def insert_result_with_bold_left_side(
 
 def main():
     root = tk.Tk()
-    root.title("Ramanujan decomposition — a, b₀, k (+ parametric form)")
+    root.title("Ramanujan decomposition — parameters a, b₀, k")
     root.minsize(640, 880)
 
     outer = ttk.Frame(root, padding=12)
@@ -796,7 +847,7 @@ def main():
     if not _paned_bg:
         _paned_bg = root.cget("bg")
 
-    # Всё выше «Макс. членов…» — вне PanedWindow: шов не затрагивает параметры и галочки.
+    # Everything above max-terms — outside PanedWindow: sash does not move params/checkboxes.
     head_frm = ttk.Frame(outer)
     head_frm.grid(row=0, column=0, sticky="ew")
 
@@ -810,7 +861,7 @@ def main():
         background=_paned_bg,
     )
     pw.grid(row=1, column=0, sticky="nsew")
-    # Canvas: иначе PanedWindow не даёт сжать панель ниже winfo_reqheight() детей — шов «липнет».
+    # Canvas: otherwise PanedWindow won't shrink pane below children reqheight — sash “sticks”.
     split_canvas = tk.Canvas(
         pw,
         bg=_paned_bg,
@@ -827,8 +878,8 @@ def main():
             w = int(event.width)
             if w > 1:
                 split_canvas.itemconfigure(_split_inner_win, width=w)
-            # Вертикаль не трогаем: inner_split всегда (0, 0). Шов только уменьшает высоту canvas —
-            # обрезка снизу, строка «Макс. членов…» не «ездит» при перетаскивании.
+            # Vertical unchanged: inner_split at (0, 0). Sash only shrinks canvas height —
+            # clip from below; max-terms row does not “slide” when dragging.
             split_canvas.coords(_split_inner_win, 0, 0)
         except (tk.TclError, ValueError):
             pass
@@ -846,7 +897,7 @@ def main():
     inner_split.bind("<Configure>", _split_inner_on_configure)
 
     bottom_frm = tk.Frame(pw, bg=_paned_bg, bd=0, highlightthickness=0)
-    # pw.add только после сборки inner_split (порог + «Примеры») и bottom_frm.
+    # pw.add only after inner_split (threshold + examples) and bottom_frm are built.
 
     head_frm.columnconfigure(1, weight=1)
     inner_split.columnconfigure(1, weight=1)
@@ -874,7 +925,7 @@ def main():
     )
     sp_a.grid(row=0, column=1, sticky="w", pady=2)
 
-    ttk.Label(head_frm, text="b₀ (initial b):").grid(row=1, column=0, sticky="w", pady=2)
+    ttk.Label(head_frm, text="b₀ (starting b):").grid(row=1, column=0, sticky="w", pady=2)
     sp_b = tk.Spinbox(
         head_frm,
         from_=-20000,
@@ -899,7 +950,7 @@ def main():
     only_count = tk.BooleanVar(value=False)
     chk = ttk.Checkbutton(
         head_frm,
-        text="Term count only (no decomposition lines)",
+        text="Term count only (no expansion lines)",
         variable=only_count,
     )
     chk.grid(row=3, column=0, columnspan=2, sticky="w", pady=(8, 4))
@@ -909,7 +960,7 @@ def main():
         head_frm,
         text=(
             "Defactorization check (g³ = (gcd of bases)³, N = factorization(N) =, reduced "
-            "identity; if gcd>1 raw decomposition is hidden; if gcd=1 — full output)"
+            "identity; if gcd>1 raw expansion is hidden; if gcd=1 — full output)"
         ),
         variable=var_defactor,
     )
@@ -923,7 +974,7 @@ def main():
         opt_sub,
         text=(
             "Full factorization of reduced identity (cubes with factored bases; "
-            "extra block below defactorization)"
+            "block below after defactorization)"
         ),
         variable=var_full_factor,
     )
@@ -938,7 +989,7 @@ def main():
     var_factor_columns = tk.BooleanVar(value=False)
     chk_fc = ttk.Checkbutton(
         opt_sub,
-        text="Factors in separate table columns",
+        text="Factors in table columns",
         variable=var_factor_columns,
     )
     chk_fc.pack(side=tk.LEFT, padx=(18, 0))
@@ -957,8 +1008,8 @@ def main():
     warn_lbl = ttk.Label(
         inner_split,
         text=(
-            "Max decomposition terms — warn if output is large\n"
-            "(only when «term count only» is unchecked):"
+            "Max decomposition terms — warn on large output\n"
+            "(only when “term count only” is unchecked):"
         ),
         justify=tk.LEFT,
     )
@@ -974,7 +1025,7 @@ def main():
     sp_warn.grid(row=0, column=1, sticky="w", pady=2)
 
     ex_frame = ttk.LabelFrame(
-        inner_split, text="Examples: parameter triple → term count (reference)"
+        inner_split, text="Examples: parameter triple → term count (for reference)"
     )
     _ex_frame_grid_kw = {
         "row": 1,
@@ -1014,14 +1065,14 @@ def main():
     warn_lbl.grid_remove()
     sp_warn.grid_remove()
     root.update_idletasks()
-    # Минимум первой панели: мало пикселей, чтобы шов можно было утащить почти к head_frm.
+    # Min first pane: few pixels so sash can be dragged almost to head_frm.
     _min_split = 6
     warn_lbl.grid(row=0, column=0, sticky="nw", pady=2)
     sp_warn.grid(row=0, column=1, sticky="w", pady=2)
     root.update_idletasks()
     ex_frame.grid(**_ex_frame_grid_kw)
     root.update_idletasks()
-    # Стартовая высота первой панели (порог + «Примеры») — по запросу inner_split.
+    # Initial height of first pane (threshold + examples) from inner_split request.
     _split_full_reqh = max(int(inner_split.winfo_reqheight()) + 24, int(_min_split) + 1)
 
     def clipboard_set(text: str) -> None:
@@ -1035,7 +1086,7 @@ def main():
         "defactor_bundle": None,
         "omit_raw_decomposition": False,
         "between_tail_lines": None,
-        "nines_probe_eligible": None,  # (a, b₀, k): nines in b₀, |L|=|R|≤26
+        "nines_probe_eligible": None,  # (a, b₀, k): b₀ mask for parametric, |L|=|R|≤26
         "param_btn": None,
     }
 
@@ -1045,8 +1096,8 @@ def main():
         if d is None or w is None:
             messagebox.showinfo(
                 "No block",
-                "Run a full computation first (without «term count only») "
-                "so text between the = bars is available.",
+                "Run a full computation first (without “term count only”) "
+                "so text appears between the lines of = signs.",
             )
             return
         clipboard_set(
@@ -1120,7 +1171,7 @@ def main():
 
     tw.bind("<Button-3>", show_ctx)
 
-    # Копировать всё — глиф Copy (Segoe MDL2)
+    # Copy all — Copy glyph (Segoe MDL2)
     copy_all_btn = tk.Button(
         out_top,
         text="\uE8C8",
@@ -1133,7 +1184,7 @@ def main():
         takefocus=False,
     )
     copy_all_btn.pack(side=tk.RIGHT, padx=(8, 0))
-    # Между === в одну строку (без рубки)
+    # Between === as one line (no wrapping)
     copy_between_btn = tk.Button(
         out_top,
         text="\u2261",
@@ -1147,14 +1198,15 @@ def main():
     )
     copy_between_btn.pack(side=tk.RIGHT, padx=(0, 4))
 
-    def run_parametric_append_for_state(a_st: int, k_st: int) -> None:
-        """Append parametric block (button and auto after «Compute»)."""
+    def run_parametric_append_for_state(a_st: int, b0_st: int, k_st: int) -> None:
+        """Append parametric block (button and auto after Compute)."""
         try:
             root.configure(cursor="watch")
             root.update_idletasks()
             rows = build_parametric_analysis_block(
                 a_st,
                 k_st,
+                b0_st,
                 show_p_factor_table=var_p_factor_table.get(),
                 p_factor_by_columns=var_p_factor_table.get()
                 and var_p_factor_columns.get(),
@@ -1169,7 +1221,7 @@ def main():
         else:
             insert_parametric_analysis_lines(tw, rows)
             tw.update_idletasks()
-            # Красный «крик» внизу — обязательно показать сразу; иначе — к началу текста.
+            # Red “shout” at bottom — scroll to end; else top of text.
             if parametric_block_has_shout(rows):
                 tw.see(tk.END)
             else:
@@ -1202,7 +1254,7 @@ def main():
             return
 
         tw.delete("1.0", tk.END)
-        tw.insert(tk.END, "Computing…\n")
+        tw.insert(tk.END, "Computing\n")
         tw.update_idletasks()
 
         use_styled = False
@@ -1219,8 +1271,8 @@ def main():
 
         try:
             data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
-            # Режим «только число» — по флагу на виджете: на части сборок (Python 3.14 + ttk)
-            # BooleanVar.get() и отрисовка чекбокса могут расходиться.
+            # “Term count only” from widget state: on some builds (Python 3.14 + ttk)
+            # BooleanVar.get() and checkbox paint can disagree.
             only_number_mode = "selected" in chk.state()
             want_full = not only_number_mode
 
@@ -1230,7 +1282,7 @@ def main():
                     (
                         f"Terms in decomposition: {data['total_terms']}\n"
                         f"This exceeds the threshold ({warn_max}). Full output and factorization "
-                        f"may take a while.\n\n"
+                        f"may take a noticeable time.\n\n"
                         f"Continue?"
                     ),
                     icon="warning",
@@ -1262,7 +1314,7 @@ def main():
                 header, eq_lines, sep_line = build_output_parts(data, wrap_width=wrap_w)
                 if var_defactor.get():
                     defactor_bundle = try_defactored_equation_lines(
-                        data["L_final"], data["R_final"], wrap_w, lang="en"
+                        data["L_final"], data["R_final"], wrap_w
                     )
                 if var_defactor.get() and defactor_bundle is not None:
                     header = header[:-1]
@@ -1324,8 +1376,8 @@ def main():
                 var_auto_parametric.get()
                 and clip_block_state.get("nines_probe_eligible")
             ):
-                a_auto, _, k_auto = clip_block_state["nines_probe_eligible"]
-                run_parametric_append_for_state(a_auto, k_auto)
+                a_auto, b0_auto, k_auto = clip_block_state["nines_probe_eligible"]
+                run_parametric_append_for_state(a_auto, b0_auto, k_auto)
         else:
             tw.insert(tk.END, text)
             tw.update_idletasks()
@@ -1346,7 +1398,7 @@ def main():
     btn_param.pack(side=tk.LEFT, padx=(10, 0))
     ttk.Checkbutton(
         btn_left,
-        text="Auto-append parametric form",
+        text="Parametric form immediately",
         variable=var_auto_parametric,
     ).pack(side=tk.LEFT, padx=(12, 0))
     chk_p_factor_table = ttk.Checkbutton(
@@ -1357,7 +1409,7 @@ def main():
     chk_p_factor_table.pack(side=tk.LEFT, padx=(12, 0))
     chk_p_factor_columns = ttk.Checkbutton(
         btn_left,
-        text="Factors in separate table columns",
+        text="Factors in table columns",
         variable=var_p_factor_columns,
     )
     chk_p_factor_columns.pack(side=tk.LEFT, padx=(8, 0))
@@ -1376,35 +1428,38 @@ def main():
         if not e:
             messagebox.showinfo(
                 "Parametric form",
-                "Run «Compute» with full output first, with b₀ all nines (9, 99, 999, …); "
-                "left and right cube counts must match and be at most "
+                "First run Compute with full output when b₀ is either all nines "
+                "(9, 99, 999, …), or has more than two digits and the “middle” (without the first and "
+                "last digit) is only nines or only zeros (e.g. 192, 2995, 101, "
+                "3000000006). Left and right cube counts must match and be at most "
                 f"{PARAMETRIC_MAX_CUBES_PER_SIDE} per side.",
             )
             return
-        a_st, _b_st, k_st = e
+        a_st, b_st, k_st = e
         try:
             cur_a = var_a.get()
+            cur_b = var_b.get()
             cur_k = var_k.get()
         except tk.TclError:
             messagebox.showerror("Parameters", "Invalid numbers in fields.")
             return
-        if cur_a != a_st or cur_k != k_st:
+        if cur_a != a_st or cur_b != b_st or cur_k != k_st:
             messagebox.showwarning(
                 "Parameters changed",
                 (
-                    f"The last eligible run used a = {a_st}, k = {k_st}. "
-                    "Restore those values or press «Compute» again."
+                    f"The last eligible run was at a = {a_st}, b₀ = {b_st}, k = {k_st}. "
+                    "Restore those values or press Compute again."
                 ),
             )
             return
-        run_parametric_append_for_state(a_st, k_st)
+        run_parametric_append_for_state(a_st, b_st, k_st)
 
     btn_param.configure(command=run_parametric_analysis)
 
     def open_author_site():
         webbrowser.open(AUTHOR_SITE_URL)
 
-    ttk.Button(btn_row, text="Author site", command=open_author_site).grid(
+    ttk.Button(btn_row, text="Author’s site", command=open_author_site).grid(
         row=0, column=1, sticky="e"
     )
 
@@ -1427,7 +1482,7 @@ def main():
         target = min(want_split, room)
         target = max(int(target), int(_min_split))
         pw.paneconfigure(split_canvas, minsize=int(_min_split))
-        # В части сборок Python у tk.PanedWindow нет sashpos — только sash_place(index, x, y).
+        # On some Python builds tk.PanedWindow has no sashpos — only sash_place(index, x, y).
         pw.sash_place(0, 0, int(target))
     except tk.TclError:
         pass
