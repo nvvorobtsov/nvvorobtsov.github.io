@@ -2,6 +2,11 @@
   "entries": [
     {
       "date": "2026-04-11",
+      "ru": "расширенная GUI decompose_gui_EXT / decompose_gui_EXT_EN: после строки с инвариантным P(x) — опциональная таблица факторов коэффициентов P и режим «факторы по колонкам» (как у таблицы оснований). Страница changes.html: на широких экранах основная колонка контента примерно в 2,5 раза шире (max-width 1800px). Обновлены sources/ и packaging/decompose_gui_EXT_windows/.",
+      "en": "Extended GUIs decompose_gui_EXT / decompose_gui_EXT_EN: after the invariant P(x) line, optional factor table for coefficients of P and “factors in table columns” mode (like the reduced bases table). changes.html: on wide viewports the main content column is ~2.5× wider (max-width 1800px). Updated sources/ and packaging/decompose_gui_EXT_windows/."
+    },
+    {
+      "date": "2026-04-11",
       "ru": "публикация 06: рукопись v4 на Zenodo (DOI 10.5281/zenodo.19498770); обложка publication6.html — v4 (§4, уточнение «изолированности», новый заголовок); кнопка Zenodo на главной ведёт на новую версию записи.",
       "en": "Publication 06: manuscript v4 on Zenodo (DOI 10.5281/zenodo.19498770); publication6.html cover updated to v4 (§4, clarified “isolated” wording, new title); main-page Zenodo button points to the new record version."
     },
