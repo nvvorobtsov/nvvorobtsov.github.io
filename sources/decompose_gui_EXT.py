@@ -235,10 +235,8 @@ def format_invariant_P_factor_table(
     x_sym: sp.Symbol,
     *,
     by_columns: bool = False,
-    coef_col_label: str = "Коэффициент",
-    factor_col_label: str = "Факторизация",
 ) -> tuple[list[str], list[Optional[str]]]:
-    """Таблица факторов коэффициентов инвариантного P(x): факторы по колонкам — выравнивание вправо."""
+    """Таблица факторов коэффициентов инвариантного P(x): как у оснований, выравнивание факторов по колонкам — вправо."""
     rows_data = _invariant_P_coef_factor_pairs(P, x_sym)
     if not rows_data:
         return ([], [])
@@ -254,7 +252,7 @@ def format_invariant_P_factor_table(
         nf = max((len(fr) for fr in factor_rows), default=0)
         if nf < 1:
             nf = 1
-        h_base = coef_col_label
+        h_base = "Коэффициент"
         wn = max(len(h_base), max((len(r[0]) for r in rows_data), default=0))
         col_widths = []
         for j in range(nf):
@@ -285,7 +283,7 @@ def format_invariant_P_factor_table(
         tags.append(None)
         return out, tags
 
-    h0, h1 = coef_col_label, factor_col_label
+    h0, h1 = "Коэффициент", "Факторизация"
     wn = max(len(h0), max((len(r[0]) for r in rows_data), default=0))
     wf = max(len(h1), max((len(r[1]) for r in rows_data), default=0))
     sep = "+" + "-" * (wn + 2) + "+" + "-" * (wf + 2) + "+"
@@ -384,36 +382,20 @@ def between_separators_one_line(
     omit_raw_decomposition: bool = False,
     between_tail_lines: Optional[list] = None,
 ) -> str:
-    """Текст между линиями === без переносов (как одна строка) для копирования."""
-    tail = ("\n" + "\n".join(between_tail_lines)) if between_tail_lines else ""
-    if omit_raw_decomposition and defactor_bundle:
-        d_g3, d_n, d_eq, _L2, _R2 = defactor_bundle
-        s = (
-            DEFACTOR_SECTION_TITLE
-            + "\n"
-            + d_g3
-            + "\n"
-            + d_n
-            + "\n"
-            + "\n".join(d_eq)
-        )
-        return s + tail
+    """Одна строка тождества (как между === в выводе): без переносов и без заголовков блоков.
+
+    При наличии дефакторизации — только сокращённое тождество (N = … = …^3+…), без строки
+    про g³ и без заголовка «После дефакторизации…». Иначе — сырое тождество. Хвост с таблицей
+    полной факторизации в буфер не попадает.
+    """
+    _ = omit_raw_decomposition  # API для copy_between_separators; выбор по defactor_bundle
+    _ = between_tail_lines
+    if defactor_bundle is not None:
+        _gcd_line, factor_line, eq_lines, _L2, _R2 = defactor_bundle
+        return factor_line.rstrip() + "".join(eq_lines)
     header, eq_lines, _ = build_output_parts(data, wrap_width=wrap_width)
     factor_line = header[-1]
-    s = factor_line.rstrip() + "".join(eq_lines)
-    if defactor_bundle:
-        d_g3, d_n, d_eq, _L2, _R2 = defactor_bundle
-        s += (
-            "\n"
-            + DEFACTOR_SECTION_TITLE
-            + "\n"
-            + d_g3
-            + "\n"
-            + d_n
-            + "\n"
-            + "\n".join(d_eq)
-        )
-    return s + tail
+    return factor_line.rstrip() + "".join(eq_lines)
 
 
 def build_output(data: dict, term_count_only: bool, *, wrap_width: int = 72) -> str:
@@ -566,9 +548,6 @@ def build_parametric_analysis_block(
     *,
     show_p_factor_table: bool = False,
     p_factor_by_columns: bool = False,
-    p_factor_section_title: str = "Таблица факторов коэффициентов P(x):",
-    p_coef_col_label: str = "Коэффициент",
-    p_fac_col_label: str = "Факторизация",
 ) -> list[tuple[str, Optional[str]]]:
     """Строки блока параметрической формы; (текст, TAG_PARAMETRIC_SHOUT) для редких сумм/сумм квадратов."""
     sides: list[tuple[list[int], list[int]]] = []
@@ -669,15 +648,11 @@ def build_parametric_analysis_block(
     rows.append((format_polynomial_line(P, x_sym), None))
     if show_p_factor_table:
         ft_lines, ft_tags = format_invariant_P_factor_table(
-            P,
-            x_sym,
-            by_columns=p_factor_by_columns,
-            coef_col_label=p_coef_col_label,
-            factor_col_label=p_fac_col_label,
+            P, x_sym, by_columns=p_factor_by_columns
         )
         if ft_lines:
             rows.append(("", None))
-            rows.append((p_factor_section_title, None))
+            rows.append(("Таблица факторов коэффициентов P(x):", None))
             for i, ln in enumerate(ft_lines):
                 tg = ft_tags[i] if i < len(ft_tags) else None
                 rows.append((ln, tg))
@@ -798,12 +773,79 @@ def main():
     root.title("Ramanujan decomposition — параметры a, b₀, k")
     root.minsize(640, 880)
 
-    frm = ttk.Frame(root, padding=12)
-    frm.grid(row=0, column=0, sticky="nsew")
+    outer = ttk.Frame(root, padding=12)
+    outer.grid(row=0, column=0, sticky="nsew")
     root.rowconfigure(0, weight=1)
     root.columnconfigure(0, weight=1)
-    frm.columnconfigure(1, weight=1)
-    frm.rowconfigure(9, weight=1)
+    outer.columnconfigure(0, weight=1)
+    outer.rowconfigure(0, weight=0)
+    outer.rowconfigure(1, weight=1)
+
+    try:
+        _paned_bg = ttk.Style().lookup("TFrame", "background")
+    except tk.TclError:
+        _paned_bg = ""
+    if not _paned_bg:
+        _paned_bg = root.cget("bg")
+
+    # Всё выше «Макс. членов…» — вне PanedWindow: шов не затрагивает параметры и галочки.
+    head_frm = ttk.Frame(outer)
+    head_frm.grid(row=0, column=0, sticky="ew")
+
+    pw = tk.PanedWindow(
+        outer,
+        orient=tk.VERTICAL,
+        sashrelief=tk.GROOVE,
+        sashwidth=7,
+        sashpad=2,
+        bd=0,
+        background=_paned_bg,
+    )
+    pw.grid(row=1, column=0, sticky="nsew")
+    # Canvas: иначе PanedWindow не даёт сжать панель ниже winfo_reqheight() детей — шов «липнет».
+    split_canvas = tk.Canvas(
+        pw,
+        bg=_paned_bg,
+        highlightthickness=0,
+        bd=0,
+    )
+    inner_split = ttk.Frame(split_canvas)
+    _split_inner_win = split_canvas.create_window(0, 0, window=inner_split, anchor="nw")
+
+    def _split_canvas_on_configure(event: tk.Event) -> None:
+        if event.widget != split_canvas:
+            return
+        try:
+            w = int(event.width)
+            if w > 1:
+                split_canvas.itemconfigure(_split_inner_win, width=w)
+            # Вертикаль не трогаем: inner_split всегда (0, 0). Шов только уменьшает высоту canvas —
+            # обрезка снизу, строка «Макс. членов…» не «ездит» при перетаскивании.
+            split_canvas.coords(_split_inner_win, 0, 0)
+        except (tk.TclError, ValueError):
+            pass
+
+    split_canvas.bind("<Configure>", _split_canvas_on_configure)
+
+    def _split_inner_on_configure(_event: tk.Event) -> None:
+        try:
+            bb = split_canvas.bbox("all")
+            if bb:
+                split_canvas.configure(scrollregion=bb)
+        except tk.TclError:
+            pass
+
+    inner_split.bind("<Configure>", _split_inner_on_configure)
+
+    bottom_frm = tk.Frame(pw, bg=_paned_bg, bd=0, highlightthickness=0)
+    # pw.add только после сборки inner_split (порог + «Примеры») и bottom_frm.
+
+    head_frm.columnconfigure(1, weight=1)
+    inner_split.columnconfigure(1, weight=1)
+    bottom_frm.columnconfigure(0, weight=1)
+    bottom_frm.columnconfigure(1, weight=1)
+    bottom_frm.rowconfigure(0, weight=0)
+    bottom_frm.rowconfigure(1, weight=1)
 
     var_a = tk.IntVar(value=2)
     var_b = tk.IntVar(value=10)
@@ -813,9 +855,9 @@ def main():
     var_p_factor_table = tk.BooleanVar(value=False)
     var_p_factor_columns = tk.BooleanVar(value=False)
 
-    ttk.Label(frm, text="a:").grid(row=0, column=0, sticky="w", pady=2)
+    ttk.Label(head_frm, text="a:").grid(row=0, column=0, sticky="w", pady=2)
     sp_a = tk.Spinbox(
-        frm,
+        head_frm,
         from_=-300,
         to=300,
         increment=1,
@@ -824,9 +866,9 @@ def main():
     )
     sp_a.grid(row=0, column=1, sticky="w", pady=2)
 
-    ttk.Label(frm, text="b₀ (начальное b):").grid(row=1, column=0, sticky="w", pady=2)
+    ttk.Label(head_frm, text="b₀ (начальное b):").grid(row=1, column=0, sticky="w", pady=2)
     sp_b = tk.Spinbox(
-        frm,
+        head_frm,
         from_=-20000,
         to=20000,
         increment=1,
@@ -835,9 +877,9 @@ def main():
     )
     sp_b.grid(row=1, column=1, sticky="w", pady=2)
 
-    ttk.Label(frm, text="k (число шагов):").grid(row=2, column=0, sticky="w", pady=2)
+    ttk.Label(head_frm, text="k (число шагов):").grid(row=2, column=0, sticky="w", pady=2)
     sp_k = tk.Spinbox(
-        frm,
+        head_frm,
         from_=1,
         to=300000,
         increment=1,
@@ -848,7 +890,7 @@ def main():
 
     only_count = tk.BooleanVar(value=False)
     chk = ttk.Checkbutton(
-        frm,
+        head_frm,
         text="Только число членов (без строки разложения)",
         variable=only_count,
     )
@@ -856,7 +898,7 @@ def main():
 
     var_defactor = tk.BooleanVar(value=True)
     chk_def = ttk.Checkbutton(
-        frm,
+        head_frm,
         text=(
             "Проверка дефакторизации (g³ = (НОД оснований)³, N = факторизация(N) =, сокращённое "
             "тождество; при НОД>1 сырое разложение не показывается; при НОД=1 — полный вывод)"
@@ -867,7 +909,7 @@ def main():
 
     var_full_factor = tk.BooleanVar(value=False)
     var_bases_only = tk.BooleanVar(value=True)
-    opt_sub = ttk.Frame(frm)
+    opt_sub = ttk.Frame(head_frm)
     opt_sub.grid(row=5, column=0, columnspan=2, sticky="w", pady=(0, 4))
     chk_ff = ttk.Checkbutton(
         opt_sub,
@@ -904,26 +946,36 @@ def main():
     var_bases_only.trace_add("write", sync_factor_suboptions)
     sync_factor_suboptions()
 
-    ttk.Label(
-        frm,
+    warn_lbl = ttk.Label(
+        inner_split,
         text=(
             "Макс. членов разложения — предупреждать о большом выводе\n"
             "(только если галочка «только число» выключена):"
         ),
         justify=tk.LEFT,
-    ).grid(row=6, column=0, sticky="nw", pady=2)
+    )
+    warn_lbl.grid(row=0, column=0, sticky="nw", pady=2)
     sp_warn = tk.Spinbox(
-        frm,
+        inner_split,
         from_=4,
         to=2_000_000,
         increment=1,
         textvariable=var_warn_max,
         width=12,
     )
-    sp_warn.grid(row=6, column=1, sticky="w", pady=2)
+    sp_warn.grid(row=0, column=1, sticky="w", pady=2)
 
-    ex_frame = ttk.LabelFrame(frm, text="Примеры: тройка параметров → число членов (для ориентира)")
-    ex_frame.grid(row=7, column=0, columnspan=2, sticky="ew", pady=(10, 6))
+    ex_frame = ttk.LabelFrame(
+        inner_split, text="Примеры: тройка параметров → число членов (для ориентира)"
+    )
+    _ex_frame_grid_kw = {
+        "row": 1,
+        "column": 0,
+        "columnspan": 2,
+        "sticky": "ew",
+        "pady": (10, 6),
+    }
+    ex_frame.grid(**_ex_frame_grid_kw)
     ex_frame.columnconfigure(0, weight=1)
 
     ttk.Label(ex_frame, text="Параметры a, b₀, k").grid(row=0, column=0, sticky="w", padx=4, pady=2)
@@ -948,6 +1000,21 @@ def main():
         ttk.Button(ex_frame, text="Установить", width=11, command=make_apply(a_i, b_i, k_i)).grid(
             row=i, column=2, padx=4, pady=1
         )
+
+    root.update_idletasks()
+    ex_frame.grid_remove()
+    warn_lbl.grid_remove()
+    sp_warn.grid_remove()
+    root.update_idletasks()
+    # Минимум первой панели: мало пикселей, чтобы шов можно было утащить почти к head_frm.
+    _min_split = 6
+    warn_lbl.grid(row=0, column=0, sticky="nw", pady=2)
+    sp_warn.grid(row=0, column=1, sticky="w", pady=2)
+    root.update_idletasks()
+    ex_frame.grid(**_ex_frame_grid_kw)
+    root.update_idletasks()
+    # Стартовая высота первой панели (порог + «Примеры») — по запросу inner_split.
+    _split_full_reqh = max(int(inner_split.winfo_reqheight()) + 24, int(_min_split) + 1)
 
     def clipboard_set(text: str) -> None:
         root.clipboard_clear()
@@ -984,8 +1051,8 @@ def main():
             )
         )
 
-    out_wrap = ttk.Frame(frm)
-    out_wrap.grid(row=9, column=0, columnspan=2, sticky="nsew", pady=(4, 0))
+    out_wrap = ttk.Frame(bottom_frm)
+    out_wrap.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(4, 0))
     out_wrap.rowconfigure(1, weight=1)
     out_wrap.columnconfigure(0, weight=1)
 
@@ -1002,7 +1069,7 @@ def main():
     h_scroll = ttk.Scrollbar(text_holder, orient=tk.HORIZONTAL)
     tw = tk.Text(
         text_holder,
-        height=28,
+        height=14,
         width=88,
         font=("Consolas", 10),
         wrap=tk.NONE,
@@ -1144,7 +1211,10 @@ def main():
 
         try:
             data = compute_ramanujan_decomposition(a, b0, k, factorize=False)
-            want_full = not only_count.get()
+            # Режим «только число» — по флагу на виджете: на части сборок (Python 3.14 + ttk)
+            # BooleanVar.get() и отрисовка чекбокса могут расходиться.
+            only_number_mode = "selected" in chk.state()
+            want_full = not only_number_mode
 
             if want_full and data["total_terms"] > warn_max:
                 ok = messagebox.askyesno(
@@ -1178,7 +1248,7 @@ def main():
                 }
 
             wrap_w = _estimate_wrap_chars(tw)
-            if only_count.get():
+            if only_number_mode:
                 text = build_output(data, True, wrap_width=wrap_w)
             else:
                 header, eq_lines, sep_line = build_output_parts(data, wrap_width=wrap_w)
@@ -1253,8 +1323,8 @@ def main():
             tw.update_idletasks()
             tw.yview_moveto(0)
 
-    btn_row = ttk.Frame(frm)
-    btn_row.grid(row=8, column=0, columnspan=2, sticky="ew", pady=6)
+    btn_row = ttk.Frame(bottom_frm)
+    btn_row.grid(row=0, column=0, columnspan=2, sticky="ew", pady=6)
     btn_row.columnconfigure(0, weight=1)
     btn_left = ttk.Frame(btn_row)
     btn_left.grid(row=0, column=0, sticky="w")
@@ -1330,9 +1400,30 @@ def main():
         row=0, column=1, sticky="e"
     )
 
-
     for w in (sp_a, sp_b, sp_k, sp_warn):
         w.bind("<Return>", lambda e: run_compute())
+
+    pw.add(split_canvas, minsize=int(_min_split), sticky="nsew")
+    pw.add(bottom_frm, minsize=200, sticky="nsew")
+    root.update_idletasks()
+    root.update()
+    try:
+        ph = max(
+            int(pw.winfo_height()),
+            int(outer.winfo_height()),
+            max(0, int(root.winfo_height()) - 48),
+        )
+        bottom_min = 200
+        want_split = int(_split_full_reqh)
+        room = max(ph - bottom_min, int(_min_split))
+        target = min(want_split, room)
+        target = max(int(target), int(_min_split))
+        pw.paneconfigure(split_canvas, minsize=int(_min_split))
+        # В части сборок Python у tk.PanedWindow нет sashpos — только sash_place(index, x, y).
+        pw.sash_place(0, 0, int(target))
+    except tk.TclError:
+        pass
+
     root.mainloop()
 
 
