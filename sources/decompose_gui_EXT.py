@@ -192,6 +192,120 @@ def _factor_string_tokens(fac_str: str) -> list[str]:
     return s.split("*")
 
 
+def _invariant_fac_tokens_for_columns(fac_str: str) -> list[str]:
+    """Токены факторов для таблицы по колонкам; дробь «num / den» делит на части по « / »."""
+    s = (fac_str or "").strip()
+    if not s:
+        return []
+    if " / " in s:
+        left, right = s.split(" / ", 1)
+        return _factor_string_tokens(left) + ["/"] + _factor_string_tokens(right)
+    return _factor_string_tokens(s)
+
+
+def _invariant_P_coef_factor_pairs(
+    P: sp.Expr, x_sym: sp.Symbol
+) -> list[tuple[str, str]]:
+    """Пары (строка коэффициента, строка факторизации) по степеням x от старшей к младшей; нулевые пропускаем."""
+    poly = sp.Poly(sp.expand(P), x_sym, domain="QQ")
+    pairs = sorted(poly.terms(), key=lambda t: t[0][0], reverse=True)
+    out: list[tuple[str, str]] = []
+    for (exp,), coef in pairs:
+        c = sp.Rational(coef)
+        if c == 0:
+            continue
+        if c.q == 1:
+            v = int(c.p)
+            if abs(v) <= 1:
+                fac = format_factorization(v)
+            else:
+                fac = format_factorization(abs(v))
+        else:
+            num, den = int(c.p), int(c.q)
+            coef_str = f"{num}/{den}" if den != 1 else str(num)
+            fac = f"{format_factorization(abs(num))} / {format_factorization(den)}"
+            out.append((coef_str, fac))
+            continue
+        out.append((str(v), fac))
+    return out
+
+
+def format_invariant_P_factor_table(
+    P: sp.Expr,
+    x_sym: sp.Symbol,
+    *,
+    by_columns: bool = False,
+    coef_col_label: str = "Коэффициент",
+    factor_col_label: str = "Факторизация",
+) -> tuple[list[str], list[Optional[str]]]:
+    """Таблица факторов коэффициентов инвариантного P(x): факторы по колонкам — выравнивание вправо."""
+    rows_data = _invariant_P_coef_factor_pairs(P, x_sym)
+    if not rows_data:
+        return ([], [])
+    coef_ints: list[int] = []
+    for cs, _fs in rows_data:
+        try:
+            coef_ints.append(int(cs))
+        except ValueError:
+            coef_ints.append(0)
+
+    if by_columns:
+        factor_rows = [_invariant_fac_tokens_for_columns(f) for _, f in rows_data]
+        nf = max((len(fr) for fr in factor_rows), default=0)
+        if nf < 1:
+            nf = 1
+        h_base = coef_col_label
+        wn = max(len(h_base), max((len(r[0]) for r in rows_data), default=0))
+        col_widths = []
+        for j in range(nf):
+            h = str(j + 1)
+            w = len(h)
+            for fr in factor_rows:
+                if j < len(fr):
+                    w = max(w, len(fr[j]))
+            col_widths.append(max(w, 1))
+        parts = ["+" + "-" * (wn + 2)] + ["+" + "-" * (cw + 2) for cw in col_widths] + ["+"]
+        sep = "".join(parts)
+        header_line = "| " + h_base.rjust(wn) + " |"
+        for j, cw in enumerate(col_widths):
+            header_line += " " + str(j + 1).center(cw) + " |"
+        out = [sep, header_line, sep]
+        tags: list[Optional[str]] = [None, None, None]
+        for row_i, ((_n, _f), fr) in enumerate(zip(rows_data, factor_rows)):
+            row_line = "| " + _n.rjust(wn) + " |"
+            for j, cw in enumerate(col_widths):
+                cell = fr[j] if j < len(fr) else ""
+                row_line += " " + cell.rjust(cw) + " |"
+            out.append(row_line)
+            v = coef_ints[row_i] if row_i < len(coef_ints) else 0
+            tags.append(
+                TAG_PRIME_TABLE_ROW if (v != 0 and _highlight_prime_or_unit_base(abs(v))) else None
+            )
+        out.append(sep)
+        tags.append(None)
+        return out, tags
+
+    h0, h1 = coef_col_label, factor_col_label
+    wn = max(len(h0), max((len(r[0]) for r in rows_data), default=0))
+    wf = max(len(h1), max((len(r[1]) for r in rows_data), default=0))
+    sep = "+" + "-" * (wn + 2) + "+" + "-" * (wf + 2) + "+"
+    out = [
+        sep,
+        "| " + h0.rjust(wn) + " | " + h1.ljust(wf) + " |",
+        sep,
+    ]
+    tags: list[Optional[str]] = [None, None, None]
+    for i, (n, fac) in enumerate(rows_data):
+        out.append("| " + n.rjust(wn) + " | " + fac.ljust(wf) + " |")
+        v = coef_ints[i] if i < len(coef_ints) else 0
+        tags.append(
+            TAG_PRIME_TABLE_ROW if (v != 0 and _highlight_prime_or_unit_base(abs(v))) else None
+        )
+    out.append(sep)
+    tags.append(None)
+    return out, tags
+
+
 def format_bases_factor_table_by_columns(
     L: list,
     R: list,
@@ -340,11 +454,21 @@ def insert_parametric_analysis_lines(
             font=(fam, min(sz + 8, 26), "bold"),
             foreground="#C62828",
         )
+        tw.tag_configure(
+            TAG_PRIME_TABLE_ROW,
+            font=(fam, sz, "bold"),
+            foreground=TABLE_PRIME_BLUE,
+        )
     except tk.TclError:
         tw.tag_configure(
             TAG_PARAMETRIC_SHOUT,
             font=("Consolas", 18, "bold"),
             foreground="#C62828",
+        )
+        tw.tag_configure(
+            TAG_PRIME_TABLE_ROW,
+            font=("Consolas", 10, "bold"),
+            foreground=TABLE_PRIME_BLUE,
         )
     for line, tag in rows:
         if tag:
@@ -436,7 +560,16 @@ def _sorted_display_sides(
     return sorted(int(x) for x in Ld), sorted(int(x) for x in Rd)
 
 
-def build_parametric_analysis_block(a: int, k: int) -> list[tuple[str, Optional[str]]]:
+def build_parametric_analysis_block(
+    a: int,
+    k: int,
+    *,
+    show_p_factor_table: bool = False,
+    p_factor_by_columns: bool = False,
+    p_factor_section_title: str = "Таблица факторов коэффициентов P(x):",
+    p_coef_col_label: str = "Коэффициент",
+    p_fac_col_label: str = "Факторизация",
+) -> list[tuple[str, Optional[str]]]:
     """Строки блока параметрической формы; (текст, TAG_PARAMETRIC_SHOUT) для редких сумм/сумм квадратов."""
     sides: list[tuple[list[int], list[int]]] = []
     for n in _PARAMETRIC_N_DIGITS:
@@ -534,6 +667,20 @@ def build_parametric_analysis_block(a: int, k: int) -> list[tuple[str, Optional[
         ("Инвариантный многочлен P(x) = Σ S1³ = Σ S2³ (обе стороны)", None),
     )
     rows.append((format_polynomial_line(P, x_sym), None))
+    if show_p_factor_table:
+        ft_lines, ft_tags = format_invariant_P_factor_table(
+            P,
+            x_sym,
+            by_columns=p_factor_by_columns,
+            coef_col_label=p_coef_col_label,
+            factor_col_label=p_fac_col_label,
+        )
+        if ft_lines:
+            rows.append(("", None))
+            rows.append((p_factor_section_title, None))
+            for i, ln in enumerate(ft_lines):
+                tg = ft_tags[i] if i < len(ft_tags) else None
+                rows.append((ln, tg))
     rows.append(("", None))
     rows.append(("Дополнительные тождества по суммам (не в кубах):", None))
     if lin_ok:
@@ -663,6 +810,8 @@ def main():
     var_k = tk.IntVar(value=5)
     var_warn_max = tk.IntVar(value=50000)
     var_auto_parametric = tk.BooleanVar(value=False)
+    var_p_factor_table = tk.BooleanVar(value=False)
+    var_p_factor_columns = tk.BooleanVar(value=False)
 
     ttk.Label(frm, text="a:").grid(row=0, column=0, sticky="w", pady=2)
     sp_a = tk.Spinbox(
@@ -928,7 +1077,13 @@ def main():
         try:
             root.configure(cursor="watch")
             root.update_idletasks()
-            rows = build_parametric_analysis_block(a_st, k_st)
+            rows = build_parametric_analysis_block(
+                a_st,
+                k_st,
+                show_p_factor_table=var_p_factor_table.get(),
+                p_factor_by_columns=var_p_factor_table.get()
+                and var_p_factor_columns.get(),
+            )
         except ParametricAnalysisError as ex:
             messagebox.showerror("Параметрическая форма", str(ex))
         except Exception:
@@ -1116,6 +1271,26 @@ def main():
         text="Сразу параметрическая форма",
         variable=var_auto_parametric,
     ).pack(side=tk.LEFT, padx=(12, 0))
+    chk_p_factor_table = ttk.Checkbutton(
+        btn_left,
+        text="Таблица факторов",
+        variable=var_p_factor_table,
+    )
+    chk_p_factor_table.pack(side=tk.LEFT, padx=(12, 0))
+    chk_p_factor_columns = ttk.Checkbutton(
+        btn_left,
+        text="Факторы по колонкам таблицы",
+        variable=var_p_factor_columns,
+    )
+    chk_p_factor_columns.pack(side=tk.LEFT, padx=(8, 0))
+
+    def _sync_p_factor_column_check(*_args: object) -> None:
+        st = tk.NORMAL if var_p_factor_table.get() else tk.DISABLED
+        chk_p_factor_columns.configure(state=st)
+
+    var_p_factor_table.trace_add("write", _sync_p_factor_column_check)
+    _sync_p_factor_column_check()
+
     clip_block_state["param_btn"] = btn_param
 
     def run_parametric_analysis():
