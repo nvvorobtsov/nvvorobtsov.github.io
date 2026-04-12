@@ -507,6 +507,80 @@ def format_polynomial_line(expr: sp.Expr, x_sym: sp.Symbol, *, x_label: str = "x
     return "".join(out) if out else "0"
 
 
+def _factor_abs_int_to_str(n: int, *, compact_powers: bool) -> str:
+    """Разложение |n| ≥ 1 на простые множители.
+
+    compact_powers=True: 2^3·3^2·7 (верхние индексы у степеней).
+    compact_powers=False: 2·2·2·3·3·7 (кратность — повторением основания).
+    """
+    n = int(abs(n))
+    if n < 1:
+        return ""
+    if n == 1:
+        return "1"
+    fac = sp.factorint(n)
+    parts: list[str] = []
+    for p in sorted(fac.keys()):
+        e = int(fac[p])
+        if compact_powers:
+            if e == 1:
+                parts.append(str(p))
+            else:
+                parts.append(str(p) + _superscript_int(e))
+        else:
+            parts.extend([str(p)] * e)
+    return "·".join(parts)
+
+
+def _format_factored_rational_magnitude(c_abs: sp.Rational, *, compact_powers: bool) -> str:
+    """Модуль положительного рационального коэффициента в «простом» виде."""
+    c_abs = sp.Rational(c_abs)
+    if c_abs.q == 1:
+        return _factor_abs_int_to_str(int(c_abs.p), compact_powers=compact_powers)
+    num = _factor_abs_int_to_str(int(c_abs.p), compact_powers=compact_powers)
+    den = _factor_abs_int_to_str(int(c_abs.q), compact_powers=compact_powers)
+    return f"{num}/{den}"
+
+
+def format_polynomial_line_factorized(
+    expr: sp.Expr, x_sym: sp.Symbol, *, x_label: str = "x"
+) -> str:
+    """Как format_polynomial_line, но коэффициенты при x и x² — без степеней у простых (3·3·x);
+    свободный член — со степенями в верхнем индексе (2^3·3^2·7)."""
+    poly = sp.Poly(sp.expand(expr), x_sym, domain="QQ")
+    if poly.is_zero:
+        return "0"
+    pairs = sorted(poly.terms(), key=lambda t: t[0][0], reverse=True)
+    out: list[str] = []
+    first = True
+    for (exp,), coef in pairs:
+        c = sp.Rational(coef)
+        if c == 0:
+            continue
+        sign_neg = c < 0
+        cabs = abs(c)
+        if first:
+            if sign_neg:
+                out.append("−")
+            first = False
+        else:
+            out.append(" − " if sign_neg else " + ")
+        if exp == 0:
+            out.append(_format_factored_rational_magnitude(cabs, compact_powers=True))
+            continue
+        if cabs == 1:
+            coef_txt = ""
+        else:
+            coef_txt = (
+                _format_factored_rational_magnitude(cabs, compact_powers=False) + "·"
+            )
+        if exp == 1:
+            out.append(coef_txt + x_label)
+        else:
+            out.append(coef_txt + x_label + _superscript_int(exp))
+    return "".join(out) if out else "0"
+
+
 def b0_is_all_nines(b0: int) -> bool:
     if b0 <= 0:
         return False
@@ -596,6 +670,7 @@ def build_parametric_analysis_block(
     *,
     show_p_factor_table: bool = False,
     p_factor_by_columns: bool = False,
+    s12_factorized: bool = False,
 ) -> list[tuple[str, Optional[str]]]:
     """Строки блока параметрической формы; (текст, TAG_PARAMETRIC_SHOUT) для редких сумм/сумм квадратов."""
     b_hi, b_mid, b_lo = parametric_probe_b0_triple(b0_template)
@@ -684,14 +759,19 @@ def build_parametric_analysis_block(
         ("", None),
         ("Группа S1 — основания кубов слева от «=» (квадратики по x)", None),
     ]
+    _fmt_poly = (
+        format_polynomial_line_factorized
+        if s12_factorized
+        else format_polynomial_line
+    )
     for i, p in enumerate(L_polys):
-        rows.append((f"{_name(i)}₁ = {format_polynomial_line(p, x_sym)}", None))
+        rows.append((f"{_name(i)}₁ = {_fmt_poly(p, x_sym)}", None))
     rows.append(("", None))
     rows.append(
         ("Группа S2 — основания кубов справа от «=» (квадратики по x)", None),
     )
     for i, p in enumerate(R_polys):
-        rows.append((f"{_name(i)}₂ = {format_polynomial_line(p, x_sym)}", None))
+        rows.append((f"{_name(i)}₂ = {_fmt_poly(p, x_sym)}", None))
     rows.append(("", None))
     rows.append(
         ("Инвариантный многочлен P(x) = Σ S1³ = Σ S2³ (обе стороны)", None),
@@ -905,6 +985,7 @@ def main():
     var_auto_parametric = tk.BooleanVar(value=False)
     var_p_factor_table = tk.BooleanVar(value=False)
     var_p_factor_columns = tk.BooleanVar(value=False)
+    var_s12_factorized = tk.BooleanVar(value=False)
 
     ttk.Label(head_frm, text="a:").grid(row=0, column=0, sticky="w", pady=2)
     sp_a = tk.Spinbox(
@@ -1202,6 +1283,7 @@ def main():
                 show_p_factor_table=var_p_factor_table.get(),
                 p_factor_by_columns=var_p_factor_table.get()
                 and var_p_factor_columns.get(),
+                s12_factorized=var_s12_factorized.get(),
             )
         except ParametricAnalysisError as ex:
             messagebox.showerror("Параметрическая форма", str(ex))
@@ -1405,6 +1487,12 @@ def main():
         variable=var_p_factor_columns,
     )
     chk_p_factor_columns.pack(side=tk.LEFT, padx=(8, 0))
+    chk_s12_fact = ttk.Checkbutton(
+        btn_left,
+        text="S1,S2: факторизованный вид",
+        variable=var_s12_factorized,
+    )
+    chk_s12_fact.pack(side=tk.LEFT, padx=(8, 0))
 
     def _sync_p_factor_column_check(*_args: object) -> None:
         st = tk.NORMAL if var_p_factor_table.get() else tk.DISABLED
