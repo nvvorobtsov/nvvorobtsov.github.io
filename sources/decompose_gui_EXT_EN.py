@@ -553,8 +553,8 @@ def _format_factored_rational_magnitude(c_abs: sp.Rational, *, compact_powers: b
 def format_polynomial_line_factorized(
     expr: sp.Expr, x_sym: sp.Symbol, *, x_label: str = "x"
 ) -> str:
-    """Like format_polynomial_line, but x and x² coefficients use repeated primes (3·3·x);
-    constant term uses superscript exponents (2^3·3^2·7)."""
+    """Like format_polynomial_line, but every coefficient is a prime product with Unicode
+    superscript exponents (e.g. 3²·x, 2²·3·5·x, and 3²·7 on the constant term)."""
     poly = sp.Poly(sp.expand(expr), x_sym, domain="QQ")
     if poly.is_zero:
         return "0"
@@ -580,7 +580,7 @@ def format_polynomial_line_factorized(
             coef_txt = ""
         else:
             coef_txt = (
-                _format_factored_rational_magnitude(cabs, compact_powers=False) + "·"
+                _format_factored_rational_magnitude(cabs, compact_powers=True) + "·"
             )
         if exp == 1:
             out.append(coef_txt + x_label)

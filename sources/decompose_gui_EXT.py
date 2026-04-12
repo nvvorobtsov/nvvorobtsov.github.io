@@ -545,8 +545,8 @@ def _format_factored_rational_magnitude(c_abs: sp.Rational, *, compact_powers: b
 def format_polynomial_line_factorized(
     expr: sp.Expr, x_sym: sp.Symbol, *, x_label: str = "x"
 ) -> str:
-    """Как format_polynomial_line, но коэффициенты при x и x² — без степеней у простых (3·3·x);
-    свободный член — со степенями в верхнем индексе (2^3·3^2·7)."""
+    """Как format_polynomial_line, но все коэффициенты — в виде произведения простых со степенями
+    в верхнем индексе (например 3²·x, 2²·3·5·x и 3²·7 у свободного члена)."""
     poly = sp.Poly(sp.expand(expr), x_sym, domain="QQ")
     if poly.is_zero:
         return "0"
@@ -572,7 +572,7 @@ def format_polynomial_line_factorized(
             coef_txt = ""
         else:
             coef_txt = (
-                _format_factored_rational_magnitude(cabs, compact_powers=False) + "·"
+                _format_factored_rational_magnitude(cabs, compact_powers=True) + "·"
             )
         if exp == 1:
             out.append(coef_txt + x_label)
