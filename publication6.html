@@ -484,8 +484,8 @@
     var SUPABASE_URL = 'https://ottgavgusjmuexofeuys.supabase.co';
     var SUPABASE_ANON_KEY = 'sb_publishable_FthtHExChvk_GGWvgZld-g_P6xmECZU';
     var COUNT_QUERY_PARAM = 'count';
-    /* Same counter as index.html “Interactive cover” for publication 6 (changelog jump links). */
-    var allowedCounterIds = { pub6_cover: true, pub6_ext_zip: true };
+    /* Match index.html counters for publication 6 (changelog jump links). Comma-separated count= allows several. */
+    var allowedCounterIds = { pub6_cover: true, pub6_zenodo: true, pub6_ext_zip: true };
 
     function apiHeaders() {
         return {
@@ -508,14 +508,23 @@
 
     function applyCountFromQuery() {
         var params = new URLSearchParams(window.location.search);
-        var cid = params.get(COUNT_QUERY_PARAM);
-        if (!cid || !allowedCounterIds[cid]) return;
-        fetch(SUPABASE_URL + '/rest/v1/rpc/register_link_click', {
-            method: 'POST',
-            headers: apiHeaders(),
-            body: JSON.stringify({ counter_id: cid }),
-            keepalive: true
-        }).catch(function () {});
+        var raw = params.get(COUNT_QUERY_PARAM);
+        if (!raw) return;
+        var ids = raw.split(',').map(function (s) { return s.trim(); }).filter(function (id) {
+            return id && allowedCounterIds[id];
+        });
+        if (!ids.length) return;
+        var seen = Object.create(null);
+        ids.forEach(function (cid) {
+            if (seen[cid]) return;
+            seen[cid] = true;
+            fetch(SUPABASE_URL + '/rest/v1/rpc/register_link_click', {
+                method: 'POST',
+                headers: apiHeaders(),
+                body: JSON.stringify({ counter_id: cid }),
+                keepalive: true
+            }).catch(function () {});
+        });
         stripCountFromUrl();
     }
 
