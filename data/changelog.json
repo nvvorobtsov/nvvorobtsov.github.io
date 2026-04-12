@@ -5,7 +5,7 @@
       "ru": "публикация 06: рукопись v5 на Zenodo (DOI 10.5281/zenodo.19533934); publication6.html и кнопка Zenodo на главной ведут на новую запись; предыдущая версия записи (v4): 10.5281/zenodo.19498770. Обновлён Readme в папке Publication 06.",
       "en": "Publication 06: manuscript v5 on Zenodo (DOI 10.5281/zenodo.19533934); publication6.html and the main-page Zenodo button point to the new record; previous record (v4): 10.5281/zenodo.19498770. Readme updated in the Publication 06 folder.",
       "link": {
-        "href": "publication6.html?count=pub6_zenodo",
+        "href": "publication6.html?count=pub6_cover",
         "en": "Publication 6 cover + Zenodo",
         "ru": "Публикация 6 — обложка и Zenodo"
       }
