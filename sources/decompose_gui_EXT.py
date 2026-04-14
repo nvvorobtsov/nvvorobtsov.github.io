@@ -611,6 +611,87 @@ def b0_parametric_probe_eligible(b0: int) -> bool:
     return b0_is_all_nines(b0) or b0_middle_uniform_for_parametric(b0)
 
 
+# Имена оснований в блоке параметрической формы — a…z (не более стольки кубов на сторону).
+PARAMETRIC_MAX_CUBES_PER_SIDE = 26
+
+
+# Вторая схема: десятичная маска «n1» + m одинаковых цифр d + «n2», d ∈ {1,…,8}.
+# Цифры 0 и 9 в «середине» отнесены к первой схеме (однородная середина 0/9).
+B0_FAMILY2_MID_DIGITS = frozenset(range(1, 9))
+
+
+def b0_known_mid_run_family_match(b0: int) -> Optional[Tuple[int, int, int, int]]:
+    """Если b₀ = «n1» + m раз цифра d + «n2» с d ∈ {1,…,8}, вернуть (n1, d, n2, m), m ≥ 1; иначе None.
+
+    Примеры: 112 → (1,1,2,1), 132 → (1,3,2,1), 45884 → (4,8,4,2), 900009 → (9,0,9,4) не подходит (d=0).
+    """
+    if b0 <= 0:
+        return None
+    s = str(b0)
+    if len(s) < 3:
+        return None
+    n1, n2 = int(s[0]), int(s[-1])
+    if not (1 <= n1 <= 9 and 0 <= n2 <= 9):
+        return None
+    mid = s[1:-1]
+    if not mid or len(set(mid)) != 1:
+        return None
+    d = int(mid[0])
+    if d not in B0_FAMILY2_MID_DIGITS:
+        return None
+    return n1, d, n2, len(mid)
+
+
+def b0_known_mid_run_family_b0(n1: int, d: int, n2: int, m: int) -> int:
+    """Число «n1» + m раз цифра d + «n2»."""
+    if m < 1:
+        raise ValueError("m must be >= 1")
+    if not (1 <= n1 <= 9 and 0 <= n2 <= 9):
+        raise ValueError("n1 must be 1..9 and n2 must be 0..9")
+    if d not in B0_FAMILY2_MID_DIGITS:
+        raise ValueError("d must be in 1..8 for второй схемы")
+    return int(str(n1) + (str(d) * m) + str(n2))
+
+
+def b0_known_mid_run_probe_triple(
+    b0_template: int,
+) -> tuple[int, int, int, int, int, int, int]:
+    """Три пробы b₀ для интерполяции квадратик по b₀; (b_lo, b_mid, b_hi, n1, d, n2, m_шаблона).
+
+    При m ≥ 2: длины середины (m−1, m, m+1). При m = 1: длины (1, 2, 3) при тех же n1,d,n2.
+    """
+    parsed = b0_known_mid_run_family_match(b0_template)
+    if parsed is None:
+        raise ValueError(
+            "b0_template не из известного семейства «n1»+d…+«n2» (n1=1…9, n2=0…9, d=1…8)"
+        )
+    n1, d, n2, m = parsed
+    if m >= 2:
+        lo, mid_i, hi = m - 1, m, m + 1
+    else:
+        lo, mid_i, hi = 1, 2, 3
+    return (
+        b0_known_mid_run_family_b0(n1, d, n2, lo),
+        b0_known_mid_run_family_b0(n1, d, n2, mid_i),
+        b0_known_mid_run_family_b0(n1, d, n2, hi),
+        n1,
+        d,
+        n2,
+        m,
+    )
+
+
+def b0_family_known_mid_run_parametric_eligible(data: dict) -> bool:
+    """Вторая схема: маска n1,d…d,n2 (n1=1…9, d=1…8, n2=0…9) и согласованное число кубов на сторонах."""
+    if b0_known_mid_run_family_match(data["b_start"]) is None:
+        return False
+    Ld, Rd = order_sides_for_display(data["L_final"], data["R_final"])
+    nL, nR = len(Ld), len(Rd)
+    if nL != nR:
+        return False
+    return 1 <= nL <= PARAMETRIC_MAX_CUBES_PER_SIDE
+
+
 def parametric_probe_b0_triple(b0_template: int) -> tuple[int, int, int]:
     """Три значения b₀ для масштабов 10⁷, 10⁶, 10⁵ (высокая → низкая проба).
 
@@ -634,10 +715,6 @@ def parametric_probe_b0_triple(b0_template: int) -> tuple[int, int, int]:
         m = total_digits - 2
         out.append(int(f + c * m + lch))
     return (out[0], out[1], out[2])
-
-
-# Имена оснований в блоке параметрической формы — a…z (не более 26 кубов на сторону).
-PARAMETRIC_MAX_CUBES_PER_SIDE = 26
 
 
 def parametric_form_eligible_for_last_run(data: dict) -> bool:
@@ -808,6 +885,182 @@ def build_parametric_analysis_block(
     else:
         rows.append(("Σ S1² = Σ S2² — не выполняется.", None))
     return rows
+
+
+def build_b0_known_mid_run_parametric_block(
+    a: int,
+    k: int,
+    b0_template: int,
+    *,
+    show_p_factor_table: bool = False,
+    p_factor_by_columns: bool = False,
+    s12_factorized: bool = False,
+) -> list[tuple[str, Optional[str]]]:
+    """Вторая схема: три расчёта при соседних b₀ в семействе «n1»+d…+«n2» (d=1…8); квадратики по b₀."""
+    b_lo, b_mid, b_hi, n1_tpl, d_tpl, n2_tpl, m_tpl = b0_known_mid_run_probe_triple(
+        b0_template
+    )
+    sides: list[tuple[list[int], list[int]]] = [
+        _sorted_display_sides(a, k, b_lo),
+        _sorted_display_sides(a, k, b_mid),
+        _sorted_display_sides(a, k, b_hi),
+    ]
+    L0, R0 = sides[0]
+    if len(L0) != len(R0):
+        raise ParametricAnalysisError(
+            "Число кубов слева и справа не совпадает; параметризация по b₀ недоступна."
+        )
+    if len(L0) > PARAMETRIC_MAX_CUBES_PER_SIDE:
+        raise ParametricAnalysisError(
+            f"Слишком много кубов на стороне (лимит {PARAMETRIC_MAX_CUBES_PER_SIDE})."
+        )
+    for i in (1, 2):
+        Li, Ri = sides[i]
+        if len(Li) != len(L0) or len(Ri) != len(R0):
+            raise ParametricAnalysisError(
+                "Число кубов на сторонах меняется между пробами семейства «n1»+d…+«n2»; "
+                "сопоставление по индексу невозможно."
+            )
+
+    b_sym = sp.Symbol("b0")
+    L_polys: list[sp.Expr] = []
+    R_polys: list[sp.Expr] = []
+    for idx in range(len(L0)):
+        pts_l = [
+            (sp.Integer(b_lo), sp.Integer(sides[0][0][idx])),
+            (sp.Integer(b_mid), sp.Integer(sides[1][0][idx])),
+            (sp.Integer(b_hi), sp.Integer(sides[2][0][idx])),
+        ]
+        pl = sp.expand(sp.interpolate(pts_l, b_sym))
+        if sp.degree(pl, b_sym) > 2:
+            raise ParametricAnalysisError(
+                "Слева: по трём пробам b₀ восстановленный полином степени > 2."
+            )
+        L_polys.append(pl)
+    for idx in range(len(R0)):
+        pts_r = [
+            (sp.Integer(b_lo), sp.Integer(sides[0][1][idx])),
+            (sp.Integer(b_mid), sp.Integer(sides[1][1][idx])),
+            (sp.Integer(b_hi), sp.Integer(sides[2][1][idx])),
+        ]
+        pr = sp.expand(sp.interpolate(pts_r, b_sym))
+        if sp.degree(pr, b_sym) > 2:
+            raise ParametricAnalysisError(
+                "Справа: по трём пробам b₀ восстановленный полином степени > 2."
+            )
+        R_polys.append(pr)
+
+    for idx, p in enumerate(L_polys):
+        if int(p.subs(b_sym, b_mid)) != sides[1][0][idx]:
+            raise ParametricAnalysisError(
+                f"Проверка на средней пробе b₀ = {b_mid}: значения S1 не совпали с вычислением."
+            )
+    for idx, p in enumerate(R_polys):
+        if int(p.subs(b_sym, b_mid)) != sides[1][1][idx]:
+            raise ParametricAnalysisError(
+                f"Проверка на средней пробе b₀ = {b_mid}: значения S2 не совпали с вычислением."
+            )
+
+    sum_L3 = sp.expand(sum(p**3 for p in L_polys))
+    sum_R3 = sp.expand(sum(p**3 for p in R_polys))
+    if sp.expand(sum_L3 - sum_R3) != 0:
+        raise ParametricAnalysisError(
+            "Суммы кубов полиномов S1 и S2 по b₀ не совпадают (тождество не выполняется)."
+        )
+    P = sum_L3
+    sum_L1 = sp.expand(sum(L_polys))
+    sum_R1 = sp.expand(sum(R_polys))
+    lin_ok = sp.expand(sum_L1 - sum_R1) == 0
+    sum_L2 = sp.expand(sum(p**2 for p in L_polys))
+    sum_R2 = sp.expand(sum(p**2 for p in R_polys))
+    sq_ok = sp.expand(sum_L2 - sum_R2) == 0
+
+    def _name(i: int) -> str:
+        return chr(ord("a") + i) if i < 26 else f"t{i + 1}"
+
+    p_at_tpl = int(sp.expand(P.subs(b_sym, sp.Integer(b0_template))))
+    rows: list[tuple[str, Optional[str]]] = [
+        ("", None),
+        (
+            "— Параметризация по b₀ (известная маска «n1» + несколько одинаковых цифр d + «n2», "
+            "n1 = 1…9, n2 = 0…9, d = 1…8, не 0 и не 9; "
+            f"здесь n1 = {n1_tpl}, d = {d_tpl}, n2 = {n2_tpl}; "
+            "три расчёта при соседних длинах середины; "
+            f"пробы b₀: {b_lo}, {b_mid}, {b_hi}; шаблон m = {m_tpl}, проверка на b₀ = {b_mid}) —",
+            None,
+        ),
+        (
+            f"a = {a},  k = {k}   (интерполяция квадратик по b₀; фиксированы n1={n1_tpl}, d={d_tpl}, n2={n2_tpl}, "
+            "меняется только число повторов середины)",
+            None,
+        ),
+        ("", None),
+        ("Группа S1 — основания кубов слева от «=» (квадратики по b₀)", None),
+    ]
+    _fmt_poly = (
+        format_polynomial_line_factorized
+        if s12_factorized
+        else format_polynomial_line
+    )
+    for i, p in enumerate(L_polys):
+        rows.append((f"{_name(i)}₁ = {_fmt_poly(p, b_sym, x_label='b₀')}", None))
+    rows.append(("", None))
+    rows.append(
+        ("Группа S2 — основания кубов справа от «=» (квадратики по b₀)", None),
+    )
+    for i, p in enumerate(R_polys):
+        rows.append((f"{_name(i)}₂ = {_fmt_poly(p, b_sym, x_label='b₀')}", None))
+    rows.append(("", None))
+    rows.append(
+        ("Инвариантный многочлен P(b₀) = Σ S1³ = Σ S2³ (обе стороны)", None),
+    )
+    rows.append((format_polynomial_line(P, b_sym, x_label="b₀"), None))
+    if show_p_factor_table:
+        ft_lines, ft_tags = format_invariant_P_factor_table(
+            P, b_sym, by_columns=p_factor_by_columns
+        )
+        if ft_lines:
+            rows.append(("", None))
+            rows.append(("Таблица факторов коэффициентов P(b₀):", None))
+            for i, ln in enumerate(ft_lines):
+                tg = ft_tags[i] if i < len(ft_tags) else None
+                rows.append((ln, tg))
+    rows.append(("", None))
+    rows.append(
+        (
+            f"Проверка подстановки: P({b0_template}) = {p_at_tpl} "
+            "(должно совпадать с числом в строке «Результат» при том же разложении).",
+            None,
+        )
+    )
+    rows.append(("", None))
+    rows.append(("Дополнительные тождества по суммам (не в кубах):", None))
+    if lin_ok:
+        rows.append(
+            (
+                "!!! ВНИМАНИЕ !!!  Σ S1 = Σ S2  ВЫПОЛНЯЕТСЯ  —  НЕОБЫЧНО !!!",
+                TAG_PARAMETRIC_SHOUT,
+            ),
+        )
+    else:
+        rows.append(("Σ S1 = Σ S2  — не выполняется.", None))
+    if sq_ok:
+        rows.append(
+            (
+                "!!! ВНИМАНИЕ !!!  Σ S1² = Σ S2²  ВЫПОЛНЯЕТСЯ  —  НЕОБЫЧНО !!!",
+                TAG_PARAMETRIC_SHOUT,
+            ),
+        )
+    else:
+        rows.append(("Σ S1² = Σ S2² — не выполняется.", None))
+    return rows
+
+
+def parametric_any_eligible_for_last_run(data: dict) -> bool:
+    """Кнопка «Параметрическая форма»: доступна при первой или второй схеме."""
+    return parametric_form_eligible_for_last_run(
+        data
+    ) or b0_family_known_mid_run_parametric_eligible(data)
 
 
 def _insert_eq_lines_bold_left(tw: tk.Text, lines: list, tag: str) -> None:
@@ -1159,7 +1412,8 @@ def main():
         "defactor_bundle": None,
         "omit_raw_decomposition": False,
         "between_tail_lines": None,
-        "nines_probe_eligible": None,  # (a, b₀, k): маска b₀ для параметрики, |L|=|R|≤26
+        "nines_probe_eligible": None,  # (a, b₀, k): первая схема (x), |L|=|R|≤26
+        "b0_family_param_eligible": None,  # (a, b₀, k): вторая схема, маска «n1»+d…+«n2», d=1…8
         "param_btn": None,
     }
 
@@ -1272,39 +1526,70 @@ def main():
     copy_between_btn.pack(side=tk.RIGHT, padx=(0, 4))
 
     def run_parametric_append_for_state(a_st: int, b0_st: int, k_st: int) -> None:
-        """Добавить блок параметрической формы (кнопка и авто после «Вычислить»)."""
+        """Добавить блок(и) параметрической формы: первая схема (x), вторая (b₀, маска n1+d…+n2)."""
+        ex = clip_block_state.get("nines_probe_eligible")
+        eb = clip_block_state.get("b0_family_param_eligible")
+        tup = (a_st, b0_st, k_st)
+        err_parts: list[str] = []
+        had_shout = False
+        any_insert = False
         try:
             root.configure(cursor="watch")
             root.update_idletasks()
-            rows = build_parametric_analysis_block(
-                a_st,
-                k_st,
-                b0_st,
+            kw = dict(
                 show_p_factor_table=var_p_factor_table.get(),
                 p_factor_by_columns=var_p_factor_table.get()
                 and var_p_factor_columns.get(),
                 s12_factorized=var_s12_factorized.get(),
             )
-        except ParametricAnalysisError as ex:
-            messagebox.showerror("Параметрическая форма", str(ex))
-        except Exception:
-            messagebox.showerror(
-                "Параметрическая форма",
-                traceback.format_exc(),
-            )
-        else:
-            insert_parametric_analysis_lines(tw, rows)
-            tw.update_idletasks()
-            # Красный «крик» внизу — обязательно показать сразу; иначе — к началу текста.
-            if parametric_block_has_shout(rows):
-                tw.see(tk.END)
-            else:
-                tw.yview_moveto(0)
+            if ex == tup:
+                try:
+                    rows_x = build_parametric_analysis_block(
+                        a_st, k_st, b0_st, **kw
+                    )
+                    insert_parametric_analysis_lines(tw, rows_x)
+                    had_shout = had_shout or parametric_block_has_shout(rows_x)
+                    any_insert = True
+                except ParametricAnalysisError as e_x:
+                    err_parts.append(
+                        f"Параметризация по первой схеме (интерполяция по x): {e_x}"
+                    )
+                except Exception:
+                    err_parts.append(
+                        "Параметризация по первой схеме (интерполяция по x):\n"
+                        + traceback.format_exc()
+                    )
+            if eb == tup:
+                try:
+                    rows_b = build_b0_known_mid_run_parametric_block(
+                        a_st, k_st, b0_st, **kw
+                    )
+                    insert_parametric_analysis_lines(tw, rows_b)
+                    had_shout = had_shout or parametric_block_has_shout(rows_b)
+                    any_insert = True
+                except ParametricAnalysisError as e_b:
+                    err_parts.append(
+                        f"Параметризация по b₀ (маска «n1»+d…+«n2»): {e_b}"
+                    )
+                except Exception:
+                    err_parts.append(
+                        "Параметризация по b₀ (маска «n1»+d…+«n2»):\n"
+                        + traceback.format_exc()
+                    )
+            if err_parts:
+                messagebox.showerror("Параметрическая форма", "\n\n".join(err_parts))
+            elif any_insert:
+                tw.update_idletasks()
+                if had_shout:
+                    tw.see(tk.END)
+                else:
+                    tw.yview_moveto(0)
         finally:
             root.configure(cursor="")
 
     def run_compute():
         clip_block_state["nines_probe_eligible"] = None
+        clip_block_state["b0_family_param_eligible"] = None
         pb = clip_block_state.get("param_btn")
         if pb is not None:
             pb.configure(state=tk.DISABLED)
@@ -1439,19 +1724,27 @@ def main():
                 )
             else:
                 clip_block_state["nines_probe_eligible"] = None
+            if b0_family_known_mid_run_parametric_eligible(data):
+                clip_block_state["b0_family_param_eligible"] = (
+                    data["a"],
+                    data["b_start"],
+                    data["k"],
+                )
+            else:
+                clip_block_state["b0_family_param_eligible"] = None
             pb2 = clip_block_state.get("param_btn")
             if pb2 is not None:
                 pb2.configure(
                     state=tk.NORMAL
-                    if clip_block_state["nines_probe_eligible"]
+                    if parametric_any_eligible_for_last_run(data)
                     else tk.DISABLED
                 )
-            if (
-                var_auto_parametric.get()
-                and clip_block_state.get("nines_probe_eligible")
+            if var_auto_parametric.get() and parametric_any_eligible_for_last_run(
+                data
             ):
-                a_auto, b0_auto, k_auto = clip_block_state["nines_probe_eligible"]
-                run_parametric_append_for_state(a_auto, b0_auto, k_auto)
+                run_parametric_append_for_state(
+                    data["a"], data["b_start"], data["k"]
+                )
         else:
             tw.insert(tk.END, text)
             tw.update_idletasks()
@@ -1504,18 +1797,25 @@ def main():
     clip_block_state["param_btn"] = btn_param
 
     def run_parametric_analysis():
-        e = clip_block_state.get("nines_probe_eligible")
-        if not e:
+        d_last = clip_block_state.get("data")
+        ex = clip_block_state.get("nines_probe_eligible")
+        eb = clip_block_state.get("b0_family_param_eligible")
+        if not ex and not eb:
             messagebox.showinfo(
                 "Параметрическая форма",
-                "Сначала выполните «Вычислить» с полным выводом, когда b₀ либо состоит из одних "
-                "девяток (9, 99, 999, …), либо имеет более двух цифр и «середина» (без первой и "
-                "последней цифры) — только девятки или только нули (например 192, 2995, 101, "
-                "3000000006). Число кубов слева и справа должно совпадать и быть не больше "
-                f"{PARAMETRIC_MAX_CUBES_PER_SIDE} на сторону.",
+                "Сначала выполните «Вычислить» с полным выводом, когда выполняется хотя бы одно "
+                "из условий:\n\n"
+                "• Первая схема (интерполяция по x): b₀ из одних девяток или с «серединой» только "
+                "из 0 или только из 9 (как раньше); |L| = |R| не больше "
+                f"{PARAMETRIC_MAX_CUBES_PER_SIDE} на сторону.\n\n"
+                "• Вторая схема (интерполяция по b₀): маска «n1» + одна и та же цифра d = 1…8, "
+                "повторённая m раз, + «n2», где n1 = 1…9, n2 = 0…9; "
+                "цифры 0 и 9 в середине — в первой схеме; то же условие на число кубов слева и справа.",
             )
             return
-        a_st, b_st, k_st = e
+        if d_last is None:
+            return
+        a_st, b_st, k_st = d_last["a"], d_last["b_start"], d_last["k"]
         try:
             cur_a = var_a.get()
             cur_b = var_b.get()

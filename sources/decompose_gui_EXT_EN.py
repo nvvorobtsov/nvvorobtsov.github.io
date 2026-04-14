@@ -619,6 +619,81 @@ def b0_parametric_probe_eligible(b0: int) -> bool:
     return b0_is_all_nines(b0) or b0_middle_uniform_for_parametric(b0)
 
 
+# Parametric block base names — a…z (at most this many cubes per side).
+PARAMETRIC_MAX_CUBES_PER_SIDE = 26
+
+
+# Scheme 2: decimal mask «n1» + m identical middle digits d + «n2», with d in {1,…,8}.
+# Middle digits 0 and 9 are intentionally handled by scheme 1.
+B0_FAMILY2_MID_DIGITS = frozenset(range(1, 9))
+
+
+def b0_known_mid_run_family_match(b0: int) -> Optional[Tuple[int, int, int, int]]:
+    """If b₀ = «n1» + m copies of digit d + «n2» with d in {1,…,8}, return (n1, d, n2, m); else None."""
+    if b0 <= 0:
+        return None
+    s = str(b0)
+    if len(s) < 3:
+        return None
+    n1, n2 = int(s[0]), int(s[-1])
+    if not (1 <= n1 <= 9 and 0 <= n2 <= 9):
+        return None
+    mid = s[1:-1]
+    if not mid or len(set(mid)) != 1:
+        return None
+    d = int(mid[0])
+    if d not in B0_FAMILY2_MID_DIGITS:
+        return None
+    return n1, d, n2, len(mid)
+
+
+def b0_known_mid_run_family_b0(n1: int, d: int, n2: int, m: int) -> int:
+    """Build decimal value «n1» + m copies of digit d + «n2»."""
+    if m < 1:
+        raise ValueError("m must be >= 1")
+    if not (1 <= n1 <= 9 and 0 <= n2 <= 9):
+        raise ValueError("n1 must be 1..9 and n2 must be 0..9")
+    if d not in B0_FAMILY2_MID_DIGITS:
+        raise ValueError("d must be in 1..8 for scheme 2")
+    return int(str(n1) + (str(d) * m) + str(n2))
+
+
+def b0_known_mid_run_probe_triple(
+    b0_template: int,
+) -> tuple[int, int, int, int, int, int, int]:
+    """Three b₀ probes for interpolation over b₀: (b_lo, b_mid, b_hi, n1, d, n2, m_template)."""
+    parsed = b0_known_mid_run_family_match(b0_template)
+    if parsed is None:
+        raise ValueError(
+            "b0_template is not in the known family «n1»+d…+«n2» (n1=1..9, n2=0..9, d=1..8)"
+        )
+    n1, d, n2, m = parsed
+    if m >= 2:
+        lo, mid_i, hi = m - 1, m, m + 1
+    else:
+        lo, mid_i, hi = 1, 2, 3
+    return (
+        b0_known_mid_run_family_b0(n1, d, n2, lo),
+        b0_known_mid_run_family_b0(n1, d, n2, mid_i),
+        b0_known_mid_run_family_b0(n1, d, n2, hi),
+        n1,
+        d,
+        n2,
+        m,
+    )
+
+
+def b0_family_known_mid_run_parametric_eligible(data: dict) -> bool:
+    """Scheme 2 eligibility: mask n1,d…d,n2 (n1=1..9, d=1..8, n2=0..9) and balanced side sizes."""
+    if b0_known_mid_run_family_match(data["b_start"]) is None:
+        return False
+    Ld, Rd = order_sides_for_display(data["L_final"], data["R_final"])
+    nL, nR = len(Ld), len(Rd)
+    if nL != nR:
+        return False
+    return 1 <= nL <= PARAMETRIC_MAX_CUBES_PER_SIDE
+
+
 def parametric_probe_b0_triple(b0_template: int) -> tuple[int, int, int]:
     """Three b₀ values for scales 10⁷, 10⁶, 10⁵ (high → low probe).
 
@@ -642,10 +717,6 @@ def parametric_probe_b0_triple(b0_template: int) -> tuple[int, int, int]:
         m = total_digits - 2
         out.append(int(f + c * m + lch))
     return (out[0], out[1], out[2])
-
-
-# Parametric block base names — a…z (at most 26 cubes per side).
-PARAMETRIC_MAX_CUBES_PER_SIDE = 26
 
 
 def parametric_form_eligible_for_last_run(data: dict) -> bool:
@@ -816,6 +887,177 @@ def build_parametric_analysis_block(
     else:
         rows.append(("Σ S1² = Σ S2² — does not hold.", None))
     return rows
+
+
+def build_b0_known_mid_run_parametric_block(
+    a: int,
+    k: int,
+    b0_template: int,
+    *,
+    show_p_factor_table: bool = False,
+    p_factor_by_columns: bool = False,
+    s12_factorized: bool = False,
+) -> list[tuple[str, Optional[str]]]:
+    """Scheme 2: three neighboring probes within family «n1»+d…+«n2» (d=1..8); quadratics in b₀."""
+    b_lo, b_mid, b_hi, n1_tpl, d_tpl, n2_tpl, m_tpl = b0_known_mid_run_probe_triple(
+        b0_template
+    )
+    sides: list[tuple[list[int], list[int]]] = [
+        _sorted_display_sides(a, k, b_lo),
+        _sorted_display_sides(a, k, b_mid),
+        _sorted_display_sides(a, k, b_hi),
+    ]
+    L0, R0 = sides[0]
+    if len(L0) != len(R0):
+        raise ParametricAnalysisError(
+            "Left and right cube counts differ; b₀-parametric mode is unavailable."
+        )
+    if len(L0) > PARAMETRIC_MAX_CUBES_PER_SIDE:
+        raise ParametricAnalysisError(
+            f"Too many cubes on a side (limit {PARAMETRIC_MAX_CUBES_PER_SIDE})."
+        )
+    for i in (1, 2):
+        Li, Ri = sides[i]
+        if len(Li) != len(L0) or len(Ri) != len(R0):
+            raise ParametricAnalysisError(
+                "Cube counts change across probes of family «n1»+d…+«n2»; "
+                "index-wise matching is impossible."
+            )
+
+    b_sym = sp.Symbol("b0")
+    L_polys: list[sp.Expr] = []
+    R_polys: list[sp.Expr] = []
+    for idx in range(len(L0)):
+        pts_l = [
+            (sp.Integer(b_lo), sp.Integer(sides[0][0][idx])),
+            (sp.Integer(b_mid), sp.Integer(sides[1][0][idx])),
+            (sp.Integer(b_hi), sp.Integer(sides[2][0][idx])),
+        ]
+        pl = sp.expand(sp.interpolate(pts_l, b_sym))
+        if sp.degree(pl, b_sym) > 2:
+            raise ParametricAnalysisError(
+                "Left: recovered polynomial degree > 2 from three b₀ probes."
+            )
+        L_polys.append(pl)
+    for idx in range(len(R0)):
+        pts_r = [
+            (sp.Integer(b_lo), sp.Integer(sides[0][1][idx])),
+            (sp.Integer(b_mid), sp.Integer(sides[1][1][idx])),
+            (sp.Integer(b_hi), sp.Integer(sides[2][1][idx])),
+        ]
+        pr = sp.expand(sp.interpolate(pts_r, b_sym))
+        if sp.degree(pr, b_sym) > 2:
+            raise ParametricAnalysisError(
+                "Right: recovered polynomial degree > 2 from three b₀ probes."
+            )
+        R_polys.append(pr)
+
+    for idx, p in enumerate(L_polys):
+        if int(p.subs(b_sym, b_mid)) != sides[1][0][idx]:
+            raise ParametricAnalysisError(
+                f"Check at middle probe b₀ = {b_mid}: S1 values do not match."
+            )
+    for idx, p in enumerate(R_polys):
+        if int(p.subs(b_sym, b_mid)) != sides[1][1][idx]:
+            raise ParametricAnalysisError(
+                f"Check at middle probe b₀ = {b_mid}: S2 values do not match."
+            )
+
+    sum_L3 = sp.expand(sum(p**3 for p in L_polys))
+    sum_R3 = sp.expand(sum(p**3 for p in R_polys))
+    if sp.expand(sum_L3 - sum_R3) != 0:
+        raise ParametricAnalysisError(
+            "Cubic sums of S1 and S2 polynomials over b₀ are not identical."
+        )
+    P = sum_L3
+    sum_L1 = sp.expand(sum(L_polys))
+    sum_R1 = sp.expand(sum(R_polys))
+    lin_ok = sp.expand(sum_L1 - sum_R1) == 0
+    sum_L2 = sp.expand(sum(p**2 for p in L_polys))
+    sum_R2 = sp.expand(sum(p**2 for p in R_polys))
+    sq_ok = sp.expand(sum_L2 - sum_R2) == 0
+
+    def _name(i: int) -> str:
+        return chr(ord("a") + i) if i < 26 else f"t{i + 1}"
+
+    p_at_tpl = int(sp.expand(P.subs(b_sym, sp.Integer(b0_template))))
+    rows: list[tuple[str, Optional[str]]] = [
+        ("", None),
+        (
+            "— Parametrization over b₀ (mask «n1» + repeated middle digit d + «n2», "
+            "n1 = 1..9, n2 = 0..9, d = 1..8; "
+            f"here n1 = {n1_tpl}, d = {d_tpl}, n2 = {n2_tpl}; "
+            f"neighbor probes: {b_lo}, {b_mid}, {b_hi}; template m = {m_tpl}; check at b₀ = {b_mid}) —",
+            None,
+        ),
+        (
+            f"a = {a},  k = {k}   (quadratic interpolation in b₀; fixed n1={n1_tpl}, d={d_tpl}, n2={n2_tpl}; "
+            "only the middle-run length changes)",
+            None,
+        ),
+        ("", None),
+        ("Group S1 — cube bases on the left (quadratics in b₀)", None),
+    ]
+    _fmt_poly = (
+        format_polynomial_line_factorized
+        if s12_factorized
+        else format_polynomial_line
+    )
+    for i, p in enumerate(L_polys):
+        rows.append((f"{_name(i)}₁ = {_fmt_poly(p, b_sym, x_label='b₀')}", None))
+    rows.append(("", None))
+    rows.append(("Group S2 — cube bases on the right (quadratics in b₀)", None))
+    for i, p in enumerate(R_polys):
+        rows.append((f"{_name(i)}₂ = {_fmt_poly(p, b_sym, x_label='b₀')}", None))
+    rows.append(("", None))
+    rows.append(("Invariant polynomial P(b₀) = Σ S1³ = Σ S2³ (both sides)", None))
+    rows.append((format_polynomial_line(P, b_sym, x_label="b₀"), None))
+    if show_p_factor_table:
+        ft_lines, ft_tags = format_invariant_P_factor_table(
+            P, b_sym, by_columns=p_factor_by_columns
+        )
+        if ft_lines:
+            rows.append(("", None))
+            rows.append(("Factor table for coefficients of P(b₀):", None))
+            for i, ln in enumerate(ft_lines):
+                tg = ft_tags[i] if i < len(ft_tags) else None
+                rows.append((ln, tg))
+    rows.append(("", None))
+    rows.append(
+        (
+            f"Substitution check: P({b0_template}) = {p_at_tpl} "
+            "(must match the number printed in the Result line for this decomposition).",
+            None,
+        )
+    )
+    rows.append(("", None))
+    rows.append(("Additional identities by sums (not cubes):", None))
+    if lin_ok:
+        rows.append(
+            (
+                "!!! ATTENTION !!!  Σ S1 = Σ S2  HOLDS  —  UNUSUAL !!!",
+                TAG_PARAMETRIC_SHOUT,
+            ),
+        )
+    else:
+        rows.append(("Σ S1 = Σ S2  does not hold.", None))
+    if sq_ok:
+        rows.append(
+            (
+                "!!! ATTENTION !!!  Σ S1² = Σ S2²  HOLDS  —  UNUSUAL !!!",
+                TAG_PARAMETRIC_SHOUT,
+            ),
+        )
+    else:
+        rows.append(("Σ S1² = Σ S2² does not hold.", None))
+    return rows
+
+
+def parametric_any_eligible_for_last_run(data: dict) -> bool:
+    """Enable “Parametric form” button when either scheme is available."""
+    return parametric_form_eligible_for_last_run(
+        data
+    ) or b0_family_known_mid_run_parametric_eligible(data)
 
 
 def _insert_eq_lines_bold_left(tw: tk.Text, lines: list, tag: str) -> None:
@@ -1167,7 +1409,8 @@ def main():
         "defactor_bundle": None,
         "omit_raw_decomposition": False,
         "between_tail_lines": None,
-        "nines_probe_eligible": None,  # (a, b₀, k): b₀ mask for parametric, |L|=|R|≤26
+        "nines_probe_eligible": None,  # (a, b₀, k): scheme 1 (x-scales), |L|=|R|≤26
+        "b0_family_param_eligible": None,  # (a, b₀, k): scheme 2, mask «n1»+d…+«n2», d=1..8
         "param_btn": None,
     }
 
@@ -1280,39 +1523,68 @@ def main():
     copy_between_btn.pack(side=tk.RIGHT, padx=(0, 4))
 
     def run_parametric_append_for_state(a_st: int, b0_st: int, k_st: int) -> None:
-        """Append parametric block (button and auto after Compute)."""
+        """Append parametric block(s): scheme 1 (x) and/or scheme 2 (b₀ family)."""
+        ex = clip_block_state.get("nines_probe_eligible")
+        eb = clip_block_state.get("b0_family_param_eligible")
+        tup = (a_st, b0_st, k_st)
+        err_parts: list[str] = []
+        had_shout = False
+        any_insert = False
         try:
             root.configure(cursor="watch")
             root.update_idletasks()
-            rows = build_parametric_analysis_block(
-                a_st,
-                k_st,
-                b0_st,
+            kw = dict(
                 show_p_factor_table=var_p_factor_table.get(),
                 p_factor_by_columns=var_p_factor_table.get()
                 and var_p_factor_columns.get(),
                 s12_factorized=var_s12_factorized.get(),
             )
-        except ParametricAnalysisError as ex:
-            messagebox.showerror("Parametric form", str(ex))
-        except Exception:
-            messagebox.showerror(
-                "Parametric form",
-                traceback.format_exc(),
-            )
-        else:
-            insert_parametric_analysis_lines(tw, rows)
-            tw.update_idletasks()
-            # Red “shout” at bottom — scroll to end; else top of text.
-            if parametric_block_has_shout(rows):
-                tw.see(tk.END)
-            else:
-                tw.yview_moveto(0)
+            if ex == tup:
+                try:
+                    rows_x = build_parametric_analysis_block(a_st, k_st, b0_st, **kw)
+                    insert_parametric_analysis_lines(tw, rows_x)
+                    had_shout = had_shout or parametric_block_has_shout(rows_x)
+                    any_insert = True
+                except ParametricAnalysisError as e_x:
+                    err_parts.append(
+                        f"Parametrization by scheme 1 (interpolation in x): {e_x}"
+                    )
+                except Exception:
+                    err_parts.append(
+                        "Parametrization by scheme 1 (interpolation in x):\n"
+                        + traceback.format_exc()
+                    )
+            if eb == tup:
+                try:
+                    rows_b = build_b0_known_mid_run_parametric_block(
+                        a_st, k_st, b0_st, **kw
+                    )
+                    insert_parametric_analysis_lines(tw, rows_b)
+                    had_shout = had_shout or parametric_block_has_shout(rows_b)
+                    any_insert = True
+                except ParametricAnalysisError as e_b:
+                    err_parts.append(
+                        f"Parametrization by scheme 2 (mask «n1»+d…+«n2»): {e_b}"
+                    )
+                except Exception:
+                    err_parts.append(
+                        "Parametrization by scheme 2 (mask «n1»+d…+«n2»):\n"
+                        + traceback.format_exc()
+                    )
+            if err_parts:
+                messagebox.showerror("Parametric form", "\n\n".join(err_parts))
+            elif any_insert:
+                tw.update_idletasks()
+                if had_shout:
+                    tw.see(tk.END)
+                else:
+                    tw.yview_moveto(0)
         finally:
             root.configure(cursor="")
 
     def run_compute():
         clip_block_state["nines_probe_eligible"] = None
+        clip_block_state["b0_family_param_eligible"] = None
         pb = clip_block_state.get("param_btn")
         if pb is not None:
             pb.configure(state=tk.DISABLED)
@@ -1447,19 +1719,27 @@ def main():
                 )
             else:
                 clip_block_state["nines_probe_eligible"] = None
+            if b0_family_known_mid_run_parametric_eligible(data):
+                clip_block_state["b0_family_param_eligible"] = (
+                    data["a"],
+                    data["b_start"],
+                    data["k"],
+                )
+            else:
+                clip_block_state["b0_family_param_eligible"] = None
             pb2 = clip_block_state.get("param_btn")
             if pb2 is not None:
                 pb2.configure(
                     state=tk.NORMAL
-                    if clip_block_state["nines_probe_eligible"]
+                    if parametric_any_eligible_for_last_run(data)
                     else tk.DISABLED
                 )
-            if (
-                var_auto_parametric.get()
-                and clip_block_state.get("nines_probe_eligible")
+            if var_auto_parametric.get() and parametric_any_eligible_for_last_run(
+                data
             ):
-                a_auto, b0_auto, k_auto = clip_block_state["nines_probe_eligible"]
-                run_parametric_append_for_state(a_auto, b0_auto, k_auto)
+                run_parametric_append_for_state(
+                    data["a"], data["b_start"], data["k"]
+                )
         else:
             tw.insert(tk.END, text)
             tw.update_idletasks()
@@ -1512,18 +1792,24 @@ def main():
     clip_block_state["param_btn"] = btn_param
 
     def run_parametric_analysis():
-        e = clip_block_state.get("nines_probe_eligible")
-        if not e:
+        d_last = clip_block_state.get("data")
+        ex = clip_block_state.get("nines_probe_eligible")
+        eb = clip_block_state.get("b0_family_param_eligible")
+        if not ex and not eb:
             messagebox.showinfo(
                 "Parametric form",
-                "First run Compute with full output when b₀ is either all nines "
-                "(9, 99, 999, …), or has more than two digits and the “middle” (without the first and "
-                "last digit) is only nines or only zeros (e.g. 192, 2995, 101, "
-                "3000000006). Left and right cube counts must match and be at most "
-                f"{PARAMETRIC_MAX_CUBES_PER_SIDE} per side.",
+                "First run Compute with full output when at least one condition holds:\n\n"
+                "• Scheme 1 (interpolation in x): b₀ is all nines or has a uniform middle "
+                "(only 0 or only 9); |L| = |R| and at most "
+                f"{PARAMETRIC_MAX_CUBES_PER_SIDE} cubes per side.\n\n"
+                "• Scheme 2 (interpolation in b₀): mask «n1» + repeated middle digit d + «n2», "
+                "with n1 = 1..9, n2 = 0..9, d = 1..8 (middle 0/9 remains in scheme 1); "
+                "same side-size condition.",
             )
             return
-        a_st, b_st, k_st = e
+        if d_last is None:
+            return
+        a_st, b_st, k_st = d_last["a"], d_last["b_start"], d_last["k"]
         try:
             cur_a = var_a.get()
             cur_b = var_b.get()
