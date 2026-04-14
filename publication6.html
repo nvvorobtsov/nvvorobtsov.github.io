@@ -211,8 +211,8 @@
     <header>
         <div class="author-tag"><span class="lang-en">Nikolai Vorobtsov</span><span class="lang-ru">Николай Воробцов</span></div>
         <h1><span class="lang-en">Parametric Symmetry in the Cubic Prouhet–Tarry–Escott Problem</span><span class="lang-ru">Параметрическая симметрия в кубической задаче Пруэта–Тарри–Эскотта</span></h1>
-        <p class="subtitle"><span class="lang-en">A non-ideal template and infinite arithmetic families (manuscript v5)</span><span class="lang-ru">Неидеальный шаблон и бесконечные арифметические семейства (рукопись v5)</span></p>
-        <div class="version-pill" title="Zenodo DOI 10.5281/zenodo.19533934"><span class="lang-en">MANUSCRIPT V5 · INTERACTIVE COVER</span><span class="lang-ru">РУКОПИСЬ V5 · ИНТЕРАКТИВНАЯ ОБЛОЖКА</span></div>
+        <p class="subtitle"><span class="lang-en">A non-ideal template and infinite arithmetic families (manuscript v6)</span><span class="lang-ru">Неидеальный шаблон и бесконечные арифметические семейства (рукопись v6)</span></p>
+        <div class="version-pill" title="Zenodo DOI 10.5281/zenodo.19564229"><span class="lang-en">MANUSCRIPT V6 · INTERACTIVE COVER</span><span class="lang-ru">РУКОПИСЬ V6 · ИНТЕРАКТИВНАЯ ОБЛОЖКА</span></div>
     </header>
 
     <main class="pub6-main-en">
@@ -315,11 +315,11 @@
 
         <div class="grid-sections">
             <section class="card" aria-labelledby="abstract-heading-en">
-                <h2 id="abstract-heading-en">Abstract (v5)</h2>
+                <h2 id="abstract-heading-en">Abstract (v6)</h2>
                 <p style="font-size: 0.95rem; margin-top: 0;">
-                    Same explicit (3, 3) template as v3, plus a full §4 on families: one polynomial identity in ℚ[x] yields infinitely many integer pairs (S₁, S₂) at x = 10<sup>b</sup>;
-                    interpolation scales (7,6,5) and <span class="mono">scan_parametric_pte.py</span> link the proof skeleton to the code. Non-ideality for k = 1, 2, 4 and the SymPy snippet play the same role as before.
-                    <strong>v5</strong> adds a subsection on admissible decimal templates <span class="mono">b₀</span> for the three probes (beyond all-nines), matching <span class="mono">decompose_gui_EXT</span> and the batch scanner.
+                    Version 6 formalizes a dual reconstruction workflow for cubic-only PTE experiments: scale-based interpolation in x and mask-family reconstruction directly in <span class="mono">b₀</span>.
+                    For families of form <span class="mono">n1 + d...d + n2</span> (with d = 1..8), three neighboring probes recover quadratic slots in <span class="mono">b₀</span> and verify the invariant polynomial <span class="mono">P(b₀)=ΣS₁³=ΣS₂³</span>.
+                    This extends practical scan coverage while preserving symbolic validation and non-ideality diagnostics.
                 </p>
             </section>
             <section class="card" aria-labelledby="refs-heading-en">
@@ -327,7 +327,7 @@
                 <ul class="biblio">
                     <li>[3] Vorobtsov, N. (2026). <i>Telescoping Ramanujan Identities</i>. Zenodo.<br><a href="https://zenodo.org/records/19053976" target="_blank" rel="noopener">zenodo.org/records/19053976</a></li>
                     <li>[4] Vorobtsov, N. (2026). <i>Euler’s In-cubes</i>. Zenodo.<br><a href="https://zenodo.org/records/19055351" target="_blank" rel="noopener">zenodo.org/records/19055351</a></li>
-                    <li>[8] Vorobtsov, N. (2026). Cubic PTE (this work, manuscript v5 on Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19533934" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19533934</a></li>
+                    <li>[8] Vorobtsov, N. (2026). Cubic PTE (this work, manuscript v6 on Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19564229" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19564229</a></li>
                     <li>[7] <i>Research portal</i>.<br><a href="https://nvvorobtsov.github.io" target="_blank" rel="noopener">nvvorobtsov.github.io</a></li>
                 </ul>
             </section>
@@ -434,11 +434,11 @@
 
         <div class="grid-sections">
             <section class="card" aria-labelledby="abstract-heading-ru">
-                <h2 id="abstract-heading-ru">Аннотация (v5)</h2>
+                <h2 id="abstract-heading-ru">Аннотация (v6)</h2>
                 <p style="font-size: 0.95rem; margin-top: 0;">
-                    Тот же явный шаблон (3, 3), что в v3, плюс полный §4 о семействах: одно многочленное тождество в ℚ[x] порождает бесконечно много целочисленных пар (S₁, S₂) при x = 10<sup>b</sup>;
-                    масштабы интерполяции (7,6,5) и <span class="mono">scan_parametric_pte.py</span> связывают скелет доказательства с кодом. Неидеальность при k = 1, 2, 4 и фрагмент SymPy по смыслу те же.
-                    <strong>v5</strong> дополняет подпункт о допустимых десятичных шаблонах <span class="mono">b₀</span> для трёх проб (шире «все девятки»), согласованный с <span class="mono">decompose_gui_EXT</span> и пакетным сканером.
+                    Версия 6 оформляет двухсхемный подход к восстановлению кубических PTE-тождеств: масштабная интерполяция по x и отдельная схема реконструкции прямо по <span class="mono">b₀</span>.
+                    Для семейств вида <span class="mono">n1 + d...d + n2</span> (d = 1..8) три соседние пробы по длине середины восстанавливают квадратики в <span class="mono">b₀</span> и проверяют инвариант <span class="mono">P(b₀)=ΣS₁³=ΣS₂³</span>.
+                    Это расширяет область практического сканирования и сохраняет строгую символическую валидацию и диагностику неидеальности.
                 </p>
             </section>
             <section class="card" aria-labelledby="refs-heading-ru">
@@ -446,7 +446,7 @@
                 <ul class="biblio">
                     <li>[3] Vorobtsov, N. (2026). <i>Telescoping Ramanujan Identities</i>. Zenodo.<br><a href="https://zenodo.org/records/19053976" target="_blank" rel="noopener">zenodo.org/records/19053976</a></li>
                     <li>[4] Vorobtsov, N. (2026). <i>Euler’s In-cubes</i>. Zenodo.<br><a href="https://zenodo.org/records/19055351" target="_blank" rel="noopener">zenodo.org/records/19055351</a></li>
-                    <li>[8] Vorobtsov, N. (2026). Препринт по кубической PTE (рукопись v5, Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19533934" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19533934</a></li>
+                    <li>[8] Vorobtsov, N. (2026). Препринт по кубической PTE (рукопись v6, Zenodo).<br><a href="https://doi.org/10.5281/zenodo.19564229" target="_blank" rel="noopener">doi.org/10.5281/zenodo.19564229</a></li>
                     <li>[7] <i>Математический портал</i>.<br><a href="https://nvvorobtsov.github.io" target="_blank" rel="noopener">nvvorobtsov.github.io</a></li>
                 </ul>
             </section>
@@ -455,7 +455,7 @@
 
     <footer>
         <div class="footer-actions">
-            <a href="https://zenodo.org/records/19533934" target="_blank" rel="noopener" class="zenodo-btn"><span class="lang-en">OPEN IN ZENODO (DOI 10.5281/zenodo.19533934)</span><span class="lang-ru">ОТКРЫТЬ В ZENODO (DOI 10.5281/zenodo.19533934)</span></a>
+            <a href="https://zenodo.org/records/19564229" target="_blank" rel="noopener" class="zenodo-btn"><span class="lang-en">OPEN IN ZENODO (DOI 10.5281/zenodo.19564229)</span><span class="lang-ru">ОТКРЫТЬ В ZENODO (DOI 10.5281/zenodo.19564229)</span></a>
             <a href="index.html" class="secondary-btn"><span class="lang-en">← Main page</span><span class="lang-ru">← Главная</span></a>
         </div>
         <div class="footer-dl-row">
@@ -467,7 +467,7 @@
                 <div class="btn-hit-count" title="Total : last 24 h (UTC)">
                     <span class="hit-num" aria-live="polite"><span class="hit-total">—</span><span class="hit-sep">:</span><span class="hit-24">—</span></span>
                 </div>
-                <p class="footer-dl-hint"><span class="lang-en">Same program as in publication 5, extended: parametric quadratics in x, P(x), and optional auto-append. Needs Python 3.9+ and SymPy.</span><span class="lang-ru">Та же программа, что в публ. 5, с дополнением: параметрическая форма, P(x), авто-блок. Нужны Python 3.9+ и SymPy.</span></p>
+                <p class="footer-dl-hint"><span class="lang-en">Extended GUI with dual parametric reconstruction (scheme 1 in x and scheme 2 in b₀), invariant polynomial checks, Python 3.9+ and SymPy.</span><span class="lang-ru">Расширенный GUI с двухсхемной параметризацией (схема 1 по x и схема 2 по b₀), проверкой инвариантного многочлена; нужны Python 3.9+ и SymPy.</span></p>
             </div>
         </div>
         <p class="footer-note"><span class="lang-en">PDF and LaTeX sources are attached to the Zenodo record. Press Esc to go back in history.</span><span class="lang-ru">PDF и исходники LaTeX — в записи Zenodo. Клавиша Esc — назад по истории браузера.</span></p>
