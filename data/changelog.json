@@ -2,8 +2,8 @@
   "entries": [
     {
       "date": "14.04.2026",
-      "ru": "расширенные GUI decompose_gui_EXT / decompose_gui_EXT_EN: добавлена «вторая схема» параметризации по b₀ для масок вида n1 + d…d + n2 (n1=1…9, n2=0…9, d=1…8; 0/9 в середине остаются в первой схеме). Для второй схемы строятся три соседние пробы по длине середины, выводятся квадратики S1/S2 по b₀, инвариантный P(b₀)=ΣS1³=ΣS2³ и проверка подстановки P(b₀ шаблона). Обновлены github_pages/sources/decompose_gui_EXT.py, decompose_gui_EXT_EN.py и пересобран decompose_gui_EXT_windows.zip.",
-      "en": "Extended GUIs decompose_gui_EXT / decompose_gui_EXT_EN: added a “scheme 2” parametrization over b₀ for masks of form n1 + d…d + n2 (n1=1..9, n2=0..9, d=1..8; middle 0/9 stays in scheme 1). Scheme 2 uses three neighboring probes by middle-run length and prints quadratic S1/S2 formulas in b₀, invariant P(b₀)=ΣS1³=ΣS2³, and a substitution check P(b₀ template). Updated github_pages/sources/decompose_gui_EXT.py, decompose_gui_EXT_EN.py, and rebuilt decompose_gui_EXT_windows.zip."
+      "ru": "публикация 06: опубликована рукопись v6 на Zenodo (DOI 10.5281/zenodo.19564229), подготовлены обложки Cover_v06.html и Cover_RUS_v06.html, на сайте обновлены publication6.html и ссылка Zenodo на главной. Также в sources обновлены decompose_gui_EXT.py / decompose_gui_EXT_EN.py и пересобран decompose_gui_EXT_windows.zip; в GUI добавлена «вторая схема» параметризации по b₀ для масок вида n1 + d…d + n2 (n1=1…9, n2=0…9, d=1…8; 0/9 в середине остаются в первой схеме).",
+      "en": "Publication 06: manuscript v6 is now published on Zenodo (DOI 10.5281/zenodo.19564229), with new covers Cover_v06.html and Cover_RUS_v06.html; the site was updated in publication6.html and the home-page Zenodo link. Also refreshed in sources: decompose_gui_EXT.py / decompose_gui_EXT_EN.py and rebuilt decompose_gui_EXT_windows.zip; the GUI now includes “scheme 2” parametrization over b₀ for masks n1 + d…d + n2 (n1=1..9, n2=0..9, d=1..8; middle 0/9 remains in scheme 1)."
     },
     {
       "date": "2026-04-11",
